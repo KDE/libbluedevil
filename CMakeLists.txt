@@ -1,4 +1,12 @@
+cmake_minimum_required(VERSION 2.8)
+
 project(libbluedevil)
+set(GENERIC_LIB_VERSION "1.0")
+set(GENERIC_LIB_SOVERSION "1")
+
+find_package(Qt4 REQUIRED)
+
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 set(libbluedevil_SRCS
     bluedevil.cpp
@@ -7,8 +15,9 @@ set(libbluedevil_SRCS
 
 QT4_GENERATE_DBUS_INTERFACE(bluez.h bluez.xml)
 QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez.xml bluez)
+QT4_AUTOMOC(${libbluedevil_SRCS})
 
-kde4_add_library(bluedevil SHARED ${libbluedevil_SRCS})
+add_library(bluedevil SHARED ${libbluedevil_SRCS})
 
 target_link_libraries(bluedevil ${QT_QTCORE_LIBRARY} ${QT_QTDBUS_LIBRARY})
 
@@ -17,4 +26,4 @@ set_target_properties(bluedevil PROPERTIES
    SOVERSION ${GENERIC_LIB_SOVERSION}
 )
 
-install(TARGETS bluedevil EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS bluedevil DESTINATION lib)
