@@ -27,3 +27,5 @@ set_target_properties(bluedevil PROPERTIES
 )
 
 install(TARGETS bluedevil DESTINATION lib)
+
+add_subdirectory(test)
