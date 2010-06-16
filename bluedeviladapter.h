@@ -136,7 +136,7 @@ Q_SIGNALS:
     void deviceRemoved(Device *device);
 
 private:
-    Adapter(const QString &adapterPath);
+    Adapter(const QString &adapterPath, QObject *parent = 0);
 
     class Private;
     Private *const d;

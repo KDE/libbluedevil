@@ -54,9 +54,6 @@ Manager::Private::Private(Manager *q)
 Manager::Private::~Private()
 {
     delete m_bluezManagerInterface;
-    delete m_defaultAdapter;
-    qDeleteAll(m_adapterList);
-    m_adapterList.clear();
 }
 
 void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
@@ -123,7 +120,7 @@ Adapter *Manager::defaultAdapter() const
 
     const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
     if (!adapterPath.isEmpty()) {
-        d->m_defaultAdapter = new Adapter(adapterPath);
+        d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
     }
 
     return d->m_defaultAdapter;
@@ -139,7 +136,7 @@ QList<Adapter*> Manager::listAdapters() const
     }
 
     Q_FOREACH (const QDBusObjectPath &objectPath, d->m_bluezManagerInterface->ListAdapters().value()) {
-        d->m_adapterList << new Adapter(objectPath.path());
+        d->m_adapterList << new Adapter(objectPath.path(), const_cast<Manager*>(this));
     }
 
     return d->m_adapterList;

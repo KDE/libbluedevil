@@ -73,8 +73,8 @@ void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Adapter::Adapter(const QString &adapterPath)
-    : QObject()
+Adapter::Adapter(const QString &adapterPath, QObject *parent)
+    : QObject(parent)
     , d(new Private(this))
 {
     d->m_bluezAdapterInterface = new OrgBluezAdapterInterface("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
