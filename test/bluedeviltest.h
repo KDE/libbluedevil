@@ -17,39 +17,28 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef BLUEDEVILDEVICE_H
-#define BLUEDEVILDEVICE_H
+#ifndef BLUEDEVILTEST_H
+#define BLUEDEVILTEST_H
 
-#include <bluedevil_export.h>
+#include <QtCore/QObject>
 
 namespace BlueDevil {
-
-class Adapter;
-
-class BLUEDEVIL_EXPORT Device
-{
-    friend class Adapter;
-
-public:
-    virtual ~Device();
-
-    QString getAddress() const;
-    QString getAlias() const;
-    quint32 getDeviceClass() const;
-    QString getIcon() const;
-    bool hasLegacyPairing() const;
-    QString getName() const;
-    bool isPaired() const;
-    short getRSSI() const;
-
-private:
-    Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-           bool legacyPairing, const QString &name, bool paired, short RSSI);
-
-    class Private;
-    Private *const d;
-};
-
+    class Device;
 }
 
-#endif // BLUEDEVILDEVICE_H
+using namespace BlueDevil;
+
+class DeviceReceiver
+    : public QObject
+{
+    Q_OBJECT
+
+public:
+    DeviceReceiver(QObject *parent = 0);
+    virtual ~DeviceReceiver();
+
+public Q_SLOTS:
+    void deviceFound(Device *device);
+};
+
+#endif // BLUEDEVILTEST_H

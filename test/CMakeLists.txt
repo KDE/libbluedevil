@@ -2,6 +2,7 @@ FIND_PACKAGE (Qt4 REQUIRED)
 
 SET (bluedeviltest_SRCS bluedeviltest.cpp)
 
+QT4_AUTOMOC(${bluedeviltest_SRCS})
 ADD_EXECUTABLE (bluedeviltest ${bluedeviltest_SRCS})
 
 INCLUDE_DIRECTORIES (${CMAKE_CURRENT_SOURCE_DIR}/.. ${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})

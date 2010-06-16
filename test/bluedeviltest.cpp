@@ -17,13 +17,39 @@
     Boston, MA 02110-1301, USA.
 */
 
+#include "bluedeviltest.h"
+
 #include <QtCore/QDebug>
 #include <QtGui/QApplication>
 
-#include "bluedeviladapter.h"
-#include "bluedevilmanager.h"
+#include <bluedeviladapter.h>
+#include <bluedevilmanager.h>
+#include <bluedevildevice.h>
 
 using namespace BlueDevil;
+
+DeviceReceiver::DeviceReceiver(QObject *parent)
+    : QObject(parent)
+{
+}
+
+DeviceReceiver::~DeviceReceiver()
+{
+}
+
+void DeviceReceiver::deviceFound(Device *device)
+{
+    qDebug() << "*** Remote device found:";
+    qDebug() << "\tAddress:\t" << device->getAddress();
+    qDebug() << "\tAlias:\t\t" << device->getAlias();
+    qDebug() << "\tClass:\t\t" << device->getDeviceClass();
+    qDebug() << "\tIcon:\t\t" << device->getIcon();
+    qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
+    qDebug() << "\tName:\t\t" << device->getName();
+    qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
+    qDebug() << "\tRSSI:\t\t" << device->getRSSI();
+    qDebug();
+}
 
 int main(int argc, char **argv)
 {
@@ -31,10 +57,18 @@ int main(int argc, char **argv)
 
     Adapter *defaultAdapter = Manager::self()->defaultAdapter();
     if (defaultAdapter) {
+        DeviceReceiver *deviceReceiver = new DeviceReceiver;
+
+        QObject::connect(defaultAdapter, SIGNAL(deviceFound(Device*)), deviceReceiver,
+                         SLOT(deviceFound(Device*)));
+
         defaultAdapter->startDiscovery();
+
         return app.exec();
     }
 
     qDebug() << "no bluetooth adapters were found";
     return 0;
 }
+
+#include "bluedeviltest.moc"

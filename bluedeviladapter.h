@@ -132,7 +132,7 @@ public:
 
 Q_SIGNALS:
     void deviceCreated(Device *device);
-    void deviceFound(Device *device, const QVariantMap &map);
+    void deviceFound(Device *device);
     void deviceRemoved(Device *device);
 
 private:

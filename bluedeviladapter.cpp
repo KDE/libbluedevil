@@ -18,8 +18,8 @@
 */
 
 #include "bluedeviladapter.h"
+#include "bluedevildevice.h"
 
-#include <QtCore/QDebug> //FIXME: remove me
 #include <QtCore/QVariantList>
 
 #include <QtDBus/QDBusMessage>
@@ -55,17 +55,20 @@ Adapter::Private::~Private()
 
 void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 {
-    qDebug() << "device created";
+    Q_UNUSED(objectPath)
 }
 
-void Adapter::Private::_k_deviceFound(const QString &device, const QVariantMap &map)
+void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    qDebug() << "device found (" << device << ")";
+    Device device(address, map["Alias"].toString(), map["Class"].toUInt(), map["Icon"].toString(),
+                  map["LegacyPairing"].toBool(), map["Name"].toString(), map["Paired"].toBool(),
+                  map["RSSI"].toInt());
+    emit m_q->deviceFound(&device);         
 }
 
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 {
-    qDebug() << "device removed";
+    Q_UNUSED(objectPath)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

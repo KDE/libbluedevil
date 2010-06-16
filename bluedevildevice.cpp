@@ -19,14 +19,90 @@
 
 #include "bluedevildevice.h"
 
+#include <QtCore/QString>
+
 namespace BlueDevil {
 
-Device::Device()
+class Device::Private
+{
+public:
+    Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
+            bool legacyPairing, const QString &name, bool paired, short RSSI);
+
+    QString m_address;
+    QString m_alias;
+    quint32 m_deviceClass;
+    QString m_icon;
+    bool    m_legacyPairing;
+    QString m_name;
+    bool    m_paired;
+    short   m_RSSI;
+};
+
+Device::Private::Private(const QString &address, const QString &alias, quint32 deviceClass,
+                         const QString &icon, bool legacyPairing, const QString &name, bool paired,
+                         short RSSI)
+    : m_address(address)
+    , m_alias(alias)
+    , m_deviceClass(deviceClass)
+    , m_icon(icon)
+    , m_legacyPairing(legacyPairing)
+    , m_name(name)
+    , m_paired(paired)
+    , m_RSSI(RSSI)
+{
+}                         
+
+Device::Device(const QString &address, const QString &alias, quint32 deviceClass,
+               const QString &icon, bool legacyPairing, const QString &name, bool paired,
+               short RSSI)
+    : d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI))
 {
 }
 
 Device::~Device()
 {
+    delete d;
+}
+
+QString Device::getAddress() const
+{
+    return d->m_address;
+}
+
+QString Device::getAlias() const
+{
+    return d->m_alias;
+}
+
+quint32 Device::getDeviceClass() const
+{
+    return d->m_deviceClass;
+}
+
+QString Device::getIcon() const
+{
+    return d->m_icon;
+}
+
+bool Device::hasLegacyPairing() const
+{
+    return d->m_legacyPairing;
+}
+
+QString Device::getName() const
+{
+    return d->m_name;
+}
+
+bool Device::isPaired() const
+{
+    return d->m_paired;
+}
+
+short Device::getRSSI() const
+{
+    return d->m_RSSI;
 }
 
 }

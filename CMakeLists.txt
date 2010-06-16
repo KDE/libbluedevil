@@ -11,6 +11,7 @@ include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 set(libbluedevil_SRCS
     bluedevilmanager.cpp
     bluedeviladapter.cpp
+    bluedevildevice.cpp
 )
 
 QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-manager.xml)
