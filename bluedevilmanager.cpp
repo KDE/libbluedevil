@@ -115,7 +115,13 @@ void Manager::release()
 Adapter *Manager::defaultAdapter() const
 {
     delete d->m_defaultAdapter;
-    d->m_defaultAdapter = new Adapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
+
+    const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
+    if (adapterPath.isEmpty()) {
+        d->m_defaultAdapter = 0;
+    } else {
+        d->m_defaultAdapter = new Adapter(adapterPath);
+    }
 
     return d->m_defaultAdapter;
 }

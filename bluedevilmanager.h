@@ -40,7 +40,14 @@ public:
     static Manager *self();
     static void release();
 
+    /**
+     * @return The default adapter. NULL if there is no default adapter.
+     */
     Adapter *defaultAdapter() const;
+
+    /**
+     * @return A list with all the connected adapters.
+     */
     QList<Adapter*> listAdapters() const;
 
 Q_SIGNALS:

@@ -29,8 +29,7 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
-    defaultAdapter->startDiscovery();
+    Manager::self()->defaultAdapter()->startDiscovery();
 
     return app.exec();
 }
