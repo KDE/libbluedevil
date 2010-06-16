@@ -24,29 +24,31 @@
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
 
-class BlueDevilAdapter::Private
+namespace BlueDevil {
+
+class Adapter::Private
 {
 public:
     QString m_adapterPath;
 };
 
-BlueDevilAdapter::BlueDevilAdapter(const QString &adapterPath)
+Adapter::Adapter(const QString &adapterPath)
     : d(new Private)
 {
     d->m_adapterPath = adapterPath;
 }
 
-BlueDevilAdapter::~BlueDevilAdapter()
+Adapter::~Adapter()
 {
     delete d;
 }
 
-QString BlueDevilAdapter::adapterPath() const
+QString Adapter::adapterPath() const
 {
     return d->m_adapterPath;
 }
 
-QString BlueDevilAdapter::address() const
+QString Adapter::address() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -54,7 +56,7 @@ QString BlueDevilAdapter::address() const
     return res["Address"].toString();
 }
 
-void BlueDevilAdapter::setName(const QString &name)
+void Adapter::setName(const QString &name)
 {
     QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "SetProperty"));
 
@@ -66,7 +68,7 @@ void BlueDevilAdapter::setName(const QString &name)
     QDBusConnection::systemBus().send(msg);
 }
 
-QString BlueDevilAdapter::name() const
+QString Adapter::name() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -74,7 +76,7 @@ QString BlueDevilAdapter::name() const
     return res["Name"].toString();
 }
 
-void BlueDevilAdapter::setPowered(bool powered)
+void Adapter::setPowered(bool powered)
 {
     QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "SetProperty"));
 
@@ -86,7 +88,7 @@ void BlueDevilAdapter::setPowered(bool powered)
     QDBusConnection::systemBus().send(msg);
 }
 
-bool BlueDevilAdapter::isPowered() const
+bool Adapter::isPowered() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -94,7 +96,7 @@ bool BlueDevilAdapter::isPowered() const
     return res["Powered"].toBool();
 }
 
-void BlueDevilAdapter::setDiscoverable(bool discoverable)
+void Adapter::setDiscoverable(bool discoverable)
 {
     QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "SetProperty"));
 
@@ -106,7 +108,7 @@ void BlueDevilAdapter::setDiscoverable(bool discoverable)
     QDBusConnection::systemBus().send(msg);
 }
 
-bool BlueDevilAdapter::isDiscoverable() const
+bool Adapter::isDiscoverable() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -114,7 +116,7 @@ bool BlueDevilAdapter::isDiscoverable() const
     return res["Discoverable"].toBool();
 }
 
-void BlueDevilAdapter::setPairable(bool pairable)
+void Adapter::setPairable(bool pairable)
 {
     QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "SetProperty"));
 
@@ -126,7 +128,7 @@ void BlueDevilAdapter::setPairable(bool pairable)
     QDBusConnection::systemBus().send(msg);
 }
 
-bool BlueDevilAdapter::isPairable() const
+bool Adapter::isPairable() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -134,7 +136,7 @@ bool BlueDevilAdapter::isPairable() const
     return res["Pairable"].toBool();
 }
 
-void BlueDevilAdapter::setPaireableTimeout(quint32 paireableTimeout)
+void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 {
     QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "SetProperty"));
 
@@ -146,7 +148,7 @@ void BlueDevilAdapter::setPaireableTimeout(quint32 paireableTimeout)
     QDBusConnection::systemBus().send(msg);
 }
 
-quint32 BlueDevilAdapter::paireableTimeout() const
+quint32 Adapter::paireableTimeout() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -154,7 +156,7 @@ quint32 BlueDevilAdapter::paireableTimeout() const
     return res["PaireableTimeout"].toBool();
 }
 
-void BlueDevilAdapter::setDiscoverableTimeout(quint32 discoverableTimeout)
+void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
 {
     QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "SetProperty"));
 
@@ -166,7 +168,7 @@ void BlueDevilAdapter::setDiscoverableTimeout(quint32 discoverableTimeout)
     QDBusConnection::systemBus().send(msg);
 }
 
-quint32 BlueDevilAdapter::discoverableTimeout() const
+quint32 Adapter::discoverableTimeout() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -174,7 +176,7 @@ quint32 BlueDevilAdapter::discoverableTimeout() const
     return res["DiscoverableTimeout"].toUInt();
 }
 
-bool BlueDevilAdapter::isDiscovering() const
+bool Adapter::isDiscovering() const
 {
     const QDBusMessage msg(QDBusMessage::createMethodCall("org.bluez", d->m_adapterPath, QString(), "GetProperties"));
     QMap<QString, QVariant> res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
@@ -182,18 +184,20 @@ bool BlueDevilAdapter::isDiscovering() const
     return res["Discovering"].toBool();
 }
 
-BlueDevilAdapter &BlueDevilAdapter::operator=(const BlueDevilAdapter& rhs)
+Adapter &Adapter::operator=(const Adapter& rhs)
 {
     d->m_adapterPath = rhs.d->m_adapterPath;
     return *this;
 }
 
-bool BlueDevilAdapter::operator==(const BlueDevilAdapter &rhs) const
+bool Adapter::operator==(const Adapter &rhs) const
 {
     return d->m_adapterPath == rhs.d->m_adapterPath;
 }
 
-bool BlueDevilAdapter::operator!=(const BlueDevilAdapter &rhs) const
+bool Adapter::operator!=(const Adapter &rhs) const
 {
     return d->m_adapterPath != rhs.d->m_adapterPath;
+}
+
 }

@@ -17,59 +17,61 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include "bluedevil.h"
+#include "bluedevilmanager.h"
 #include "bluedeviladapter.h"
 
-#include <bluez.h>
+#include <bluezmanager.h>
 
 #include <QtCore/QHash>
 
-static BlueDevil *instance = 0;
+namespace BlueDevil {
 
-class BlueDevil::Private
+static Manager *instance = 0;
+
+class Manager::Private
 {
 public:
-    Private(BlueDevil *q);
+    Private(Manager *q);
 
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
     void _k_adapterRemoved(const QDBusObjectPath &objectPath);
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
-    QHash<QString, BlueDevilAdapter*>  m_adapterMap;
+    QHash<QString, Adapter*>  m_adapterMap;
     OrgBluezManagerInterface          *m_bluezManagerInterface;
 
-    BlueDevil *m_q;
+    Manager *const m_q;
 };
 
-BlueDevil::Private::Private(BlueDevil *q)
+Manager::Private::Private(Manager *q)
     : m_q(q)
 {
 }
 
-void BlueDevil::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
+void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
-    emit m_q->adapterAdded(BlueDevilAdapter(objectPath.path()));
+    emit m_q->adapterAdded(Adapter(objectPath.path()));
 }
 
-void BlueDevil::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
+void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
 {
-    emit m_q->adapterRemoved(BlueDevilAdapter(objectPath.path()));
+    emit m_q->adapterRemoved(Adapter(objectPath.path()));
 }
 
-void BlueDevil::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
+void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
 {
-    emit m_q->defaultAdapterChanged(BlueDevilAdapter(objectPath.path()));
+    emit m_q->defaultAdapterChanged(Adapter(objectPath.path()));
 }
 
-void BlueDevil::Private::_k_propertyChanged(const QString &property, const QDBusVariant &newValue)
+void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &newValue)
 {
     emit m_q->propertyChanged(property, newValue);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BlueDevil::BlueDevil(QObject *parent)
+Manager::Manager(QObject *parent)
     : QObject(parent)
     , d(new Private(this))
 {
@@ -85,34 +87,36 @@ BlueDevil::BlueDevil(QObject *parent)
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 }
 
-BlueDevil::~BlueDevil()
+Manager::~Manager()
 {
     delete d->m_bluezManagerInterface;
     delete d;
 }
 
-BlueDevil* BlueDevil::self()
+Manager* Manager::self()
 {
     if (!instance) {
-        instance = new BlueDevil;
+        instance = new Manager;
     }
     return instance;
 }
 
-BlueDevilAdapter BlueDevil::defaultAdapter() const
+Adapter Manager::defaultAdapter() const
 {
-    return BlueDevilAdapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
+    return Adapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
 }
 
-QList<BlueDevilAdapter> BlueDevil::listAdapters() const
+QList<Adapter> Manager::listAdapters() const
 {
-    QList<BlueDevilAdapter> res;
+    QList<Adapter> res;
 
     Q_FOREACH (const QDBusObjectPath &objectPath, d->m_bluezManagerInterface->ListAdapters().value()) {
-        res << BlueDevilAdapter(objectPath.path());
+        res << Adapter(objectPath.path());
     }
 
     return res;
 }
 
-#include "bluedevil.moc"
+}
+
+#include "bluedevilmanager.moc"

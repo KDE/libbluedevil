@@ -24,14 +24,16 @@
 
 #include <QtCore/QString>
 
-class BlueDevil;
+namespace BlueDevil {
 
-class BLUEDEVIL_EXPORT BlueDevilAdapter
+class Manager;
+
+class BLUEDEVIL_EXPORT Adapter
 {
-    friend class BlueDevil;
+    friend class Manager;
 
 public:
-    virtual ~BlueDevilAdapter();
+    virtual ~Adapter();
 
     /**
      * @return The adapter path on the DBus system.
@@ -114,15 +116,17 @@ public:
      */
     bool isDiscovering() const;
 
-    BlueDevilAdapter &operator=(const BlueDevilAdapter &rhs);
-    bool operator==(const BlueDevilAdapter &rhs) const;
-    bool operator!=(const BlueDevilAdapter &rhs) const;
+    Adapter &operator=(const Adapter &rhs);
+    bool operator==(const Adapter &rhs) const;
+    bool operator!=(const Adapter &rhs) const;
 
 private:
-    BlueDevilAdapter(const QString &adapterPath);
+    Adapter(const QString &adapterPath);
 
     class Private;
     Private *const d;
 };
+
+}
 
 #endif // BLUEDEVILADAPTER_H

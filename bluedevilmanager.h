@@ -17,8 +17,8 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef BLUEDEVIL_H
-#define BLUEDEVIL_H
+#ifndef BLUEDEVILMANAGER_H
+#define BLUEDEVILMANAGER_H
 
 #include <bluedevil_export.h>
 #include <bluedeviladapter.h>
@@ -26,27 +26,29 @@
 #include <QtCore/QObject>
 #include <QtDBus/QDBusObjectPath>
 
-class BLUEDEVIL_EXPORT BlueDevil
+namespace BlueDevil {
+
+class BLUEDEVIL_EXPORT Manager
     : public QObject
 {
     Q_OBJECT
 
 public:
-    virtual ~BlueDevil();
+    virtual ~Manager();
 
-    static BlueDevil *self();
+    static Manager *self();
 
-    BlueDevilAdapter defaultAdapter() const;
-    QList<BlueDevilAdapter> listAdapters() const;
+    Adapter defaultAdapter() const;
+    QList<Adapter> listAdapters() const;
 
 Q_SIGNALS:
-    void adapterAdded(const BlueDevilAdapter &adapter);
-    void adapterRemoved(const BlueDevilAdapter &adapter);
-    void defaultAdapterChanged(const BlueDevilAdapter &adapter);
+    void adapterAdded(const Adapter &adapter);
+    void adapterRemoved(const Adapter &adapter);
+    void defaultAdapterChanged(const Adapter &adapter);
     void propertyChanged(const QString &property, const QDBusVariant &newValue);
 
 private:
-    BlueDevil(QObject *parent = 0);
+    Manager(QObject *parent = 0);
 
     class Private;
     Private *const d;
@@ -57,4 +59,6 @@ private:
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
 };
 
-#endif // BLUEDEVIL_H
+}
+
+#endif // BLUEDEVILMANAGER_H

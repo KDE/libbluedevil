@@ -9,12 +9,12 @@ find_package(Qt4 REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 set(libbluedevil_SRCS
-    bluedevil.cpp
+    bluedevilmanager.cpp
     bluedeviladapter.cpp
 )
 
-QT4_GENERATE_DBUS_INTERFACE(bluez.h bluez.xml)
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez.xml bluez)
+QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-manager.xml)
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-manager.xml bluezmanager)
 QT4_AUTOMOC(${libbluedevil_SRCS})
 
 add_library(bluedevil SHARED ${libbluedevil_SRCS})
