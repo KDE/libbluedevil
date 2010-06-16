@@ -34,6 +34,8 @@ class Manager;
 class BLUEDEVIL_EXPORT Adapter
     : public QObject
 {
+    Q_OBJECT
+
     friend class Manager;
 
 public:
@@ -120,9 +122,13 @@ public:
      */
     bool isDiscovering() const;
 
-    Adapter &operator=(const Adapter &rhs);
-    bool operator==(const Adapter &rhs) const;
-    bool operator!=(const Adapter &rhs) const;
+    void requestSession() const;
+
+    void releaseSession() const;
+
+    void startDiscovery() const;
+
+    void stopDiscovery() const;
 
 Q_SIGNALS:
     void deviceCreated(Device *device);

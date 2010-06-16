@@ -30,15 +30,7 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
 
     Adapter *defaultAdapter = Manager::self()->defaultAdapter();
-    qDebug() << "default adapter path: " << defaultAdapter->adapterPath();
-    qDebug() << "is powered? " << defaultAdapter->isPowered();
-    defaultAdapter->setPowered(true);
-    qDebug() << "powered on !";
-    qDebug() << "is powered? " << defaultAdapter->isPowered();
-    defaultAdapter->setPowered(false);
-    qDebug() << "powered off !";
-    qDebug() << "is powered? " << defaultAdapter->isPowered();
+    defaultAdapter->startDiscovery();
 
-    delete defaultAdapter;
-    return 0;
+    return app.exec();
 }

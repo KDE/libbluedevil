@@ -102,7 +102,7 @@ QString Adapter::address() const
 
 void Adapter::setName(const QString &name)
 {
-    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name));
+    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name)).waitForFinished();
 }
 
 QString Adapter::name() const
@@ -112,7 +112,7 @@ QString Adapter::name() const
 
 void Adapter::setPowered(bool powered)
 {
-    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered));
+    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered)).waitForFinished();
 }
 
 bool Adapter::isPowered() const
@@ -122,7 +122,7 @@ bool Adapter::isPowered() const
 
 void Adapter::setDiscoverable(bool discoverable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable));
+    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable)).waitForFinished();
 }
 
 bool Adapter::isDiscoverable() const
@@ -132,7 +132,7 @@ bool Adapter::isDiscoverable() const
 
 void Adapter::setPairable(bool pairable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable));
+    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable)).waitForFinished();
 }
 
 bool Adapter::isPairable() const
@@ -142,7 +142,7 @@ bool Adapter::isPairable() const
 
 void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout));
+    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout)).waitForFinished();
 }
 
 quint32 Adapter::paireableTimeout() const
@@ -152,7 +152,7 @@ quint32 Adapter::paireableTimeout() const
 
 void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout));
+    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout)).waitForFinished();
 }
 
 quint32 Adapter::discoverableTimeout() const
@@ -165,14 +165,26 @@ bool Adapter::isDiscovering() const
     return d->m_bluezAdapterInterface->GetProperties().value()["Discovering"].toBool();
 }
 
-bool Adapter::operator==(const Adapter &rhs) const
+void Adapter::requestSession() const
 {
-    return d->m_adapterPath == rhs.d->m_adapterPath;
+    d->m_bluezAdapterInterface->RequestSession();
 }
 
-bool Adapter::operator!=(const Adapter &rhs) const
+void Adapter::releaseSession() const
 {
-    return d->m_adapterPath != rhs.d->m_adapterPath;
+    d->m_bluezAdapterInterface->ReleaseSession();
+}
+
+void Adapter::startDiscovery() const
+{
+    d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
+}
+
+void Adapter::stopDiscovery() const
+{
+    d->m_bluezAdapterInterface->StopDiscovery().waitForFinished();
 }
 
 }
+
+#include "bluedeviladapter.moc"
