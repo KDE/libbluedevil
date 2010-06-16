@@ -32,40 +32,49 @@ class Manager::Private
 {
 public:
     Private(Manager *q);
+    ~Private();
 
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
     void _k_adapterRemoved(const QDBusObjectPath &objectPath);
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
-    void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezManagerInterface *m_bluezManagerInterface;
+    Adapter                  *m_defaultAdapter;
+    QList<Adapter*>           m_adapterList;
 
     Manager *const m_q;
 };
 
 Manager::Private::Private(Manager *q)
-    : m_q(q)
+    : m_defaultAdapter(0)
+    , m_q(q)
 {
+}
+
+Manager::Private::~Private()
+{
+    delete m_bluezManagerInterface;
+    delete m_defaultAdapter;
+    qDeleteAll(m_adapterList);
+    m_adapterList.clear();
 }
 
 void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
-    emit m_q->adapterAdded(Adapter(objectPath.path()));
+    Adapter adapter(objectPath.path());
+    emit m_q->adapterAdded(&adapter);
 }
 
 void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
 {
-    emit m_q->adapterRemoved(Adapter(objectPath.path()));
+    Adapter adapter(objectPath.path());
+    emit m_q->adapterRemoved(&adapter);
 }
 
 void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
 {
-    emit m_q->defaultAdapterChanged(Adapter(objectPath.path()));
-}
-
-void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &newValue)
-{
-    emit m_q->propertyChanged(property, newValue);
+    Adapter adapter(objectPath.path());
+    emit m_q->defaultAdapterChanged(&adapter);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,13 +91,10 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_adapterRemoved(QDBusObjectPath)));
     connect(d->m_bluezManagerInterface, SIGNAL(DefaultAdapterChanged(QDBusObjectPath)),
             this, SLOT(_k_defaultAdapterChanged(QDBusObjectPath)));
-    connect(d->m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
-            this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 }
 
 Manager::~Manager()
 {
-    delete d->m_bluezManagerInterface;
     delete d;
 }
 
@@ -100,20 +106,30 @@ Manager* Manager::self()
     return instance;
 }
 
+void Manager::release()
+{
+    delete instance;
+    instance = 0;
+}
+
 Adapter *Manager::defaultAdapter() const
 {
-    return new Adapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
+    delete d->m_defaultAdapter;
+    d->m_defaultAdapter = new Adapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
+
+    return d->m_defaultAdapter;
 }
 
 QList<Adapter*> Manager::listAdapters() const
 {
-    QList<Adapter*> res;
+    qDeleteAll(d->m_adapterList);
+    d->m_adapterList.clear();
 
     Q_FOREACH (const QDBusObjectPath &objectPath, d->m_bluezManagerInterface->ListAdapters().value()) {
-        res << new Adapter(objectPath.path());
+        d->m_adapterList << new Adapter(objectPath.path());
     }
 
-    return res;
+    return d->m_adapterList;
 }
 
 }

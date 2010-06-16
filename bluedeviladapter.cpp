@@ -19,6 +19,7 @@
 
 #include "bluedeviladapter.h"
 
+#include <QtCore/QDebug> //FIXME: remove me
 #include <QtCore/QVariantList>
 
 #include <QtDBus/QDBusMessage>
@@ -30,6 +31,11 @@ class Adapter::Private
 {
 public:
     Private(Adapter *q);
+    ~Private();
+
+    void _k_deviceCreated(const QDBusObjectPath &objectPath);
+    void _k_deviceFound(const QString &device);
+    void _k_deviceRemoved(const QDBusObjectPath &objectPath);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QString                   m_adapterPath;
@@ -42,6 +48,26 @@ Adapter::Private::Private(Adapter *q)
 {
 }
 
+Adapter::Private::~Private()
+{
+    delete m_bluezAdapterInterface;
+}
+
+void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
+{
+    qDebug() << "device created";
+}
+
+void Adapter::Private::_k_deviceFound(const QString &device)
+{
+    qDebug() << "device found";
+}
+
+void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
+{
+    qDebug() << "device removed";
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Adapter::Adapter(const QString &adapterPath)
@@ -50,6 +76,13 @@ Adapter::Adapter(const QString &adapterPath)
 {
     d->m_bluezAdapterInterface = new OrgBluezAdapterInterface("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
     d->m_adapterPath = adapterPath;
+
+    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceCreated(QDBusObjectPath)),
+            this, SLOT(_k_deviceCreated(QDBusObjectPath)));
+    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceFound(QString)),
+            this, SLOT(_k_deviceFound(QString)));
+    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceRemoved(QDBusObjectPath)),
+            this, SLOT(_k_deviceRemoved(QDBusObjectPath)));
 }
 
 Adapter::~Adapter()

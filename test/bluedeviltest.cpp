@@ -20,6 +20,7 @@
 #include <QtCore/QDebug>
 #include <QtGui/QApplication>
 
+#include "bluedeviladapter.h"
 #include "bluedevilmanager.h"
 
 using namespace BlueDevil;

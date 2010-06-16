@@ -28,6 +28,7 @@
 
 namespace BlueDevil {
 
+class Device;
 class Manager;
 
 class BLUEDEVIL_EXPORT Adapter
@@ -123,11 +124,20 @@ public:
     bool operator==(const Adapter &rhs) const;
     bool operator!=(const Adapter &rhs) const;
 
+Q_SIGNALS:
+    void deviceCreated(Device *device);
+    void deviceFound(Device *device);
+    void deviceRemoved(Device *device);
+
 private:
     Adapter(const QString &adapterPath);
 
     class Private;
     Private *const d;
+
+    Q_PRIVATE_SLOT(d, void _k_deviceCreated(QDBusObjectPath))
+    Q_PRIVATE_SLOT(d, void _k_deviceFound(QString))
+    Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
 };
 
 }

@@ -17,48 +17,18 @@
     Boston, MA 02110-1301, USA.
 */
 
-#ifndef BLUEDEVILMANAGER_H
-#define BLUEDEVILMANAGER_H
-
-#include <bluedevil_export.h>
-
-#include <QtCore/QObject>
-#include <QtDBus/QDBusObjectPath>
+#ifndef BLUEDEVILDEVICE_H
+#define BLUEDEVILDEVICE_H
 
 namespace BlueDevil {
 
-class Adapter;
-
-class BLUEDEVIL_EXPORT Manager
-    : public QObject
+class Device
 {
-    Q_OBJECT
-
 public:
-    virtual ~Manager();
-
-    static Manager *self();
-    static void release();
-
-    Adapter *defaultAdapter() const;
-    QList<Adapter*> listAdapters() const;
-
-Q_SIGNALS:
-    void adapterAdded(Adapter *adapter);
-    void adapterRemoved(Adapter *adapter);
-    void defaultAdapterChanged(Adapter *adapter);
-
-private:
-    Manager(QObject *parent = 0);
-
-    class Private;
-    Private *const d;
-
-    Q_PRIVATE_SLOT(d, void _k_adapterAdded(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_adapterRemoved(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_defaultAdapterChanged(QDBusObjectPath))
+    Device();
+    ~Device();
 };
 
 }
 
-#endif // BLUEDEVILMANAGER_H
+#endif // BLUEDEVILDEVICE_H
