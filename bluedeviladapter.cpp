@@ -23,21 +23,32 @@
 
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
-
-#define SERVICE "org.bluez"
-#define ADAPTER_IFACE "org.bluez.Adapter"
-
+#include <QtCore/QDebug>
 namespace BlueDevil {
 
 class Adapter::Private
 {
 public:
-    QString m_adapterPath;
+    Private(Adapter *q);
+
+    OrgBluezAdapterInterface *m_bluezAdapterInterface;
+    QString                   m_adapterPath;
+
+    Adapter *const m_q;
 };
 
-Adapter::Adapter(const QString &adapterPath)
-    : d(new Private)
+Adapter::Private::Private(Adapter *q)
+    : m_q(q)
 {
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Adapter::Adapter(const QString &adapterPath)
+    : QObject()
+    , d(new Private(this))
+{
+    d->m_bluezAdapterInterface = new OrgBluezAdapterInterface("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
     d->m_adapterPath = adapterPath;
 }
 
@@ -53,144 +64,72 @@ QString Adapter::adapterPath() const
 
 QString Adapter::address() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["Address"].toString();
+    return d->m_bluezAdapterInterface->GetProperties().value()["Address"].toString();
 }
 
 void Adapter::setName(const QString &name)
 {
-    QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "SetProperty"));
-
-    QVariantList arguments;
-    arguments << QString("Name");
-    arguments << name;
-    msg.setArguments(arguments);
-
-    QDBusConnection::systemBus().send(msg);
+    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name));
 }
 
 QString Adapter::name() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["Name"].toString();
+    return d->m_bluezAdapterInterface->GetProperties().value()["Name"].toString();
 }
 
 void Adapter::setPowered(bool powered)
 {
-    QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "SetProperty"));
-
-    QVariantList arguments;
-    arguments << QString("Powered");
-    arguments << powered;
-    msg.setArguments(arguments);
-
-    QDBusConnection::systemBus().send(msg);
+    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered));
 }
 
 bool Adapter::isPowered() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["Powered"].toBool();
+    return d->m_bluezAdapterInterface->GetProperties().value()["Powered"].toBool();
 }
 
 void Adapter::setDiscoverable(bool discoverable)
 {
-    QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "SetProperty"));
-
-    QVariantList arguments;
-    arguments << QString("Discoverable");
-    arguments << discoverable;
-    msg.setArguments(arguments);
-
-    QDBusConnection::systemBus().send(msg);
+    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable));
 }
 
 bool Adapter::isDiscoverable() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["Discoverable"].toBool();
+    return d->m_bluezAdapterInterface->GetProperties().value()["Discoverable"].toBool();
 }
 
 void Adapter::setPairable(bool pairable)
 {
-    QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "SetProperty"));
-
-    QVariantList arguments;
-    arguments << QString("Pairable");
-    arguments << pairable;
-    msg.setArguments(arguments);
-
-    QDBusConnection::systemBus().send(msg);
+    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable));
 }
 
 bool Adapter::isPairable() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["Pairable"].toBool();
+    return d->m_bluezAdapterInterface->GetProperties().value()["Pairable"].toBool();
 }
 
 void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 {
-    QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "SetProperty"));
-
-    QVariantList arguments;
-    arguments << QString("PaireableTimeout");
-    arguments << paireableTimeout;
-    msg.setArguments(arguments);
-
-    QDBusConnection::systemBus().send(msg);
+    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout));
 }
 
 quint32 Adapter::paireableTimeout() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["PaireableTimeout"].toBool();
+    return d->m_bluezAdapterInterface->GetProperties().value()["PaireableTimeout"].toUInt();
 }
 
 void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
 {
-    QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "SetProperty"));
-
-    QVariantList arguments;
-    arguments << QString("DiscoverableTimeout");
-    arguments << discoverableTimeout;
-    msg.setArguments(arguments);
-
-    QDBusConnection::systemBus().send(msg);
+    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout));
 }
 
 quint32 Adapter::discoverableTimeout() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["DiscoverableTimeout"].toUInt();
+    return d->m_bluezAdapterInterface->GetProperties().value()["DiscoverableTimeout"].toUInt();
 }
 
 bool Adapter::isDiscovering() const
 {
-    const QDBusMessage msg(QDBusMessage::createMethodCall(SERVICE, d->m_adapterPath, ADAPTER_IFACE, "GetProperties"));
-    QVariantMap res = QDBusConnection::systemBus().call(msg).arguments().first().toMap();
-
-    return res["Discovering"].toBool();
-}
-
-Adapter &Adapter::operator=(const Adapter& rhs)
-{
-    d->m_adapterPath = rhs.d->m_adapterPath;
-    return *this;
+    return d->m_bluezAdapterInterface->GetProperties().value()["Discovering"].toBool();
 }
 
 bool Adapter::operator==(const Adapter &rhs) const

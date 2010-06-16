@@ -21,14 +21,17 @@
 #define BLUEDEVILADAPTER_H
 
 #include <bluedevil_export.h>
+#include <bluezadapter.h>
 
 #include <QtCore/QString>
+#include <QtCore/QObject>
 
 namespace BlueDevil {
 
 class Manager;
 
 class BLUEDEVIL_EXPORT Adapter
+    : public QObject
 {
     friend class Manager;
 

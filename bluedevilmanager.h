@@ -38,8 +38,8 @@ public:
 
     static Manager *self();
 
-    Adapter defaultAdapter() const;
-    QList<Adapter> listAdapters() const;
+    Adapter *defaultAdapter() const;
+    QList<Adapter*> listAdapters() const;
 
 Q_SIGNALS:
     void adapterAdded(const Adapter &adapter);

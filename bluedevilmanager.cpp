@@ -38,8 +38,7 @@ public:
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
-    QHash<QString, Adapter*>  m_adapterMap;
-    OrgBluezManagerInterface          *m_bluezManagerInterface;
+    OrgBluezManagerInterface *m_bluezManagerInterface;
 
     Manager *const m_q;
 };
@@ -101,17 +100,17 @@ Manager* Manager::self()
     return instance;
 }
 
-Adapter Manager::defaultAdapter() const
+Adapter *Manager::defaultAdapter() const
 {
-    return Adapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
+    return new Adapter(d->m_bluezManagerInterface->DefaultAdapter().value().path());
 }
 
-QList<Adapter> Manager::listAdapters() const
+QList<Adapter*> Manager::listAdapters() const
 {
-    QList<Adapter> res;
+    QList<Adapter*> res;
 
     Q_FOREACH (const QDBusObjectPath &objectPath, d->m_bluezManagerInterface->ListAdapters().value()) {
-        res << Adapter(objectPath.path());
+        res << new Adapter(objectPath.path());
     }
 
     return res;
