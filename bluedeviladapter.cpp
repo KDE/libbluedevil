@@ -23,7 +23,7 @@
 
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
-#include <QtCore/QDebug>
+
 namespace BlueDevil {
 
 class Adapter::Private
