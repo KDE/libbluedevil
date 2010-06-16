@@ -60,7 +60,7 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &device, const QVariantMap &map)
 {
-    qDebug() << "device found";
+    qDebug() << "device found (" << device << ")";
 }
 
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)

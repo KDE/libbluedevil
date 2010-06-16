@@ -29,7 +29,12 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    Manager::self()->defaultAdapter()->startDiscovery();
+    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
+    if (defaultAdapter) {
+        defaultAdapter->startDiscovery();
+        return app.exec();
+    }
 
-    return app.exec();
+    qDebug() << "no bluetooth adapters were found";
+    return 0;
 }
