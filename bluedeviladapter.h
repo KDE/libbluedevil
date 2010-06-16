@@ -132,7 +132,7 @@ public:
 
 Q_SIGNALS:
     void deviceCreated(Device *device);
-    void deviceFound(Device *device);
+    void deviceFound(Device *device, const QVariantMap &map);
     void deviceRemoved(Device *device);
 
 private:
@@ -142,7 +142,7 @@ private:
     Private *const d;
 
     Q_PRIVATE_SLOT(d, void _k_deviceCreated(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_deviceFound(QString))
+    Q_PRIVATE_SLOT(d, void _k_deviceFound(QString,QVariantMap))
     Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
 };
 

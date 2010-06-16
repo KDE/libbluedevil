@@ -34,7 +34,7 @@ public:
     ~Private();
 
     void _k_deviceCreated(const QDBusObjectPath &objectPath);
-    void _k_deviceFound(const QString &device);
+    void _k_deviceFound(const QString &device, const QVariantMap &map);
     void _k_deviceRemoved(const QDBusObjectPath &objectPath);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
@@ -58,7 +58,7 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
     qDebug() << "device created";
 }
 
-void Adapter::Private::_k_deviceFound(const QString &device)
+void Adapter::Private::_k_deviceFound(const QString &device, const QVariantMap &map)
 {
     qDebug() << "device found";
 }
@@ -79,8 +79,8 @@ Adapter::Adapter(const QString &adapterPath)
 
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceCreated(QDBusObjectPath)),
             this, SLOT(_k_deviceCreated(QDBusObjectPath)));
-    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceFound(QString)),
-            this, SLOT(_k_deviceFound(QString)));
+    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceFound(QString,QVariantMap)),
+            this, SLOT(_k_deviceFound(QString,QVariantMap)));
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceRemoved(QDBusObjectPath)),
             this, SLOT(_k_deviceRemoved(QDBusObjectPath)));
 }

@@ -3,7 +3,7 @@
 <node name="/org/bluez/5160/hci0">
         <interface name="org.bluez.Adapter">
                 <method name="GetProperties">
-                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QMap&lt;QString, QVariant>"/>
+                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
                         <arg type="a{sv}" direction="out"/>
                 </method>
                 <method name="SetProperty">
@@ -56,8 +56,8 @@
                 </signal>
                 <signal name="DeviceFound">
                         <arg type="s"/>
-                        <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="<type>"/>
                         <arg type="a{sv}"/>
+                        <annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QVariantMap"/>
                 </signal>
                 <signal name="DeviceDisappeared">
                         <arg type="s"/>
@@ -88,6 +88,7 @@
                 </method>
                 <method name="GetProperties">
                         <arg type="a{sv}" direction="out"/>
+                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
                 </method>
                 <signal name="PropertyChanged">
                         <arg type="s"/>
@@ -100,8 +101,8 @@
                         <arg type="v" direction="in"/>
                 </method>
                 <method name="GetProperties">
-                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out1" value="QMap&lt;QString, QVariant>"/>
                         <arg type="a{sv}" direction="out"/>
+                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
                 </method>
                 <signal name="PropertyChanged">
                         <arg type="s"/>
@@ -114,8 +115,8 @@
                         <arg type="v" direction="in"/>
                 </method>
                 <method name="GetProperties">
-                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out2" value="QMap&lt;QString, QVariant>"/>
                         <arg type="a{sv}" direction="out"/>
+                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
                 </method>
                 <signal name="PropertyChanged">
                         <arg type="s"/>
