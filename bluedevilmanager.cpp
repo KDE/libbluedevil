@@ -115,11 +115,14 @@ void Manager::release()
 Adapter *Manager::defaultAdapter() const
 {
     delete d->m_defaultAdapter;
+    d->m_defaultAdapter = 0;
+
+    if (!QDBusConnection::systemBus().isConnected()) {
+        return d->m_defaultAdapter;
+    }
 
     const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
-    if (adapterPath.isEmpty()) {
-        d->m_defaultAdapter = 0;
-    } else {
+    if (!adapterPath.isEmpty()) {
         d->m_defaultAdapter = new Adapter(adapterPath);
     }
 
@@ -130,6 +133,10 @@ QList<Adapter*> Manager::listAdapters() const
 {
     qDeleteAll(d->m_adapterList);
     d->m_adapterList.clear();
+
+    if (!QDBusConnection::systemBus().isConnected()) {
+        return d->m_adapterList;
+    }
 
     Q_FOREACH (const QDBusObjectPath &objectPath, d->m_bluezManagerInterface->ListAdapters().value()) {
         d->m_adapterList << new Adapter(objectPath.path());
