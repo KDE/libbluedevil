@@ -67,7 +67,7 @@ int main(int argc, char **argv)
         return app.exec();
     }
 
-    qDebug() << "no bluetooth adapters were found";
+    qDebug() << "!!! No bluetooth adapters were found";
     return 0;
 }
 
