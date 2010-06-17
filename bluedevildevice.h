@@ -50,7 +50,7 @@ public:
     bool isPaired() const;
     short RSSI() const;
 
-    QAlternativeMap discoverServices(const QString &pattern);
+    QAlternativeMap discoverServices(const QString &pattern = QString());
     void cancelDiscovery();
     void disconnect();
 

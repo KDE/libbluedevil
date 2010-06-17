@@ -48,6 +48,7 @@ void DeviceReceiver::deviceFound(Device *device)
     qDebug() << "\tName:\t\t" << device->name();
     qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
     qDebug() << "\tRSSI:\t\t" << device->RSSI();
+    qDebug() << "\tServices:\n" << device->discoverServices();
     qDebug();
 }
 
