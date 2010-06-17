@@ -3,8 +3,8 @@
 <node name="/">
         <interface name="org.bluez.Manager">
                 <method name="GetProperties">
-                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QMap&lt;QString, QVariant>"/>
                         <arg type="a{sv}" direction="out"/>
+                        <annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
                 </method>
                 <method name="DefaultAdapter">
                         <arg type="o" direction="out"/>

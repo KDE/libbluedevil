@@ -40,14 +40,14 @@ DeviceReceiver::~DeviceReceiver()
 void DeviceReceiver::deviceFound(Device *device)
 {
     qDebug() << "*** Remote device found:";
-    qDebug() << "\tAddress:\t" << device->getAddress();
-    qDebug() << "\tAlias:\t\t" << device->getAlias();
-    qDebug() << "\tClass:\t\t" << device->getDeviceClass();
-    qDebug() << "\tIcon:\t\t" << device->getIcon();
+    qDebug() << "\tAddress:\t" << device->address();
+    qDebug() << "\tAlias:\t\t" << device->alias();
+    qDebug() << "\tClass:\t\t" << device->deviceClass();
+    qDebug() << "\tIcon:\t\t" << device->icon();
     qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
-    qDebug() << "\tName:\t\t" << device->getName();
+    qDebug() << "\tName:\t\t" << device->name();
     qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
-    qDebug() << "\tRSSI:\t\t" << device->getRSSI();
+    qDebug() << "\tRSSI:\t\t" << device->RSSI();
     qDebug();
 }
 

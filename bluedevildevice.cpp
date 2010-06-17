@@ -29,6 +29,11 @@ public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
             bool legacyPairing, const QString &name, bool paired, short RSSI);
 
+    void _k_propertyChanged(const QString &property, const QDBusVariant &value);
+
+    OrgBluezDeviceInterface *m_bluezDeviceInterface;
+
+    // Bluez cached properties
     QString m_address;
     QString m_alias;
     quint32 m_deviceClass;
@@ -51,7 +56,13 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
     , m_paired(paired)
     , m_RSSI(RSSI)
 {
-}                         
+}
+
+void Device::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
+{
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Device::Device(const QString &address, const QString &alias, quint32 deviceClass,
                const QString &icon, bool legacyPairing, const QString &name, bool paired,
@@ -66,22 +77,22 @@ Device::~Device()
     delete d;
 }
 
-QString Device::getAddress() const
+QString Device::address() const
 {
     return d->m_address;
 }
 
-QString Device::getAlias() const
+QString Device::alias() const
 {
     return d->m_alias;
 }
 
-quint32 Device::getDeviceClass() const
+quint32 Device::deviceClass() const
 {
     return d->m_deviceClass;
 }
 
-QString Device::getIcon() const
+QString Device::icon() const
 {
     return d->m_icon;
 }
@@ -91,7 +102,7 @@ bool Device::hasLegacyPairing() const
     return d->m_legacyPairing;
 }
 
-QString Device::getName() const
+QString Device::name() const
 {
     return d->m_name;
 }
@@ -101,9 +112,12 @@ bool Device::isPaired() const
     return d->m_paired;
 }
 
-short Device::getRSSI() const
+short Device::RSSI() const
 {
     return d->m_RSSI;
 }
 
 }
+
+#include "bluedevildevice.moc"
+

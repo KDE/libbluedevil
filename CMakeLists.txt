@@ -18,6 +18,8 @@ QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-manager.xml)
 QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-manager.xml bluezmanager)
 QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-adapter.xml)
 QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-adapter.xml bluezadapter)
+QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-device.xml)
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-device.xml bluezdevice)
 QT4_AUTOMOC(${libbluedevil_SRCS})
 
 add_library(bluedevil SHARED ${libbluedevil_SRCS})

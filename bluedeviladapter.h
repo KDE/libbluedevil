@@ -131,10 +131,8 @@ public:
     void stopDiscovery() const;
 
 Q_SIGNALS:
-    void deviceCreated(Device *device);
     void deviceFound(Device *device);
     void deviceDisappeared(Device *device);
-    void deviceRemoved(Device *device);
 
 private:
     Adapter(const QString &adapterPath, QObject *parent = 0);

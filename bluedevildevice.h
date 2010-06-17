@@ -21,6 +21,7 @@
 #define BLUEDEVILDEVICE_H
 
 #include <bluedevil_export.h>
+#include <bluezdevice.h>
 
 #include <QtCore/QObject>
 
@@ -31,19 +32,24 @@ class Adapter;
 class BLUEDEVIL_EXPORT Device
     : public QObject
 {
+    Q_OBJECT
+
     friend class Adapter;
 
 public:
     virtual ~Device();
 
-    QString getAddress() const;
-    QString getAlias() const;
-    quint32 getDeviceClass() const;
-    QString getIcon() const;
+    QString address() const;
+    QString alias() const;
+    quint32 deviceClass() const;
+    QString icon() const;
     bool hasLegacyPairing() const;
-    QString getName() const;
+    QString name() const;
     bool isPaired() const;
-    short getRSSI() const;
+    short RSSI() const;
+
+Q_SIGNALS:
+    void disconnectRequested();
 
 private:
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
@@ -51,6 +57,8 @@ private:
 
     class Private;
     Private *const d;
+
+    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
 };
 
 }
