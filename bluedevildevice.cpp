@@ -142,7 +142,7 @@ QAlternativeMap Device::discoverServices(const QString &pattern)
         connect(d->m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), this, SIGNAL(disconnectRequested()));
     }
 
-    return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();;
+    return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
 }
 
 void Device::cancelDiscovery()
