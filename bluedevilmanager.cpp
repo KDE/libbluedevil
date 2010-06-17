@@ -41,7 +41,7 @@ public:
 
     OrgBluezManagerInterface *m_bluezManagerInterface;
     Adapter                  *m_defaultAdapter;
-    QList<Adapter*>           m_adapterList;
+    QHash<QString, Adapter*>  m_adaptersHash;
 
     Manager *const m_q;
 };
@@ -59,20 +59,32 @@ Manager::Private::~Private()
 
 void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
-    Adapter adapter(objectPath.path());
-    emit m_q->adapterAdded(&adapter);
+    Adapter *const adapter = new Adapter(objectPath.path(), m_q);
+    m_adaptersHash.insert(objectPath.path(), adapter);
+    emit m_q->adapterAdded(adapter);
 }
 
 void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
 {
-    Adapter adapter(objectPath.path());
-    emit m_q->adapterRemoved(&adapter);
+    Adapter *const adapter = m_adaptersHash.take(objectPath.path()); // return and remove it from the hash
+    if (adapter) {
+        if (adapter == m_defaultAdapter) {
+            m_defaultAdapter = 0;
+        }
+        emit m_q->adapterRemoved(adapter);
+        delete adapter;
+    }
 }
 
 void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
 {
-    Adapter adapter(objectPath.path());
-    emit m_q->defaultAdapterChanged(&adapter);
+    Adapter *adapter = m_adaptersHash[objectPath.path()];
+    if (!adapter) {
+        adapter = new Adapter(objectPath.path(), m_q);
+        m_adaptersHash.insert(objectPath.path(), adapter);
+    }
+    m_defaultAdapter = adapter;
+    emit m_q->defaultAdapterChanged(adapter);
 }
 
 void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
@@ -137,18 +149,11 @@ Adapter *Manager::defaultAdapter() const
 
 QList<Adapter*> Manager::listAdapters() const
 {
-    qDeleteAll(d->m_adapterList);
-    d->m_adapterList.clear();
-
     if (!QDBusConnection::systemBus().isConnected()) {
-        return d->m_adapterList;
+        return QList<Adapter*>();
     }
 
-    Q_FOREACH (const QDBusObjectPath &objectPath, d->m_bluezManagerInterface->ListAdapters().value()) {
-        d->m_adapterList << new Adapter(objectPath.path(), const_cast<Manager*>(this));
-    }
-
-    return d->m_adapterList;
+    return d->m_adaptersHash.values();
 }
 
 }
