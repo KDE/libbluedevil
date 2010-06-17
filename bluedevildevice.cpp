@@ -55,8 +55,9 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
 
 Device::Device(const QString &address, const QString &alias, quint32 deviceClass,
                const QString &icon, bool legacyPairing, const QString &name, bool paired,
-               short RSSI)
-    : d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI))
+               short RSSI, QObject *parent)
+    : QObject(parent)
+    , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI))
 {
 }
 

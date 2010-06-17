@@ -25,6 +25,10 @@
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
 
+#define ENSURE_PROPERTIES_FETCHED     if (!d->m_propertiesFetched) { \
+                                          d->fetchProperties();      \
+                                      }
+
 namespace BlueDevil {
 
 class Adapter::Private
@@ -32,6 +36,8 @@ class Adapter::Private
 public:
     Private(Adapter *q);
     ~Private();
+
+    void fetchProperties();
 
     void _k_deviceCreated(const QDBusObjectPath &objectPath);
     void _k_deviceFound(const QString &address, const QVariantMap &map);
@@ -41,12 +47,26 @@ public:
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QString                   m_adapterPath;
+    QHash<QString, Device*>   m_devicesHash;
+
+    // Bluez cached properties
+    QString m_address;
+    QString m_name;
+    quint32 m_class;
+    bool    m_powered;
+    bool    m_discoverable;
+    bool    m_pairable;
+    quint32 m_pairableTimeout;
+    quint32 m_discoverableTimeout;
+    bool    m_discovering;
+    bool    m_propertiesFetched;
 
     Adapter *const m_q;
 };
 
 Adapter::Private::Private(Adapter *q)
-    : m_q(q)
+    : m_propertiesFetched(false)
+    , m_q(q)
 {
 }
 
@@ -55,33 +75,72 @@ Adapter::Private::~Private()
     delete m_bluezAdapterInterface;
 }
 
+void Adapter::Private::fetchProperties()
+{
+    QVariantMap properties = m_bluezAdapterInterface->GetProperties().value();
+    m_address = properties["Address"].toString();
+    m_name = properties["Name"].toString();
+    m_class = properties["Class"].toUInt();
+    m_powered = properties["Powered"].toBool();
+    m_discoverable = properties["Discoverable"].toBool();
+    m_pairable = properties["Pairable"].toBool();
+    m_pairableTimeout = properties["PairableTimeout"].toUInt();
+    m_discoverableTimeout = properties["DiscoverableTimeout"].toUInt();
+    m_discovering = properties["Discovering"].toBool();
+    m_propertiesFetched = true;
+}
+
 void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 {
-    Q_UNUSED(objectPath)
+    Device *const device = m_devicesHash[objectPath.path()];
+    if (device) {
+        emit m_q->deviceCreated(device);
+    }
 }
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    Device device(address, map["Alias"].toString(), map["Class"].toUInt(), map["Icon"].toString(),
-                  map["LegacyPairing"].toBool(), map["Name"].toString(), map["Paired"].toBool(),
-                  map["RSSI"].toInt());
-    emit m_q->deviceFound(&device);         
+    Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
+                                      map["Icon"].toString(), map["LegacyPairing"].toBool(),
+                                      map["Name"].toString(), map["Paired"].toBool(),
+                                      map["RSSI"].toInt(), m_q);
+    m_devicesHash.insert(address, device);
+    emit m_q->deviceFound(device);
 }
 
 void Adapter::Private::_k_deviceDisappeared(const QString &address)
 {
-    Q_UNUSED(address)
+    Device *const device = m_devicesHash.take(address);
+    if (device) {
+        emit m_q->deviceDisappeared(device);
+        delete device;
+    }
 }
 
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 {
-    Q_UNUSED(objectPath)
+    Device *const device = m_devicesHash.take(objectPath.path());
+    if (device) {
+        emit m_q->deviceRemoved(device);
+        delete device;
+    }
 }
 
 void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
 {
-    Q_UNUSED(property)
-    Q_UNUSED(value)
+    if (property == "Name") {
+        m_name = value.variant().toString();
+    } else if (property == "Powered") {
+        m_powered = value.variant().toBool();
+    } else if (property == "Discoverable") {
+        m_discoverable = value.variant().toBool();
+    } else if (property == "Pairable") {
+        m_pairable = value.variant().toBool();
+    } else if (property == "PairableTimeout") {
+        m_pairableTimeout = value.variant().toUInt();
+    } else if (property == "DiscoverableTimeout") {
+        m_discoverableTimeout = value.variant().toUInt();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,7 +176,8 @@ QString Adapter::adapterPath() const
 
 QString Adapter::address() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["Address"].toString();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_address;
 }
 
 void Adapter::setName(const QString &name)
@@ -127,7 +187,8 @@ void Adapter::setName(const QString &name)
 
 QString Adapter::name() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["Name"].toString();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_name;
 }
 
 void Adapter::setPowered(bool powered)
@@ -137,7 +198,8 @@ void Adapter::setPowered(bool powered)
 
 bool Adapter::isPowered() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["Powered"].toBool();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_powered;
 }
 
 void Adapter::setDiscoverable(bool discoverable)
@@ -147,7 +209,8 @@ void Adapter::setDiscoverable(bool discoverable)
 
 bool Adapter::isDiscoverable() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["Discoverable"].toBool();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_discoverable;
 }
 
 void Adapter::setPairable(bool pairable)
@@ -157,7 +220,8 @@ void Adapter::setPairable(bool pairable)
 
 bool Adapter::isPairable() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["Pairable"].toBool();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_pairable;
 }
 
 void Adapter::setPaireableTimeout(quint32 paireableTimeout)
@@ -167,7 +231,8 @@ void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 
 quint32 Adapter::paireableTimeout() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["PaireableTimeout"].toUInt();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_pairableTimeout;
 }
 
 void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
@@ -177,12 +242,14 @@ void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
 
 quint32 Adapter::discoverableTimeout() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["DiscoverableTimeout"].toUInt();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_discoverableTimeout;
 }
 
 bool Adapter::isDiscovering() const
 {
-    return d->m_bluezAdapterInterface->GetProperties().value()["Discovering"].toBool();
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_discovering;
 }
 
 void Adapter::requestSession() const

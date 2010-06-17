@@ -22,11 +22,14 @@
 
 #include <bluedevil_export.h>
 
+#include <QtCore/QObject>
+
 namespace BlueDevil {
 
 class Adapter;
 
 class BLUEDEVIL_EXPORT Device
+    : public QObject
 {
     friend class Adapter;
 
@@ -44,7 +47,7 @@ public:
 
 private:
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-           bool legacyPairing, const QString &name, bool paired, short RSSI);
+           bool legacyPairing, const QString &name, bool paired, short RSSI, QObject *parent = 0);
 
     class Private;
     Private *const d;
