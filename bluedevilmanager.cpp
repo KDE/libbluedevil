@@ -37,6 +37,7 @@ public:
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
     void _k_adapterRemoved(const QDBusObjectPath &objectPath);
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
+    void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezManagerInterface *m_bluezManagerInterface;
     Adapter                  *m_defaultAdapter;
@@ -74,6 +75,12 @@ void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPat
     emit m_q->defaultAdapterChanged(&adapter);
 }
 
+void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
+{
+    Q_UNUSED(property)
+    Q_UNUSED(value)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Manager::Manager(QObject *parent)
@@ -88,6 +95,8 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_adapterRemoved(QDBusObjectPath)));
     connect(d->m_bluezManagerInterface, SIGNAL(DefaultAdapterChanged(QDBusObjectPath)),
             this, SLOT(_k_defaultAdapterChanged(QDBusObjectPath)));
+    connect(d->m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
+            this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 }
 
 Manager::~Manager()

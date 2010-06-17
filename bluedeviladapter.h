@@ -133,6 +133,7 @@ public:
 Q_SIGNALS:
     void deviceCreated(Device *device);
     void deviceFound(Device *device);
+    void deviceDisappeared(Device *device);
     void deviceRemoved(Device *device);
 
 private:
@@ -143,7 +144,9 @@ private:
 
     Q_PRIVATE_SLOT(d, void _k_deviceCreated(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_deviceFound(QString,QVariantMap))
+    Q_PRIVATE_SLOT(d, void _k_deviceDisappeared(QString))
     Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
+    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
 };
 
 }

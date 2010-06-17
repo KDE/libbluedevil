@@ -34,8 +34,10 @@ public:
     ~Private();
 
     void _k_deviceCreated(const QDBusObjectPath &objectPath);
-    void _k_deviceFound(const QString &device, const QVariantMap &map);
+    void _k_deviceFound(const QString &address, const QVariantMap &map);
+    void _k_deviceDisappeared(const QString &address);
     void _k_deviceRemoved(const QDBusObjectPath &objectPath);
+    void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QString                   m_adapterPath;
@@ -66,9 +68,20 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
     emit m_q->deviceFound(&device);         
 }
 
+void Adapter::Private::_k_deviceDisappeared(const QString &address)
+{
+    Q_UNUSED(address)
+}
+
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 {
     Q_UNUSED(objectPath)
+}
+
+void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
+{
+    Q_UNUSED(property)
+    Q_UNUSED(value)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,8 +97,12 @@ Adapter::Adapter(const QString &adapterPath, QObject *parent)
             this, SLOT(_k_deviceCreated(QDBusObjectPath)));
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceFound(QString,QVariantMap)),
             this, SLOT(_k_deviceFound(QString,QVariantMap)));
+    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceDisappeared(QString)),
+            this, SLOT(_k_deviceDisappeared(QString)));
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceRemoved(QDBusObjectPath)),
             this, SLOT(_k_deviceRemoved(QDBusObjectPath)));
+    connect(d->m_bluezAdapterInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
+            this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 }
 
 Adapter::~Adapter()
