@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(libbluedevil)
 set(GENERIC_LIB_VERSION "1.0")
 set(GENERIC_LIB_SOVERSION "1")
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 find_package(Qt4 REQUIRED)
 
@@ -14,12 +15,11 @@ set(libbluedevil_SRCS
     bluedevildevice.cpp
 )
 
-QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-manager.xml)
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-manager.xml bluezmanager)
-QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-adapter.xml)
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-adapter.xml bluezadapter)
-QT4_GENERATE_DBUS_INTERFACE(bluez/bluez.h bluez/bluez-device.xml)
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS bluez/bluez-device.xml bluezdevice)
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-manager.xml bluezmanager)
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-adapter.xml bluezadapter)
+set(libbluedevil_xml ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-device.xml)
+set_source_files_properties(${libbluedevil_xml} PROPERTIES INCLUDE "bluedevildevice.h")
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${libbluedevil_xml} bluezdevice)
 QT4_AUTOMOC(${libbluedevil_SRCS})
 
 add_library(bluedevil SHARED ${libbluedevil_SRCS})

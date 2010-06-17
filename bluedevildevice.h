@@ -27,6 +27,8 @@
 
 namespace BlueDevil {
 
+typedef QMap<quint32, QString> QAlternativeMap;
+
 class Adapter;
 
 class BLUEDEVIL_EXPORT Device
@@ -66,5 +68,7 @@ private:
 };
 
 }
+
+Q_DECLARE_METATYPE(BlueDevil::QAlternativeMap)
 
 #endif // BLUEDEVILDEVICE_H
