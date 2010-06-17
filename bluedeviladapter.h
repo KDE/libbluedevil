@@ -21,10 +21,9 @@
 #define BLUEDEVILADAPTER_H
 
 #include <bluedevil_export.h>
-#include <bluezadapter.h>
 
-#include <QtCore/QString>
 #include <QtCore/QObject>
+#include <QtDBus/QDBusObjectPath>
 
 namespace BlueDevil {
 
@@ -37,6 +36,7 @@ class BLUEDEVIL_EXPORT Adapter
     Q_OBJECT
 
     friend class Manager;
+    friend class Device;
 
 public:
     virtual ~Adapter();
@@ -136,6 +136,9 @@ Q_SIGNALS:
 
 private:
     Adapter(const QString &adapterPath, QObject *parent = 0);
+
+    QDBusObjectPath findDevice(const QString &address) const;
+    QDBusObjectPath createDevice(const QString &address) const;
 
     class Private;
     Private *const d;

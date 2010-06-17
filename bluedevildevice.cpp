@@ -18,6 +18,9 @@
 */
 
 #include "bluedevildevice.h"
+#include "bluedeviladapter.h"
+
+#include <bluezdevice.h>
 
 #include <QtCore/QString>
 
@@ -32,6 +35,7 @@ public:
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezDeviceInterface *m_bluezDeviceInterface;
+    Adapter                 *m_adapter;
 
     // Bluez cached properties
     QString m_address;
@@ -47,7 +51,8 @@ public:
 Device::Private::Private(const QString &address, const QString &alias, quint32 deviceClass,
                          const QString &icon, bool legacyPairing, const QString &name, bool paired,
                          short RSSI)
-    : m_address(address)
+    : m_bluezDeviceInterface(0)
+    , m_address(address)
     , m_alias(alias)
     , m_deviceClass(deviceClass)
     , m_icon(icon)
@@ -66,10 +71,11 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
 
 Device::Device(const QString &address, const QString &alias, quint32 deviceClass,
                const QString &icon, bool legacyPairing, const QString &name, bool paired,
-               short RSSI, QObject *parent)
-    : QObject(parent)
+               short RSSI, Adapter *adapter)
+    : QObject(adapter)
     , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI))
 {
+    d->m_adapter = adapter;
 }
 
 Device::~Device()
@@ -115,6 +121,41 @@ bool Device::isPaired() const
 short Device::RSSI() const
 {
     return d->m_RSSI;
+}
+
+QVariantMap Device::discoverServices(const QString &pattern)
+{
+    if (!d->m_bluezDeviceInterface) {
+        QDBusObjectPath devicePath = d->m_adapter->findDevice(d->m_address);
+
+        if (devicePath.path().isEmpty()) {
+            devicePath = d->m_adapter->createDevice(d->m_address);
+        }
+
+        d->m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
+                                                                devicePath.path(),
+                                                                QDBusConnection::systemBus(),
+                                                                this);
+
+        connect(d->m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), this, SIGNAL(disconnectRequested()));
+    }
+
+//     d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
+    return QVariantMap();
+}
+
+void Device::cancelDiscovery()
+{
+    if (d->m_bluezDeviceInterface) {
+        d->m_bluezDeviceInterface->CancelDiscovery();
+    }
+}
+
+void Device::disconnect()
+{
+    if (d->m_bluezDeviceInterface) {
+        d->m_bluezDeviceInterface->Disconnect();
+    }
 }
 
 }

@@ -21,9 +21,9 @@
 #define BLUEDEVILDEVICE_H
 
 #include <bluedevil_export.h>
-#include <bluezdevice.h>
 
 #include <QtCore/QObject>
+#include <QtDBus/QDBusObjectPath>
 
 namespace BlueDevil {
 
@@ -48,12 +48,16 @@ public:
     bool isPaired() const;
     short RSSI() const;
 
+    QVariantMap discoverServices(const QString &pattern);
+    void cancelDiscovery();
+    void disconnect();
+
 Q_SIGNALS:
     void disconnectRequested();
 
 private:
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-           bool legacyPairing, const QString &name, bool paired, short RSSI, QObject *parent = 0);
+           bool legacyPairing, const QString &name, bool paired, short RSSI, Adapter *adapter = 0);
 
     class Private;
     Private *const d;

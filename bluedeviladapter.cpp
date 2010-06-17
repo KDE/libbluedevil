@@ -20,10 +20,7 @@
 #include "bluedeviladapter.h"
 #include "bluedevildevice.h"
 
-#include <QtCore/QVariantList>
-
-#include <QtDBus/QDBusMessage>
-#include <QtDBus/QDBusConnection>
+#include <bluezadapter.h>
 
 #define ENSURE_PROPERTIES_FETCHED     if (!d->m_propertiesFetched) { \
                                           d->fetchProperties();      \
@@ -92,10 +89,7 @@ void Adapter::Private::fetchProperties()
 
 void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 {
-    Device *const device = m_devicesHash[objectPath.path()];
-    if (device) {
-        emit m_q->deviceCreated(device);
-    }
+    Q_UNUSED(objectPath)
 }
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
@@ -119,11 +113,7 @@ void Adapter::Private::_k_deviceDisappeared(const QString &address)
 
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 {
-    Device *const device = m_devicesHash.take(objectPath.path());
-    if (device) {
-        emit m_q->deviceRemoved(device);
-        delete device;
-    }
+    Q_UNUSED(objectPath)
 }
 
 void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
@@ -270,6 +260,16 @@ void Adapter::startDiscovery() const
 void Adapter::stopDiscovery() const
 {
     d->m_bluezAdapterInterface->StopDiscovery().waitForFinished();
+}
+
+QDBusObjectPath Adapter::findDevice(const QString &address) const
+{
+    return d->m_bluezAdapterInterface->FindDevice(address).value();
+}
+
+QDBusObjectPath Adapter::createDevice(const QString &address) const
+{
+    return d->m_bluezAdapterInterface->CreateDevice(address).value();
 }
 
 }
