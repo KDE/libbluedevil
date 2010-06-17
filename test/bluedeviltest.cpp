@@ -39,8 +39,6 @@ DeviceReceiver::~DeviceReceiver()
 
 void DeviceReceiver::deviceFound(Device *device)
 {
-    device->discoverServices(QString());
-
     qDebug() << "*** Remote device found:";
     qDebug() << "\tAddress:\t" << device->address();
     qDebug() << "\tAlias:\t\t" << device->alias();

@@ -75,6 +75,8 @@ Device::Device(const QString &address, const QString &alias, quint32 deviceClass
     : QObject(adapter)
     , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI))
 {
+    qRegisterMetaType<BlueDevil::QAlternativeMap>("BlueDevil::QAlternativeMap");
+    qDBusRegisterMetaType<BlueDevil::QAlternativeMap>();
     d->m_adapter = adapter;
 }
 
@@ -123,7 +125,7 @@ short Device::RSSI() const
     return d->m_RSSI;
 }
 
-QVariantMap Device::discoverServices(const QString &pattern)
+QAlternativeMap Device::discoverServices(const QString &pattern)
 {
     if (!d->m_bluezDeviceInterface) {
         QDBusObjectPath devicePath = d->m_adapter->findDevice(d->m_address);
@@ -140,8 +142,7 @@ QVariantMap Device::discoverServices(const QString &pattern)
         connect(d->m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), this, SIGNAL(disconnectRequested()));
     }
 
-//     d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
-    return QVariantMap();
+    return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();;
 }
 
 void Device::cancelDiscovery()
