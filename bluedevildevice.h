@@ -41,7 +41,7 @@ class Adapter;
  *
  * Since this values are cached, you will not get updates on their state until you make a call that
  * forces the device to be registered on the bus (and thus, created, in D-Bus terminology), or you
- * explicitly call to create.
+ * explicitly call to registerDevice.
  *
  * After the Device has been registered, it will automatically update its properties internally, and
  * additionally signals like pairedChanged will be emitted when this properties are updated.
