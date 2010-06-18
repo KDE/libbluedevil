@@ -39,6 +39,7 @@ public:
 
 public Q_SLOTS:
     void deviceFound(Device *device);
+    void deviceRegistered(Device *device, bool registered);
 };
 
 #endif // BLUEDEVILTEST_H

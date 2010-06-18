@@ -40,16 +40,28 @@ DeviceReceiver::~DeviceReceiver()
 
 void DeviceReceiver::deviceFound(Device *device)
 {
-    qDebug() << "*** Remote device found:";
-    qDebug() << "\tAddress:\t" << device->address();
-    qDebug() << "\tAlias:\t\t" << device->alias();
-    qDebug() << "\tClass:\t\t" << device->deviceClass();
-    qDebug() << "\tIcon:\t\t" << device->icon();
-    qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
-    qDebug() << "\tName:\t\t" << device->name();
-    qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
-    qDebug() << "\tTrusted:\t" << (device->isTrusted() ? "yes" : "no");
-    qDebug() << "\tServices:\n" << device->UUIDs();
+    qDebug() << "*** Remote device found: " << device->name() << ". Registering it asynchronously...";
+    connect(device, SIGNAL(registerDeviceResult(Device*,bool)),
+            this, SLOT(deviceRegistered(Device*,bool)));
+    asyncCall(device, SLOT(registerDevice()));
+}
+
+void DeviceReceiver::deviceRegistered(Device *device, bool registered)
+{
+    if (registered) {
+        qDebug() << "*** Remote device registered:";
+        qDebug() << "\tAddress:\t" << device->address();
+        qDebug() << "\tAlias:\t\t" << device->alias();
+        qDebug() << "\tClass:\t\t" << device->deviceClass();
+        qDebug() << "\tIcon:\t\t" << device->icon();
+        qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
+        qDebug() << "\tName:\t\t" << device->name();
+        qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
+        qDebug() << "\tTrusted:\t" << (device->isTrusted() ? "yes" : "no");
+        qDebug() << "\tServices:\n" << device->UUIDs();
+    } else {
+        qDebug() << "!!! Remote device not registered: " << device->name();
+    }
     qDebug();
 }
 
