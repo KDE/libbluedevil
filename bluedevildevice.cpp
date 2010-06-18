@@ -23,12 +23,20 @@
 #include <bluezdevice.h>
 
 #include <QtCore/QString>
+#include <QtCore/QThread>
 
 #define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
                                       d->fetchProperties();      \
                                   }
 
 namespace BlueDevil {
+
+void asyncCall(Device *device, const char *slot)
+{
+    QThread *thread = new QThread;
+    QObject::connect(thread, SIGNAL(started()), device, slot);
+    thread->start();
+}
 
 class Device::Private
 {
