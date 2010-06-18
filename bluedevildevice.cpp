@@ -36,7 +36,7 @@ public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
             bool legacyPairing, const QString &name, bool paired, Device *q);
 
-    void ensureDeviceCreated();
+    bool ensureDeviceCreated();
     void fetchProperties();
 
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
@@ -80,7 +80,7 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
 {
 }
 
-void Device::Private::ensureDeviceCreated()
+bool Device::Private::ensureDeviceCreated()
 {
     if (!m_bluezDeviceInterface) {
         QDBusObjectPath devicePath = m_adapter->findDevice(m_address);
@@ -90,7 +90,7 @@ void Device::Private::ensureDeviceCreated()
         }
 
         if (devicePath.path().isEmpty()) {
-            return;
+            return false;
         }
 
         m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
@@ -102,15 +102,12 @@ void Device::Private::ensureDeviceCreated()
         connect(m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
     }
+    return true;
 }
 
 void Device::Private::fetchProperties()
 {
-    ensureDeviceCreated();
-
-    // Recheck, since even trying to ensure the device is created, if given an invalid D-Bus object
-    // path, the instance could have not been created.
-    if (!m_bluezDeviceInterface) {
+    if (!ensureDeviceCreated()) {
         return;
     }
 
@@ -246,11 +243,7 @@ bool Device::hasLegacyPairing() const
 
 QUInt32StringHash Device::discoverServices(const QString &pattern)
 {
-    d->ensureDeviceCreated();
-
-    // Recheck, since even trying to ensure the device is created, if given an invalid D-Bus object
-    // path, the instance could have not been created.
-    if (!d->m_bluezDeviceInterface) {
+    if (!d->ensureDeviceCreated()) {
         return QUInt32StringHash();
     }
 
