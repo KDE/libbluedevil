@@ -28,6 +28,18 @@
 
 namespace BlueDevil {
 
+class Device;
+
+/**
+ * Generates an asynchronous call on any method of the Device class. Only some methods allow the
+ * option of returning the result in form of signal, so not all methods can return information
+ * in an asynchronous way.
+ */
+void BLUEDEVIL_EXPORT asyncCall(Device *device, const char *slot);
+
+/**
+ * @internal
+ */
 typedef QMap<quint32, QString> QUInt32StringMap;
 
 class Adapter;
@@ -46,6 +58,10 @@ class Adapter;
  * After the Device has been registered, it will automatically update its properties internally, and
  * additionally signals like pairedChanged will be emitted when this properties are updated.
  *
+ * Please note that since some functions here are blocking, there exists a way to asynchronous
+ * perform certain operations that are known to be expensive. This way your GUI will not block
+ * itself when waiting for a response from the remote device.
+ *
  * @author Rafael Fernández López <ereslibre@kde.org>
  */
 class BLUEDEVIL_EXPORT Device
@@ -59,18 +75,9 @@ public:
     virtual ~Device();
 
     /**
-     * It is not mandatory to call to this method. If you are just retrieving some information that
-     * will not trigger a connection to the device, and you do not need to check if some properties
-     * were updated, please do not call to this method, since it is expensive (it will force a
-     * registration of the device on the bus).
-     *
-     * On the other hand, if what you want is to receive signals of properties being updated and
-     * you have not called a method that triggers a connection to the device, you should explicitly
-     * call to this method, so the device is registered.
-     *
-     * @return Whether it was possible to correctly register this remote device on the bus.
+     * @return The adapter that discovered this remote device.
      */
-    bool registerDevice();
+    Adapter *adapter() const;
 
     /**
      * @return The physical address of the remote device.
@@ -101,59 +108,11 @@ public:
     quint32 deviceClass() const;
 
     /**
-     * @return The list of supported services by the remote device.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    QStringList UUIDs() const;
-
-    /**
      * @return Whether this remote device is paired or not.
      *
      * @note This request will not trigger a connection to the device.
      */
     bool isPaired() const;
-
-    /**
-     * @return Whether this remote device is connected or not.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    bool isConnected() const;
-
-    /**
-     * @return Whether this remote device is trusted or not.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    bool isTrusted() const;
-
-    /**
-     * Sets whether this remote device is trusted or not.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    void setTrusted(bool trusted);
-
-    /**
-     * @return Whether this remote device is blocked or not.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    bool isBlocked() const;
-
-    /**
-     * Sets whether this remote device is blocked or not.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    void setBlocked(bool blocked);
 
     /**
      * @return The alias of the remote device.
@@ -163,40 +122,126 @@ public:
     QString alias() const;
 
     /**
-     * Sets the alias of the remote device.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     */
-    void setAlias(const QString &alias);
-
-    /**
-     * @return The adapter that discovered this remote device.
-     */
-    Adapter *adapter() const;
-
-    /**
      * @return Whether this remote device supports legacy pairing or not.
      *
      * @note This request will not trigger a connection to the device.
      */
     bool hasLegacyPairing() const;
 
+public Q_SLOTS:
+    /**
+     * It is not mandatory to call to this method. If you are just retrieving some information that
+     * will not trigger a connection to the device, and you do not need to check if some properties
+     * were updated, please do not call to this method, since it is expensive (it will force a
+     * registration of the device on the bus).
+     *
+     * On the other hand, if what you want is to receive signals of properties being updated and
+     * you have not called a method that triggers a connection to the device, you should explicitly
+     * call to this method, so the device is registered.
+     *
+     * @return Whether it was possible to correctly register this remote device on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. registerDeviceResult
+     *       signal will be emitted with the result.
+     */
+    bool registerDevice();
+
+    /**
+     * @return The list of supported services by the remote device.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. UUIDsResult signal
+     *       will be emitted with the result.
+     */
+    QStringList UUIDs();
+
+    /**
+     * @return Whether this remote device is connected or not.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. isConnectedResult
+     *       signal will be emitted with the result.
+     */
+    bool isConnected();
+
+    /**
+     * @return Whether this remote device is trusted or not.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. isTrustedResult
+     *       signal will be emitted with the result.
+     */
+    bool isTrusted();
+
+    /**
+     * Sets whether this remote device is trusted or not.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall.
+     */
+    void setTrusted(bool trusted);
+
+    /**
+     * @return Whether this remote device is blocked or not.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. isBlockedResult
+     *       signal will be emitted with the result.
+     */
+    bool isBlocked();
+
+    /**
+     * Sets whether this remote device is blocked or not.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall.
+     */
+    void setBlocked(bool blocked);
+
+    /**
+     * Sets the alias of the remote device.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall.
+     */
+    void setAlias(const QString &alias);
+
     /**
      * @return A map with all supported services by this device.
      *
      * @note This request will trigger a connection to the device with the consequent registration
      *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. discoverServicesResult
+     *       signal will be emitted with the result.
      */
     QUInt32StringMap discoverServices(const QString &pattern = QString());
 
     /**
      * Cancels service discovery.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall.
      */
     void cancelDiscovery();
 
     /**
      * Disconnect from this remote device.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall.
      */
     void disconnect();
 
@@ -207,6 +252,17 @@ Q_SIGNALS:
     void blockedChanged(bool blocked);
     void aliasChanged(const QString &alias);
     void disconnectRequested();
+
+/*
+ * Signals coming from asynchronous API.
+ */
+Q_SIGNALS:
+    void registerDeviceResult(Device *device, bool deviceRegistered);
+    void UUIDsResult(Device *device, const QStringList &UUIDs);
+    void isConnectedResult(Device *device, bool connected);
+    void isTrustedResult(Device *device, bool trusted);
+    void isBlockedResult(Device *device, bool blocked);
+    void discoverServicesResult(Device *device, const QUInt32StringMap &services);
 
 private:
     /**

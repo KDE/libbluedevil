@@ -71,6 +71,7 @@ public:
      */
     QList<Adapter*> listAdapters() const;
 
+
 Q_SIGNALS:
     void adapterAdded(Adapter *adapter);
     void adapterRemoved(Adapter *adapter);

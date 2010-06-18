@@ -169,9 +169,9 @@ Device::~Device()
     delete d;
 }
 
-bool Device::registerDevice()
+Adapter *Device::adapter() const
 {
-    return d->ensureDeviceCreated();
+    return d->m_adapter;
 }
 
 QString Device::address() const
@@ -194,26 +194,54 @@ quint32 Device::deviceClass() const
     return d->m_deviceClass;
 }
 
-QStringList Device::UUIDs() const
-{
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_UUIDs;
-}
-
 bool Device::isPaired() const
 {
     return d->m_paired;
 }
 
-bool Device::isConnected() const
+QString Device::alias() const
+{
+    return d->m_alias;
+}
+
+bool Device::hasLegacyPairing() const
+{
+    return d->m_legacyPairing;
+}
+
+bool Device::registerDevice()
+{
+    const bool res = d->ensureDeviceCreated();
+    if (sender()) {
+        emit registerDeviceResult(this, res);
+    }
+    return res;
+}
+
+QStringList Device::UUIDs()
 {
     ENSURE_PROPERTIES_FETCHED
+    if (sender()) {
+        emit UUIDsResult(this, d->m_UUIDs);
+    }
+    return d->m_UUIDs;
+}
+
+bool Device::isConnected()
+{
+    ENSURE_PROPERTIES_FETCHED
+    if (sender()) {
+        emit isConnectedResult(this, d->m_connected);
+    }
     return d->m_connected;
 }
 
-bool Device::isTrusted() const
+bool Device::isTrusted()
 {
     ENSURE_PROPERTIES_FETCHED
+    if (sender()) {
+        emit isTrustedResult(this, d->m_trusted);
+    }
     return d->m_trusted;
 }
 
@@ -225,9 +253,12 @@ void Device::setTrusted(bool trusted)
     d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted)).waitForFinished();
 }
 
-bool Device::isBlocked() const
+bool Device::isBlocked()
 {
     ENSURE_PROPERTIES_FETCHED
+    if (sender()) {
+        emit isBlockedResult(this, d->m_blocked);
+    }
     return d->m_blocked;
 }
 
@@ -239,11 +270,6 @@ void Device::setBlocked(bool blocked)
     d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked)).waitForFinished();
 }
 
-QString Device::alias() const
-{
-    return d->m_alias;
-}
-
 void Device::setAlias(const QString& alias)
 {
     if (!d->ensureDeviceCreated()) {
@@ -252,22 +278,16 @@ void Device::setAlias(const QString& alias)
     d->m_bluezDeviceInterface->SetProperty("Alias", QDBusVariant(alias)).waitForFinished();
 }
 
-Adapter *Device::adapter() const
-{
-    return d->m_adapter;
-}
-
-bool Device::hasLegacyPairing() const
-{
-    return d->m_legacyPairing;
-}
-
 QUInt32StringMap Device::discoverServices(const QString &pattern)
 {
     if (!d->ensureDeviceCreated()) {
         return QUInt32StringMap();
     }
-    return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
+    const QUInt32StringMap res = d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
+    if (sender()) {
+        emit discoverServicesResult(this, res);
+    }
+    return res;
 }
 
 void Device::cancelDiscovery()
