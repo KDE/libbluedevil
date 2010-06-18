@@ -83,18 +83,18 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
 bool Device::Private::ensureDeviceCreated()
 {
     if (!m_bluezDeviceInterface) {
-        QDBusObjectPath devicePath = m_adapter->findDevice(m_address);
+        QString devicePath = m_adapter->findDevice(m_address);
 
-        if (devicePath.path().isEmpty()) {
+        if (devicePath.isEmpty()) {
             devicePath = m_adapter->createDevice(m_address);
         }
 
-        if (devicePath.path().isEmpty()) {
+        if (devicePath.isEmpty()) {
             return false;
         }
 
         m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
-                                                             devicePath.path(),
+                                                             devicePath,
                                                              QDBusConnection::systemBus(),
                                                              m_q);
 

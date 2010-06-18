@@ -149,10 +149,20 @@ Q_SIGNALS:
     void deviceDisappeared(Device *device);
 
 private:
+    /**
+     * @internal
+     */
     Adapter(const QString &adapterPath, QObject *parent = 0);
 
-    QDBusObjectPath findDevice(const QString &address) const;
-    QDBusObjectPath createDevice(const QString &address) const;
+    /**
+     * @internal
+     */
+    QString findDevice(const QString &address) const;
+
+    /**
+     * @internal
+     */
+    QString createDevice(const QString &address) const;
 
     class Private;
     Private *const d;

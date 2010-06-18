@@ -77,6 +77,9 @@ Q_SIGNALS:
     void defaultAdapterChanged(Adapter *adapter);
 
 private:
+    /**
+     * @internal
+     */
     Manager(QObject *parent = 0);
 
     class Private;

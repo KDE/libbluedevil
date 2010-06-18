@@ -209,6 +209,9 @@ Q_SIGNALS:
     void disconnectRequested();
 
 private:
+    /**
+     * @internal
+     */
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
            bool legacyPairing, const QString &name, bool paired, Adapter *adapter);
 

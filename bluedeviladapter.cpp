@@ -255,14 +255,24 @@ QList<Device*> Adapter::foundDevices() const
     return d->m_devicesHash.values();
 }
 
-QDBusObjectPath Adapter::findDevice(const QString &address) const
+QString Adapter::findDevice(const QString &address) const
 {
-    return d->m_bluezAdapterInterface->FindDevice(address).value();
+    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->FindDevice(address);
+    res.waitForFinished();
+    if (res.isValid()) {
+        return res.value().path();
+    }
+    return QString();
 }
 
-QDBusObjectPath Adapter::createDevice(const QString &address) const
+QString Adapter::createDevice(const QString &address) const
 {
-    return d->m_bluezAdapterInterface->CreateDevice(address).value();
+    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreateDevice(address);
+    res.waitForFinished();
+    if (res.isValid()) {
+        return res.value().path();
+    }
+    return QString();
 }
 
 }
