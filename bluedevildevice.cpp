@@ -107,6 +107,13 @@ void Device::Private::ensureDeviceCreated()
 void Device::Private::fetchProperties()
 {
     ensureDeviceCreated();
+
+    // Recheck, since even trying to ensure the device is created, if given an invalid D-Bus object
+    // path, the instance could have not been created.
+    if (!m_bluezDeviceInterface) {
+        return;
+    }
+
     QVariantMap properties = m_bluezDeviceInterface->GetProperties().value();
 
     m_connected = properties["Connected"].toBool();
@@ -240,6 +247,13 @@ bool Device::hasLegacyPairing() const
 QUInt32StringHash Device::discoverServices(const QString &pattern)
 {
     d->ensureDeviceCreated();
+
+    // Recheck, since even trying to ensure the device is created, if given an invalid D-Bus object
+    // path, the instance could have not been created.
+    if (!d->m_bluezDeviceInterface) {
+        return QUInt32StringHash();
+    }
+
     return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
 }
 
