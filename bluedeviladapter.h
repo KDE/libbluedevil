@@ -47,6 +47,11 @@ public:
     QString address() const;
 
     /**
+     * @return The friendly name of the adapter.
+     */
+    QString name() const;
+
+    /**
      * Sets the name of this adapter to @p name.
      *
      * This is the friendly name of the adapter.
@@ -54,9 +59,9 @@ public:
     void setName(const QString &name);
 
     /**
-     * @return The friendly name of the adapter.
+     * @return Whether this adapter is consuming energy or not.
      */
-    QString name() const;
+    bool isPowered() const;
 
     /**
      * Sets whether this adapter is consuming energy or not.
@@ -64,9 +69,9 @@ public:
     void setPowered(bool powered);
 
     /**
-     * @return Whether this adapter is consuming energy or not.
+     * @return Whether this adapter is discoverable or not.
      */
-    bool isPowered() const;
+    bool isDiscoverable() const;
 
     /**
      * Sets whether this adapter is discoverable or not.
@@ -74,9 +79,9 @@ public:
     void setDiscoverable(bool discoverable);
 
     /**
-     * @return Whether this adapter is discoverable or not.
+     * @return Whether this adapter is pairable or not.
      */
-    bool isDiscoverable() const;
+    bool isPairable() const;
 
     /**
      * Sets whether this adapter is pairable or not.
@@ -84,9 +89,9 @@ public:
     void setPairable(bool pairable);
 
     /**
-     * @return Whether this adapter is pairable or not.
+     * @return The timeout for the pairing process for this adapter in seconds.
      */
-    bool isPairable() const;
+    quint32 paireableTimeout() const;
 
     /**
      * Sets the timeout for the pairing process for this adapter in seconds.
@@ -96,9 +101,9 @@ public:
     void setPaireableTimeout(quint32 paireableTimeout);
 
     /**
-     * @return The timeout for the pairing process for this adapter in seconds.
+     * @return The timeout for this adapter to be discovered in seconds.
      */
-    quint32 paireableTimeout() const;
+    quint32 discoverableTimeout() const;
 
     /**
      * Sets the timeout for this adapter to be discovered in seconds.
@@ -108,21 +113,18 @@ public:
     void setDiscoverableTimeout(quint32 discoverableTimeout);
 
     /**
-     * @return The timeout for this adapter to be discovered in seconds.
-     */
-    quint32 discoverableTimeout() const;
-
-    /**
      * @return Whether this adapter is discovering at the moment or not.
      */
     bool isDiscovering() const;
 
-    void requestSession() const;
-
-    void releaseSession() const;
-
+    /**
+     * Starts device discovery. deviceFound signal will be emitted for each device found.
+     */
     void startDiscovery() const;
 
+    /**
+     * Stops device discovery.
+     */
     void stopDiscovery() const;
 
 Q_SIGNALS:

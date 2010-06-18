@@ -162,20 +162,15 @@ QString Adapter::address() const
     return d->m_address;
 }
 
-void Adapter::setName(const QString &name)
-{
-    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name)).waitForFinished();
-}
-
 QString Adapter::name() const
 {
     ENSURE_PROPERTIES_FETCHED
     return d->m_name;
 }
 
-void Adapter::setPowered(bool powered)
+void Adapter::setName(const QString &name)
 {
-    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name)).waitForFinished();
 }
 
 bool Adapter::isPowered() const
@@ -184,9 +179,9 @@ bool Adapter::isPowered() const
     return d->m_powered;
 }
 
-void Adapter::setDiscoverable(bool discoverable)
+void Adapter::setPowered(bool powered)
 {
-    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered)).waitForFinished();
 }
 
 bool Adapter::isDiscoverable() const
@@ -195,9 +190,9 @@ bool Adapter::isDiscoverable() const
     return d->m_discoverable;
 }
 
-void Adapter::setPairable(bool pairable)
+void Adapter::setDiscoverable(bool discoverable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable)).waitForFinished();
 }
 
 bool Adapter::isPairable() const
@@ -206,9 +201,9 @@ bool Adapter::isPairable() const
     return d->m_pairable;
 }
 
-void Adapter::setPaireableTimeout(quint32 paireableTimeout)
+void Adapter::setPairable(bool pairable)
 {
-    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable)).waitForFinished();
 }
 
 quint32 Adapter::paireableTimeout() const
@@ -217,9 +212,9 @@ quint32 Adapter::paireableTimeout() const
     return d->m_pairableTimeout;
 }
 
-void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
+void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout)).waitForFinished();
 }
 
 quint32 Adapter::discoverableTimeout() const
@@ -228,20 +223,15 @@ quint32 Adapter::discoverableTimeout() const
     return d->m_discoverableTimeout;
 }
 
+void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
+{
+    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout)).waitForFinished();
+}
+
 bool Adapter::isDiscovering() const
 {
     ENSURE_PROPERTIES_FETCHED
     return d->m_discovering;
-}
-
-void Adapter::requestSession() const
-{
-    d->m_bluezAdapterInterface->RequestSession();
-}
-
-void Adapter::releaseSession() const
-{
-    d->m_bluezAdapterInterface->ReleaseSession();
 }
 
 void Adapter::startDiscovery() const

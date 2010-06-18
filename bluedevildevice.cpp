@@ -117,23 +117,21 @@ void Device::Private::fetchProperties()
 
 void Device::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
 {
-    if (property == "UUIDs") {
-        m_UUIDs.clear();
-        Q_FOREACH (const QVariant &UUID, value.variant().toList()) {
-            m_UUIDs << UUID.toString();
-        }
-    } else if (property == "Paired") {
+    if (property == "Paired") {
         m_paired = value.variant().toBool();
+        emit m_q->pairedChanged(m_paired);
     } else if (property == "Connected") {
         m_connected = value.variant().toBool();
+        emit m_q->connectedChanged(m_connected);
     } else if (property == "Trusted") {
         m_trusted = value.variant().toBool();
+        emit m_q->trustedChanged(m_trusted);
     } else if (property == "Blocked") {
         m_blocked = value.variant().toBool();
+        emit m_q->blockedChanged(m_blocked);
     } else if (property == "Alias") {
         m_alias = value.variant().toString();
-    } else if (property == "LegacyPairing") {
-        m_alias = value.variant().toBool();
+        emit m_q->aliasChanged(m_alias);
     }
 }
 

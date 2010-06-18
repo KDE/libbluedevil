@@ -63,6 +63,11 @@ public:
     void disconnect();
 
 Q_SIGNALS:
+    void pairedChanged(bool paired);
+    void connectedChanged(bool connected);
+    void trustedChanged(bool trusted);
+    void blockedChanged(bool blocked);
+    void aliasChanged(const QString &alias);
     void disconnectRequested();
 
 private:
