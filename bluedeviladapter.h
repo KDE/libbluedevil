@@ -139,6 +139,11 @@ public:
      */
     void stopDiscovery() const;
 
+    /**
+     * @return A list with all found devices on the discovery phase.
+     */
+    QList<Device*> foundDevices() const;
+
 Q_SIGNALS:
     void deviceFound(Device *device);
     void deviceDisappeared(Device *device);

@@ -250,6 +250,11 @@ void Adapter::stopDiscovery() const
     d->m_bluezAdapterInterface->StopDiscovery().waitForFinished();
 }
 
+QList<Device*> Adapter::foundDevices() const
+{
+    return d->m_devicesHash.values();
+}
+
 QDBusObjectPath Adapter::findDevice(const QString &address) const
 {
     return d->m_bluezAdapterInterface->FindDevice(address).value();

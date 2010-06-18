@@ -29,6 +29,18 @@ namespace BlueDevil {
 
 class Adapter;
 
+/**
+ * Manager class. The entry point to BlueDevil exposed services.
+ *
+ * The typical way to proceed is to work with the default adapter, but you can also list all
+ * bluetooth adapters and work with the one you want.
+ *
+ * The interface is a singleton with release-when-you-want capability.
+ *
+ * All adapters and devices are created by BlueDevil, and the ownership is always of BlueDevil.
+ *
+ * @author Rafael Fernández López <ereslibre@kde.org>
+ */
 class BLUEDEVIL_EXPORT Manager
     : public QObject
 {
@@ -37,7 +49,16 @@ class BLUEDEVIL_EXPORT Manager
 public:
     virtual ~Manager();
 
+    /**
+     * @return The Manager instance.
+     */
     static Manager *self();
+
+    /**
+     * When you consider you have finished working with BlueDevil you can immediatly release the
+     * memory by calling this method. It will automatically delete all Adapters and Devices that
+     * were still on memory.
+     */
     static void release();
 
     /**
