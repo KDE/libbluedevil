@@ -34,6 +34,19 @@ class Device;
  * Generates an asynchronous call on any method of the Device class. Only some methods allow the
  * option of returning the result in form of signal, so not all methods can return information
  * in an asynchronous way.
+ *
+ * A typical usage follows:
+ *
+ * @code
+ * connect(device, SIGNAL(registerDeviceResult(Device*,bool)), this, SLOT(deviceRegistered(Device*,bool)));
+ * BlueDevil::asyncCall(device, SLOT(registerDevice()));
+ * @endcode
+ *
+ * We will later receive on our deviceRegistered slot the information when the fetching of
+ * information has finished.
+ *
+ * @warning Only documented methods (they are always slots) can be called asynchronously. They have
+ *          been carefully chosen beforehand for those which are blocking.
  */
 void BLUEDEVIL_EXPORT asyncCall(Device *device, const char *slot);
 
