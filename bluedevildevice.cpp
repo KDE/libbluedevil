@@ -152,14 +152,19 @@ Device::Device(const QString &address, const QString &alias, quint32 deviceClass
     : QObject(adapter)
     , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, this))
 {
-    qRegisterMetaType<BlueDevil::QUInt32StringHash>("BlueDevil::QUInt32StringHash");
-    qDBusRegisterMetaType<BlueDevil::QUInt32StringHash>();
+    qRegisterMetaType<BlueDevil::QUInt32StringMap>("BlueDevil::QUInt32StringMap");
+    qDBusRegisterMetaType<BlueDevil::QUInt32StringMap>();
     d->m_adapter = adapter;
 }
 
 Device::~Device()
 {
     delete d;
+}
+
+bool Device::registerDevice()
+{
+    return d->ensureDeviceCreated();
 }
 
 QString Device::address() const
@@ -207,6 +212,9 @@ bool Device::isTrusted() const
 
 void Device::setTrusted(bool trusted)
 {
+    if (!d->ensureDeviceCreated()) {
+        return;
+    }
     d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted)).waitForFinished();
 }
 
@@ -218,6 +226,9 @@ bool Device::isBlocked() const
 
 void Device::setBlocked(bool blocked)
 {
+    if (!d->ensureDeviceCreated()) {
+        return;
+    }
     d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked)).waitForFinished();
 }
 
@@ -228,6 +239,9 @@ QString Device::alias() const
 
 void Device::setAlias(const QString& alias)
 {
+    if (!d->ensureDeviceCreated()) {
+        return;
+    }
     d->m_bluezDeviceInterface->SetProperty("Alias", QDBusVariant(alias)).waitForFinished();
 }
 
@@ -241,12 +255,11 @@ bool Device::hasLegacyPairing() const
     return d->m_legacyPairing;
 }
 
-QUInt32StringHash Device::discoverServices(const QString &pattern)
+QUInt32StringMap Device::discoverServices(const QString &pattern)
 {
     if (!d->ensureDeviceCreated()) {
-        return QUInt32StringHash();
+        return QUInt32StringMap();
     }
-
     return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
 }
 

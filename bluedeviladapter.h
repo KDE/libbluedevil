@@ -30,6 +30,13 @@ namespace BlueDevil {
 class Device;
 class Manager;
 
+/**
+ * This class represents an adapter.
+ *
+ * The task of an adapter is basically to discover remote devices.
+ *
+ * @author Rafael Fernández López <ereslibre@kde.org>
+ */
 class BLUEDEVIL_EXPORT Adapter
     : public QObject
 {
@@ -57,6 +64,11 @@ public:
      * This is the friendly name of the adapter.
      */
     void setName(const QString &name);
+
+    /**
+     * @return The class of the adapter.
+     */
+    quint32 adapterClass() const;
 
     /**
      * @return Whether this adapter is consuming energy or not.

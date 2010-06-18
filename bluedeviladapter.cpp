@@ -173,6 +173,12 @@ void Adapter::setName(const QString &name)
     d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name)).waitForFinished();
 }
 
+quint32 Adapter::adapterClass() const
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_class;
+}
+
 bool Adapter::isPowered() const
 {
     ENSURE_PROPERTIES_FETCHED
