@@ -20,6 +20,7 @@
 #include "bluedeviltest.h"
 
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 #include <QtGui/QApplication>
 
 #include <bluedeviladapter.h>
@@ -55,6 +56,11 @@ void DeviceReceiver::deviceFound(Device *device)
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
+
+    qDebug() << "*** Will scan devices for 30 seconds...";
+    qDebug();
+
+    QTimer::singleShot(30000, &app, SLOT(quit()));
 
     Adapter *defaultAdapter = Manager::self()->defaultAdapter();
     if (defaultAdapter) {
