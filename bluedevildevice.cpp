@@ -36,6 +36,7 @@ public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
             bool legacyPairing, const QString &name, bool paired, Device *q);
 
+    void ensureDeviceCreated();
     void fetchProperties();
 
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
@@ -79,7 +80,7 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
 {
 }
 
-void Device::Private::fetchProperties()
+void Device::Private::ensureDeviceCreated()
 {
     if (!m_bluezDeviceInterface) {
         QDBusObjectPath devicePath = m_adapter->findDevice(m_address);
@@ -101,7 +102,11 @@ void Device::Private::fetchProperties()
         connect(m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
     }
+}
 
+void Device::Private::fetchProperties()
+{
+    ensureDeviceCreated();
     QVariantMap properties = m_bluezDeviceInterface->GetProperties().value();
 
     m_connected = properties["Connected"].toBool();
@@ -234,27 +239,7 @@ bool Device::hasLegacyPairing() const
 
 QUInt32StringHash Device::discoverServices(const QString &pattern)
 {
-    if (!d->m_bluezDeviceInterface) {
-        QDBusObjectPath devicePath = d->m_adapter->findDevice(d->m_address);
-
-        if (devicePath.path().isEmpty()) {
-            devicePath = d->m_adapter->createDevice(d->m_address);
-        }
-
-        if (devicePath.path().isEmpty()) {
-            return QUInt32StringHash();
-        }
-
-        d->m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
-                                                                devicePath.path(),
-                                                                QDBusConnection::systemBus(),
-                                                                this);
-
-        connect(d->m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), this, SIGNAL(disconnectRequested()));
-        connect(d->m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
-                this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
-    }
-
+    d->ensureDeviceCreated();
     return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
 }
 
