@@ -24,9 +24,9 @@
 
 #include <QtCore/QString>
 
-#define ENSURE_PROPERTIES_FETCHED     if (!d->m_propertiesFetched) { \
-                                          d->fetchProperties();      \
-                                      }
+#define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
+                                      d->fetchProperties();      \
+                                  }
 
 namespace BlueDevil {
 
@@ -45,14 +45,17 @@ public:
 
     // Bluez cached properties
     QString     m_address;
-    QString     m_alias;
-    quint32     m_deviceClass;
-    QString     m_icon;
-    bool        m_legacyPairing;
     QString     m_name;
-    bool        m_paired;
-    short       m_RSSI;
+    QString     m_icon;
+    quint32     m_deviceClass;
     QStringList m_UUIDs;
+    bool        m_paired;
+    bool        m_connected;
+    bool        m_trusted;
+    bool        m_blocked;
+    QString     m_alias;
+    bool        m_legacyPairing;
+    short       m_RSSI;
     bool        m_propertiesFetched;
 
     Device *const m_q;
@@ -90,6 +93,8 @@ void Device::Private::fetchProperties()
                                                              m_q);
 
         connect(m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), m_q, SIGNAL(disconnectRequested()));
+        connect(m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
+                m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
     }
 
     QVariantMap properties = m_bluezDeviceInterface->GetProperties().value();
@@ -102,6 +107,17 @@ void Device::Private::fetchProperties()
 
 void Device::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
 {
+    if (property == "Paired") {
+        m_paired = value.variant().toBool();
+    } else if (property == "Connected") {
+        m_connected = value.variant().toBool();
+    } else if (property == "Trusted") {
+        m_trusted = value.variant().toBool();
+    } else if (property == "Blocked") {
+        m_blocked = value.variant().toBool();
+    } else if (property == "Alias") {
+        m_alias = value.variant().toString();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,14 +143,9 @@ QString Device::address() const
     return d->m_address;
 }
 
-QString Device::alias() const
+QString Device::name() const
 {
-    return d->m_alias;
-}
-
-quint32 Device::deviceClass() const
-{
-    return d->m_deviceClass;
+    return d->m_name;
 }
 
 QString Device::icon() const
@@ -142,14 +153,15 @@ QString Device::icon() const
     return d->m_icon;
 }
 
-bool Device::hasLegacyPairing() const
+quint32 Device::deviceClass() const
 {
-    return d->m_legacyPairing;
+    return d->m_deviceClass;
 }
 
-QString Device::name() const
+QStringList Device::UUIDs() const
 {
-    return d->m_name;
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_UUIDs;
 }
 
 bool Device::isPaired() const
@@ -157,15 +169,57 @@ bool Device::isPaired() const
     return d->m_paired;
 }
 
+bool Device::isConnected() const
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_connected;
+}
+
+bool Device::isTrusted() const
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_trusted;
+}
+
+void Device::setTrusted(bool trusted)
+{
+    d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted)).waitForFinished();
+}
+
+bool Device::isBlocked() const
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_blocked;
+}
+
+void Device::setBlocked(bool blocked)
+{
+    d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked)).waitForFinished();
+}
+
+QString Device::alias() const
+{
+    return d->m_alias;
+}
+
+void Device::setAlias(const QString& alias)
+{
+    d->m_bluezDeviceInterface->SetProperty("Alias", QDBusVariant(alias)).waitForFinished();
+}
+
+Adapter *Device::adapter() const
+{
+    return d->m_adapter;
+}
+
+bool Device::hasLegacyPairing() const
+{
+    return d->m_legacyPairing;
+}
+
 short Device::RSSI() const
 {
     return d->m_RSSI;
-}
-
-QStringList Device::UUIDs() const
-{
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_UUIDs;
 }
 
 QUInt32StringHash Device::discoverServices(const QString &pattern)
@@ -183,6 +237,8 @@ QUInt32StringHash Device::discoverServices(const QString &pattern)
                                                                 this);
 
         connect(d->m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), this, SIGNAL(disconnectRequested()));
+        connect(d->m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
+                this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
     }
 
     return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();

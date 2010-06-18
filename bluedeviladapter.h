@@ -42,11 +42,6 @@ public:
     virtual ~Adapter();
 
     /**
-     * @return The adapter path on the DBus system.
-     */
-    QString adapterPath() const;
-
-    /**
      * @return The address of the adapter.
      */
     QString address() const;

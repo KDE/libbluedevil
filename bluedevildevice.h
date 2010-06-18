@@ -43,15 +43,21 @@ public:
     virtual ~Device();
 
     QString address() const;
-    QString alias() const;
-    quint32 deviceClass() const;
-    QString icon() const;
-    bool hasLegacyPairing() const;
     QString name() const;
-    bool isPaired() const;
-    short RSSI() const;
-
+    QString icon() const;
+    quint32 deviceClass() const;
     QStringList UUIDs() const;
+    bool isPaired() const;
+    bool isConnected() const;
+    bool isTrusted() const;
+    void setTrusted(bool trusted);
+    bool isBlocked() const;
+    void setBlocked(bool blocked);
+    QString alias() const;
+    void setAlias(const QString &alias);
+    Adapter *adapter() const;
+    bool hasLegacyPairing() const;
+    short RSSI() const;
 
     QUInt32StringHash discoverServices(const QString &pattern = QString());
     void cancelDiscovery();

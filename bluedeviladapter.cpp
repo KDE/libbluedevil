@@ -22,9 +22,9 @@
 
 #include <bluezadapter.h>
 
-#define ENSURE_PROPERTIES_FETCHED     if (!d->m_propertiesFetched) { \
-                                          d->fetchProperties();      \
-                                      }
+#define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
+                                      d->fetchProperties();      \
+                                  }
 
 namespace BlueDevil {
 
@@ -43,7 +43,6 @@ public:
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
-    QString                   m_adapterPath;
     QHash<QString, Device*>   m_devicesHash;
 
     // Bluez cached properties
@@ -140,7 +139,6 @@ Adapter::Adapter(const QString &adapterPath, QObject *parent)
     , d(new Private(this))
 {
     d->m_bluezAdapterInterface = new OrgBluezAdapterInterface("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
-    d->m_adapterPath = adapterPath;
 
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceCreated(QDBusObjectPath)),
             this, SLOT(_k_deviceCreated(QDBusObjectPath)));
@@ -157,11 +155,6 @@ Adapter::Adapter(const QString &adapterPath, QObject *parent)
 Adapter::~Adapter()
 {
     delete d;
-}
-
-QString Adapter::adapterPath() const
-{
-    return d->m_adapterPath;
 }
 
 QString Adapter::address() const
