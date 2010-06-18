@@ -57,19 +57,19 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    qDebug() << "*** Will scan devices for 30 seconds...";
-    qDebug();
-
-    QTimer::singleShot(30000, &app, SLOT(quit()));
-
     Adapter *defaultAdapter = Manager::self()->defaultAdapter();
     if (defaultAdapter) {
+        qDebug() << "*** Will scan devices for 30 seconds...";
+        qDebug();
+
         DeviceReceiver *deviceReceiver = new DeviceReceiver;
 
         QObject::connect(defaultAdapter, SIGNAL(deviceFound(Device*)), deviceReceiver,
                          SLOT(deviceFound(Device*)));
 
         defaultAdapter->startDiscovery();
+
+        QTimer::singleShot(30000, &app, SLOT(quit()));
 
         return app.exec();
     }
