@@ -23,11 +23,12 @@
 #include <bluedevil_export.h>
 
 #include <QtCore/QObject>
+#include <QtCore/QStringList>
 #include <QtDBus/QDBusObjectPath>
 
 namespace BlueDevil {
 
-typedef QMap<quint32, QString> QAlternativeMap;
+typedef QMap<quint32, QString> QUInt32StringHash;
 
 class Adapter;
 
@@ -50,7 +51,9 @@ public:
     bool isPaired() const;
     short RSSI() const;
 
-    QAlternativeMap discoverServices(const QString &pattern = QString());
+    QStringList UUIDs() const;
+
+    QUInt32StringHash discoverServices(const QString &pattern = QString());
     void cancelDiscovery();
     void disconnect();
 
@@ -69,6 +72,6 @@ private:
 
 }
 
-Q_DECLARE_METATYPE(BlueDevil::QAlternativeMap)
+Q_DECLARE_METATYPE(BlueDevil::QUInt32StringHash)
 
 #endif // BLUEDEVILDEVICE_H

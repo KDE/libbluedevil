@@ -18,7 +18,7 @@
 		<method name="DiscoverServices">
 			<arg type="s" direction="in"/>
 			<arg type="a{us}" direction="out"/>
-			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="BlueDevil::QAlternativeMap"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="BlueDevil::QUInt32StringHash"/>
 		</method>
 		<method name="CancelDiscovery"/>
 		<method name="Disconnect"/>

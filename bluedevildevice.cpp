@@ -24,13 +24,19 @@
 
 #include <QtCore/QString>
 
+#define ENSURE_PROPERTIES_FETCHED     if (!d->m_propertiesFetched) { \
+                                          d->fetchProperties();      \
+                                      }
+
 namespace BlueDevil {
 
 class Device::Private
 {
 public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-            bool legacyPairing, const QString &name, bool paired, short RSSI);
+            bool legacyPairing, const QString &name, bool paired, short RSSI, Device *q);
+
+    void fetchProperties();
 
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
@@ -38,19 +44,23 @@ public:
     Adapter                 *m_adapter;
 
     // Bluez cached properties
-    QString m_address;
-    QString m_alias;
-    quint32 m_deviceClass;
-    QString m_icon;
-    bool    m_legacyPairing;
-    QString m_name;
-    bool    m_paired;
-    short   m_RSSI;
+    QString     m_address;
+    QString     m_alias;
+    quint32     m_deviceClass;
+    QString     m_icon;
+    bool        m_legacyPairing;
+    QString     m_name;
+    bool        m_paired;
+    short       m_RSSI;
+    QStringList m_UUIDs;
+    bool        m_propertiesFetched;
+
+    Device *const m_q;
 };
 
 Device::Private::Private(const QString &address, const QString &alias, quint32 deviceClass,
                          const QString &icon, bool legacyPairing, const QString &name, bool paired,
-                         short RSSI)
+                         short RSSI, Device *q)
     : m_bluezDeviceInterface(0)
     , m_address(address)
     , m_alias(alias)
@@ -60,7 +70,34 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
     , m_name(name)
     , m_paired(paired)
     , m_RSSI(RSSI)
+    , m_propertiesFetched(false)
+    , m_q(q)
 {
+}
+
+void Device::Private::fetchProperties()
+{
+    if (!m_bluezDeviceInterface) {
+        QDBusObjectPath devicePath = m_adapter->findDevice(m_address);
+
+        if (devicePath.path().isEmpty()) {
+            devicePath = m_adapter->createDevice(m_address);
+        }
+
+        m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
+                                                             devicePath.path(),
+                                                             QDBusConnection::systemBus(),
+                                                             m_q);
+
+        connect(m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), m_q, SIGNAL(disconnectRequested()));
+    }
+
+    QVariantMap properties = m_bluezDeviceInterface->GetProperties().value();
+    const QVariantList UUIDs = properties["UUIDs"].toList();
+    Q_FOREACH (const QVariant &UUID, UUIDs) {
+        m_UUIDs << UUID.toString();
+    }
+    m_propertiesFetched = true;
 }
 
 void Device::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
@@ -73,10 +110,10 @@ Device::Device(const QString &address, const QString &alias, quint32 deviceClass
                const QString &icon, bool legacyPairing, const QString &name, bool paired,
                short RSSI, Adapter *adapter)
     : QObject(adapter)
-    , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI))
+    , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI, this))
 {
-    qRegisterMetaType<BlueDevil::QAlternativeMap>("BlueDevil::QAlternativeMap");
-    qDBusRegisterMetaType<BlueDevil::QAlternativeMap>();
+    qRegisterMetaType<BlueDevil::QUInt32StringHash>("BlueDevil::QUInt32StringHash");
+    qDBusRegisterMetaType<BlueDevil::QUInt32StringHash>();
     d->m_adapter = adapter;
 }
 
@@ -125,7 +162,13 @@ short Device::RSSI() const
     return d->m_RSSI;
 }
 
-QAlternativeMap Device::discoverServices(const QString &pattern)
+QStringList Device::UUIDs() const
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_UUIDs;
+}
+
+QUInt32StringHash Device::discoverServices(const QString &pattern)
 {
     if (!d->m_bluezDeviceInterface) {
         QDBusObjectPath devicePath = d->m_adapter->findDevice(d->m_address);
