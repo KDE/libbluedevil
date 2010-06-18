@@ -57,6 +57,8 @@ public:
     QString     m_alias;
     bool        m_legacyPairing;
     bool        m_propertiesFetched;
+    bool        m_registrationOnBusRejected; // used for avoid trying to register this device more
+                                             // than one time on the bus.
 
     Device *const m_q;
 };
@@ -76,21 +78,26 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
     , m_blocked(false)
     , m_legacyPairing(legacyPairing)
     , m_propertiesFetched(false)
+    , m_registrationOnBusRejected(false)
     , m_q(q)
 {
 }
 
 bool Device::Private::ensureDeviceCreated()
 {
+    if (m_registrationOnBusRejected) {
+        return false;
+    }
+
     if (!m_bluezDeviceInterface) {
         QString devicePath = m_adapter->findDevice(m_address);
 
         if (devicePath.isEmpty()) {
             devicePath = m_adapter->createDevice(m_address);
-        }
-
-        if (devicePath.isEmpty()) {
-            return false;
+            if (devicePath.isEmpty()) {
+                m_registrationOnBusRejected = true;
+                return false;
+            }
         }
 
         m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
