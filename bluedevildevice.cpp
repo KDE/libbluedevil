@@ -34,7 +34,7 @@ class Device::Private
 {
 public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-            bool legacyPairing, const QString &name, bool paired, short RSSI, Device *q);
+            bool legacyPairing, const QString &name, bool paired, Device *q);
 
     void fetchProperties();
 
@@ -55,7 +55,6 @@ public:
     bool        m_blocked;
     QString     m_alias;
     bool        m_legacyPairing;
-    short       m_RSSI;
     bool        m_propertiesFetched;
 
     Device *const m_q;
@@ -63,7 +62,7 @@ public:
 
 Device::Private::Private(const QString &address, const QString &alias, quint32 deviceClass,
                          const QString &icon, bool legacyPairing, const QString &name, bool paired,
-                         short RSSI, Device *q)
+                         Device *q)
     : m_bluezDeviceInterface(0)
     , m_address(address)
     , m_alias(alias)
@@ -72,7 +71,6 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
     , m_legacyPairing(legacyPairing)
     , m_name(name)
     , m_paired(paired)
-    , m_RSSI(RSSI)
     , m_propertiesFetched(false)
     , m_q(q)
 {
@@ -87,6 +85,10 @@ void Device::Private::fetchProperties()
             devicePath = m_adapter->createDevice(m_address);
         }
 
+        if (devicePath.path().isEmpty()) {
+            return;
+        }
+
         m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
                                                              devicePath.path(),
                                                              QDBusConnection::systemBus(),
@@ -98,16 +100,26 @@ void Device::Private::fetchProperties()
     }
 
     QVariantMap properties = m_bluezDeviceInterface->GetProperties().value();
+
+    m_connected = properties["Connected"].toBool();
+    m_trusted = properties["Trusted"].toBool();
+    m_blocked = properties["Blocked"].toBool();
     const QVariantList UUIDs = properties["UUIDs"].toList();
     Q_FOREACH (const QVariant &UUID, UUIDs) {
         m_UUIDs << UUID.toString();
     }
+
     m_propertiesFetched = true;
 }
 
 void Device::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
 {
-    if (property == "Paired") {
+    if (property == "UUIDs") {
+        m_UUIDs.clear();
+        Q_FOREACH (const QVariant &UUID, value.variant().toList()) {
+            m_UUIDs << UUID.toString();
+        }
+    } else if (property == "Paired") {
         m_paired = value.variant().toBool();
     } else if (property == "Connected") {
         m_connected = value.variant().toBool();
@@ -117,6 +129,8 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
         m_blocked = value.variant().toBool();
     } else if (property == "Alias") {
         m_alias = value.variant().toString();
+    } else if (property == "LegacyPairing") {
+        m_alias = value.variant().toBool();
     }
 }
 
@@ -124,9 +138,9 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
 
 Device::Device(const QString &address, const QString &alias, quint32 deviceClass,
                const QString &icon, bool legacyPairing, const QString &name, bool paired,
-               short RSSI, Adapter *adapter)
+               Adapter *adapter)
     : QObject(adapter)
-    , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, RSSI, this))
+    , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, this))
 {
     qRegisterMetaType<BlueDevil::QUInt32StringHash>("BlueDevil::QUInt32StringHash");
     qDBusRegisterMetaType<BlueDevil::QUInt32StringHash>();
@@ -217,11 +231,6 @@ bool Device::hasLegacyPairing() const
     return d->m_legacyPairing;
 }
 
-short Device::RSSI() const
-{
-    return d->m_RSSI;
-}
-
 QUInt32StringHash Device::discoverServices(const QString &pattern)
 {
     if (!d->m_bluezDeviceInterface) {
@@ -229,6 +238,10 @@ QUInt32StringHash Device::discoverServices(const QString &pattern)
 
         if (devicePath.path().isEmpty()) {
             devicePath = d->m_adapter->createDevice(d->m_address);
+        }
+
+        if (devicePath.path().isEmpty()) {
+            return QUInt32StringHash();
         }
 
         d->m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",

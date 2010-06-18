@@ -47,7 +47,6 @@ void DeviceReceiver::deviceFound(Device *device)
     qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
     qDebug() << "\tName:\t\t" << device->name();
     qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
-    qDebug() << "\tRSSI:\t\t" << device->RSSI();
     qDebug() << "\tServices:\n" << device->UUIDs();
     qDebug();
 }

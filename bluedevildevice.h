@@ -57,7 +57,6 @@ public:
     void setAlias(const QString &alias);
     Adapter *adapter() const;
     bool hasLegacyPairing() const;
-    short RSSI() const;
 
     QUInt32StringHash discoverServices(const QString &pattern = QString());
     void cancelDiscovery();
@@ -68,7 +67,7 @@ Q_SIGNALS:
 
 private:
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-           bool legacyPairing, const QString &name, bool paired, short RSSI, Adapter *adapter = 0);
+           bool legacyPairing, const QString &name, bool paired, Adapter *adapter);
 
     class Private;
     Private *const d;

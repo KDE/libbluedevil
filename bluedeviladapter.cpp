@@ -95,8 +95,7 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
 {
     Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
                                       map["Icon"].toString(), map["LegacyPairing"].toBool(),
-                                      map["Name"].toString(), map["Paired"].toBool(),
-                                      map["RSSI"].toInt(), m_q);
+                                      map["Name"].toString(), map["Paired"].toBool(), m_q);
     m_devicesHash.insert(address, device);
     emit m_q->deviceFound(device);
 }
