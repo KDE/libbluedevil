@@ -33,7 +33,7 @@ namespace BlueDevil {
 
 void asyncCall(Device *device, const char *slot)
 {
-    QThread *thread = new QThread;
+    QThread *thread = new QThread(device);
     QObject::connect(thread, SIGNAL(started()), device, slot);
     thread->start();
 }
