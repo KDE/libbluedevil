@@ -38,6 +38,7 @@ DeviceReceiver::~DeviceReceiver()
 {
 }
 
+#ifdef ASYNCHRONOUS_API
 void DeviceReceiver::deviceFound(Device *device)
 {
     qDebug() << "*** Remote device found: " << device->name() << ". Registering it asynchronously...";
@@ -64,6 +65,21 @@ void DeviceReceiver::deviceRegistered(Device *device, bool registered)
     }
     qDebug();
 }
+#else
+void DeviceReceiver::deviceFound(Device *device)
+{
+    qDebug() << "*** Remote device found. Requesting information synchronously:";
+    qDebug() << "\tAddress:\t" << device->address();
+    qDebug() << "\tAlias:\t\t" << device->alias();
+    qDebug() << "\tClass:\t\t" << device->deviceClass();
+    qDebug() << "\tIcon:\t\t" << device->icon();
+    qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
+    qDebug() << "\tName:\t\t" << device->name();
+    qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
+    qDebug() << "\tTrusted:\t" << (device->isTrusted() ? "yes" : "no");
+    qDebug() << "\tServices:\n" << device->UUIDs();
+}
+#endif
 
 int main(int argc, char **argv)
 {
