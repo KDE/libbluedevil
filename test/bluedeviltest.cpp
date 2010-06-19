@@ -38,6 +38,21 @@ DeviceReceiver::~DeviceReceiver()
 {
 }
 
+void DeviceReceiver::scanDevices()
+{
+    qDebug() << "*** Will scan devices for 30 seconds...";
+    qDebug();
+
+    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
+
+    QObject::connect(defaultAdapter, SIGNAL(deviceFound(Device*)), this,
+                        SLOT(deviceFound(Device*)));
+
+    defaultAdapter->startDiscovery();
+
+    QTimer::singleShot(30000, QCoreApplication::instance(), SLOT(quit()));
+}
+
 #ifdef ASYNCHRONOUS_API
 void DeviceReceiver::deviceFound(Device *device)
 {
@@ -81,29 +96,33 @@ void DeviceReceiver::deviceFound(Device *device)
 }
 #endif
 
+void DeviceReceiver::adapterAdded(Adapter *adapter)
+{
+    qDebug() << "*** An adapter has been connected.";
+    qDebug();
+    scanDevices();
+}
+
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
-    if (defaultAdapter) {
-        qDebug() << "*** Will scan devices for 30 seconds...";
+    if (!Manager::self()->defaultAdapter()) {
+        qDebug() << "!!! No bluetooth adapters were found. Waiting for bluetooth adapters. Ctrl + C to cancel...";
         qDebug();
-
-        DeviceReceiver *deviceReceiver = new DeviceReceiver;
-
-        QObject::connect(defaultAdapter, SIGNAL(deviceFound(Device*)), deviceReceiver,
-                         SLOT(deviceFound(Device*)));
-
-        defaultAdapter->startDiscovery();
-
-        QTimer::singleShot(30000, &app, SLOT(quit()));
-
-        return app.exec();
     }
 
-    qDebug() << "!!! No bluetooth adapters were found";
-    return 0;
+    DeviceReceiver *deviceReceiver = new DeviceReceiver;
+
+    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
+    if (defaultAdapter) {
+        deviceReceiver->scanDevices();
+    } else {
+        QObject::connect(Manager::self(), SIGNAL(adapterAdded(Adapter*)), deviceReceiver,
+                         SLOT(adapterAdded(Adapter*)));
+    }
+
+    return app.exec();
 }
 
 #include "bluedeviltest.moc"

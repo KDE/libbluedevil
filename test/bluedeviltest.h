@@ -25,6 +25,7 @@
 #define ASYNCHRONOUS_API
 
 namespace BlueDevil {
+    class Adapter;
     class Device;
 }
 
@@ -39,8 +40,11 @@ public:
     DeviceReceiver(QObject *parent = 0);
     virtual ~DeviceReceiver();
 
+    void scanDevices();
+
 public Q_SLOTS:
     void deviceFound(Device *device);
+    void adapterAdded(Adapter *adapter);
 #ifdef ASYNCHRONOUS_API
     void deviceRegistered(Device *device, bool registered);
 #endif
