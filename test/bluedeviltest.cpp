@@ -107,17 +107,15 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    if (!Manager::self()->defaultAdapter()) {
-        qDebug() << "!!! No bluetooth adapters were found. Waiting for bluetooth adapters. Ctrl + C to cancel...";
-        qDebug();
-    }
-
     DeviceReceiver *deviceReceiver = new DeviceReceiver;
 
     Adapter *defaultAdapter = Manager::self()->defaultAdapter();
     if (defaultAdapter) {
         deviceReceiver->scanDevices();
     } else {
+        qDebug() << "!!! No bluetooth adapters were found. Waiting for bluetooth adapters. Ctrl + C to cancel...";
+        qDebug();
+
         QObject::connect(Manager::self(), SIGNAL(adapterAdded(Adapter*)), deviceReceiver,
                          SLOT(adapterAdded(Adapter*)));
     }
