@@ -43,7 +43,8 @@ public:
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
-    QHash<QString, Device*>   m_devicesHash;
+    QMap<QString, Device*>    m_devicesMap;
+    QMap<QString, Device*>    m_temporaryDiscoveredDevicesMap;
 
     // Bluez cached properties
     QString m_address;
@@ -93,16 +94,20 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
+    if (m_temporaryDiscoveredDevicesMap[address] != 0) {
+        return;
+    }
     Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
                                       map["Icon"].toString(), map["LegacyPairing"].toBool(),
                                       map["Name"].toString(), map["Paired"].toBool(), m_q);
-    m_devicesHash.insert(address, device);
+    m_devicesMap.insert(address, device);
+    m_temporaryDiscoveredDevicesMap.insert(address, device);
     emit m_q->deviceFound(device);
 }
 
 void Adapter::Private::_k_deviceDisappeared(const QString &address)
 {
-    Device *const device = m_devicesHash.take(address);
+    Device *const device = m_devicesMap.take(address);
     if (device) {
         emit m_q->deviceDisappeared(device);
         delete device;
@@ -242,6 +247,7 @@ bool Adapter::isDiscovering() const
 
 void Adapter::startDiscovery() const
 {
+    d->m_temporaryDiscoveredDevicesMap.clear();
     d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
 }
 
@@ -252,7 +258,7 @@ void Adapter::stopDiscovery() const
 
 QList<Device*> Adapter::foundDevices() const
 {
-    return d->m_devicesHash.values();
+    return d->m_devicesMap.values();
 }
 
 QString Adapter::findDevice(const QString &address) const
