@@ -44,7 +44,6 @@ public:
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QMap<QString, Device*>    m_devicesMap;
-    QMap<QString, Device*>    m_temporaryDiscoveredDevicesMap;
 
     // Bluez cached properties
     QString m_address;
@@ -94,14 +93,13 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    if (m_temporaryDiscoveredDevicesMap[address] != 0) {
+    if (m_devicesMap[address] != 0) {
         return;
     }
     Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
                                       map["Icon"].toString(), map["LegacyPairing"].toBool(),
                                       map["Name"].toString(), map["Paired"].toBool(), m_q);
     m_devicesMap.insert(address, device);
-    m_temporaryDiscoveredDevicesMap.insert(address, device);
     emit m_q->deviceFound(device);
 }
 
@@ -247,7 +245,8 @@ bool Adapter::isDiscovering() const
 
 void Adapter::startDiscovery() const
 {
-    d->m_temporaryDiscoveredDevicesMap.clear();
+    qDeleteAll(d->m_devicesMap);
+    d->m_devicesMap.clear();
     d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
 }
 
