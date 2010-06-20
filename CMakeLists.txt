@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
 project(libbluedevil)
-set(GENERIC_LIB_VERSION "1.0")
+set(GENERIC_LIB_VERSION "1.1")
 set(GENERIC_LIB_SOVERSION "1")
+set(VERSION ${GENERIC_LIB_VERSION})
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
 find_package(Qt4 REQUIRED)
@@ -32,5 +33,13 @@ set_target_properties(bluedevil PROPERTIES
 )
 
 install(TARGETS bluedevil DESTINATION lib)
+install(FILES	bluedevilmanager.h
+        	bluedeviladapter.h
+		bluedevildevice.h DESTINATION include/BlueDevil)
 
 add_subdirectory(test)
+
+if(NOT WIN32) # pkgconfig file
+   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/bluedevil.pc.in ${CMAKE_CURRENT_BINARY_DIR}/bluedevil.pc @ONLY)
+   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/bluedevil.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+endif(NOT WIN32)
