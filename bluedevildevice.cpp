@@ -108,6 +108,8 @@ bool Device::Private::ensureDeviceCreated()
             }
         }
 
+        m_adapter->addDeviceWithUBI(devicePath, m_q);
+
         m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
                                                              devicePath,
                                                              QDBusConnection::systemBus(),

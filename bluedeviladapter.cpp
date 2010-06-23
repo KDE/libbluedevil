@@ -249,6 +249,7 @@ void Adapter::startDiscovery() const
 {
     qDeleteAll(d->m_devicesMap);
     d->m_devicesMap.clear();
+    d->m_devicesMap.clear();
     d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
 }
 
