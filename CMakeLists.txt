@@ -36,7 +36,8 @@ install(TARGETS bluedevil DESTINATION lib)
 install(FILES bluedevilmanager.h
               bluedeviladapter.h
               bluedevildevice.h
-              bluedevil_export.h DESTINATION include/bluedevil)
+              bluedevil_export.h
+              bluedevil.h DESTINATION include/bluedevil)
 
 add_subdirectory(test)
 
