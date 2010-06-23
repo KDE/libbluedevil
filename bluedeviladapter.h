@@ -130,16 +130,6 @@ public:
     bool isDiscovering() const;
 
     /**
-     * Starts device discovery. deviceFound signal will be emitted for each device found.
-     */
-    void startDiscovery() const;
-
-    /**
-     * Stops device discovery.
-     */
-    void stopDiscovery() const;
-
-    /**
      * @return A list with all found devices on the discovery phase.
      */
     QList<Device*> foundDevices() const;
@@ -169,6 +159,17 @@ public:
      * @return A device defined by its UBI.
      */
     Device *deviceForUBI(const QString &UBI);
+
+public Q_SLOTS:
+    /**
+     * Starts device discovery. deviceFound signal will be emitted for each device found.
+     */
+    void startDiscovery() const;
+
+    /**
+     * Stops device discovery.
+     */
+    void stopDiscovery() const;
 
 Q_SIGNALS:
     void deviceFound(Device *device);

@@ -245,19 +245,6 @@ bool Adapter::isDiscovering() const
     return d->m_discovering;
 }
 
-void Adapter::startDiscovery() const
-{
-    qDeleteAll(d->m_devicesMap);
-    d->m_devicesMap.clear();
-    d->m_devicesMapUBIKey.clear();
-    d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
-}
-
-void Adapter::stopDiscovery() const
-{
-    d->m_bluezAdapterInterface->StopDiscovery().waitForFinished();
-}
-
 QList<Device*> Adapter::foundDevices() const
 {
     return d->m_devicesMap.values();
@@ -303,6 +290,19 @@ Device *Adapter::deviceForUBI(const QString &UBI)
         return d->m_devicesMapUBIKey[UBI];
     }
     return new Device(UBI, this);
+}
+
+void Adapter::startDiscovery() const
+{
+    qDeleteAll(d->m_devicesMap);
+    d->m_devicesMap.clear();
+    d->m_devicesMapUBIKey.clear();
+    d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
+}
+
+void Adapter::stopDiscovery() const
+{
+    d->m_bluezAdapterInterface->StopDiscovery().waitForFinished();
 }
 
 QString Adapter::findDevice(const QString &address) const
