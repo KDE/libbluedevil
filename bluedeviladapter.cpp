@@ -44,6 +44,7 @@ public:
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QMap<QString, Device*>    m_devicesMap;
+    QMap<QString, Device*>    m_devicesMapUBIKey;
 
     // Bluez cached properties
     QString m_address;
@@ -106,6 +107,7 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
 void Adapter::Private::_k_deviceDisappeared(const QString &address)
 {
     Device *const device = m_devicesMap.take(address);
+    m_devicesMapUBIKey.remove(m_devicesMapUBIKey.key(device));
     if (device) {
         emit m_q->deviceDisappeared(device);
         delete device;
@@ -289,6 +291,16 @@ void Adapter::unregisterAgent(const QString &agentPath)
     d->m_bluezAdapterInterface->UnregisterAgent(QDBusObjectPath(agentPath));
 }
 
+Device *Adapter::deviceForAddress(const QString &address) const
+{
+    return d->m_devicesMap[address];
+}
+
+Device *Adapter::deviceForUBI(const QString &UBI) const
+{
+    return d->m_devicesMapUBIKey[UBI];
+}
+
 QString Adapter::findDevice(const QString &address) const
 {
     QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->FindDevice(address);
@@ -307,6 +319,11 @@ QString Adapter::createDevice(const QString &address) const
         return res.value().path();
     }
     return QString();
+}
+
+void Adapter::addDeviceWithUBI(const QString &ubi, Device *device)
+{
+    d->m_devicesMapUBIKey.insert(ubi, device);
 }
 
 }

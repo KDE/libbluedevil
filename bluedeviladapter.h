@@ -160,6 +160,16 @@ public:
      */
     void unregisterAgent(const QString &agentPath);
 
+    /**
+     * @return A device defined by its hardware address.
+     */
+    Device *deviceForAddress(const QString &address) const;
+
+    /**
+     * @return A device defined by its UBI.
+     */
+    Device *deviceForUBI(const QString &UBI) const;
+
 Q_SIGNALS:
     void deviceFound(Device *device);
     void deviceDisappeared(Device *device);
@@ -179,6 +189,11 @@ private:
      * @internal
      */
     QString createDevice(const QString &address) const;
+
+    /**
+     * @internal
+     */
+    void addDeviceWithUBI(const QString &ubi, Device *device);
 
     class Private;
     Private *const d;
