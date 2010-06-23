@@ -20,7 +20,7 @@
 #ifndef BLUEDEVILMANAGER_H
 #define BLUEDEVILMANAGER_H
 
-#include <bluedevil_export.h>
+#include <bluedevil/bluedevil_export.h>
 
 #include <QtCore/QObject>
 #include <QtDBus/QDBusObjectPath>

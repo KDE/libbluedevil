@@ -1,6 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
 libdir=@CMAKE_INSTALL_PREFIX@/lib
-includedir=@CMAKE_INSTALL_PREFIX@/include/BlueDevil
+includedir=@CMAKE_INSTALL_PREFIX@/include
 
 Name: bluedevil
 Description: BlueDevil library

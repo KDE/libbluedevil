@@ -20,7 +20,7 @@
 #ifndef BLUEDEVILDEVICE_H
 #define BLUEDEVILDEVICE_H
 
-#include <bluedevil_export.h>
+#include <bluedevil/bluedevil_export.h>
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>

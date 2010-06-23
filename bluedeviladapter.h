@@ -20,7 +20,7 @@
 #ifndef BLUEDEVILADAPTER_H
 #define BLUEDEVILADAPTER_H
 
-#include <bluedevil_export.h>
+#include <bluedevil/bluedevil_export.h>
 
 #include <QtCore/QObject>
 #include <QtDBus/QDBusObjectPath>
@@ -143,6 +143,22 @@ public:
      * @return A list with all found devices on the discovery phase.
      */
     QList<Device*> foundDevices() const;
+
+    enum RegisterCapability {
+        DisplayOnly = 0,
+        DisplayYesNo = 1,
+        KeyboardOnly = 2,
+        NoInputNoOutput = 3
+    };
+    /**
+     * Registers agent.
+     */
+    void registerAgent(const QString &agentPath, RegisterCapability registerCapability);
+
+    /**
+     * Unregisters agent.
+     */
+    void unregisterAgent(const QString &agentPath);
 
 Q_SIGNALS:
     void deviceFound(Device *device);

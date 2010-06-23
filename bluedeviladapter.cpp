@@ -260,6 +260,35 @@ QList<Device*> Adapter::foundDevices() const
     return d->m_devicesMap.values();
 }
 
+void Adapter::registerAgent(const QString &agentPath, RegisterCapability registerCapability)
+{
+    QString capability;
+
+    switch (registerCapability) {
+        case DisplayOnly:
+            capability = "DisplayOnly";
+            break;
+        case DisplayYesNo:
+            capability = "DisplayYesNo";
+            break;
+        case KeyboardOnly:
+            capability = "KeyboardOnly";
+            break;
+        case NoInputNoOutput:
+            capability = "NoInputNoOutput";
+            break;
+        default:
+            return;
+    }
+
+    d->m_bluezAdapterInterface->RegisterAgent(QDBusObjectPath(agentPath), capability);
+}
+
+void Adapter::unregisterAgent(const QString &agentPath)
+{
+    d->m_bluezAdapterInterface->UnregisterAgent(QDBusObjectPath(agentPath));
+}
+
 QString Adapter::findDevice(const QString &address) const
 {
     QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->FindDevice(address);

@@ -33,9 +33,10 @@ set_target_properties(bluedevil PROPERTIES
 )
 
 install(TARGETS bluedevil DESTINATION lib)
-install(FILES	bluedevilmanager.h
-        	bluedeviladapter.h
-		bluedevildevice.h DESTINATION include/BlueDevil)
+install(FILES bluedevilmanager.h
+              bluedeviladapter.h
+              bluedevildevice.h
+              bluedevil_export.h DESTINATION include/bluedevil)
 
 add_subdirectory(test)
 
