@@ -168,7 +168,7 @@ public:
     /**
      * @return A device defined by its UBI.
      */
-    Device *deviceForUBI(const QString &UBI) const;
+    Device *deviceForUBI(const QString &UBI);
 
 Q_SIGNALS:
     void deviceFound(Device *device);
@@ -193,7 +193,7 @@ private:
     /**
      * @internal
      */
-    void addDeviceWithUBI(const QString &ubi, Device *device);
+    void addDeviceWithUBI(const QString &UBI, Device *device);
 
     class Private;
     Private *const d;

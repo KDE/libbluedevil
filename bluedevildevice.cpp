@@ -43,8 +43,9 @@ class Device::Private
 public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
             bool legacyPairing, const QString &name, bool paired, Device *q);
+    Private(Device *q);
 
-    bool ensureDeviceCreated();
+    bool ensureDeviceCreated(const QString &busDevicePath = QString());
     void fetchProperties();
 
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
@@ -91,24 +92,35 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
 {
 }
 
-bool Device::Private::ensureDeviceCreated()
+Device::Private::Private(Device *q)
+    : m_bluezDeviceInterface(0)
+    , m_propertiesFetched(false)
+    , m_registrationOnBusRejected(false)
+    , m_q(q)
+{
+}
+
+bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
 {
     if (m_registrationOnBusRejected) {
         return false;
     }
 
     if (!m_bluezDeviceInterface) {
-        QString devicePath = m_adapter->findDevice(m_address);
+        QString devicePath;
 
-        if (devicePath.isEmpty()) {
-            devicePath = m_adapter->createDevice(m_address);
+        if (busDevicePath.isEmpty()) {
+            devicePath = m_adapter->findDevice(m_address);
             if (devicePath.isEmpty()) {
-                m_registrationOnBusRejected = true;
-                return false;
+                devicePath = m_adapter->createDevice(m_address);
+                if (devicePath.isEmpty()) {
+                    m_registrationOnBusRejected = true;
+                    return false;
+                }
             }
+        } else {
+            devicePath = busDevicePath;
         }
-
-        m_adapter->addDeviceWithUBI(devicePath, m_q);
 
         m_bluezDeviceInterface = new OrgBluezDeviceInterface("org.bluez",
                                                              devicePath,
@@ -118,6 +130,8 @@ bool Device::Private::ensureDeviceCreated()
         connect(m_bluezDeviceInterface, SIGNAL(DisconnectRequested()), m_q, SIGNAL(disconnectRequested()));
         connect(m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
+
+        m_adapter->addDeviceWithUBI(devicePath, m_q);
     }
     return true;
 }
@@ -169,9 +183,25 @@ Device::Device(const QString &address, const QString &alias, quint32 deviceClass
     : QObject(adapter)
     , d(new Private(address, alias, deviceClass, icon, legacyPairing, name, paired, this))
 {
+    d->m_adapter = adapter;
     qRegisterMetaType<BlueDevil::QUInt32StringMap>("BlueDevil::QUInt32StringMap");
     qDBusRegisterMetaType<BlueDevil::QUInt32StringMap>();
+}
+
+Device::Device(const QString &devicePath, Adapter *adapter)
+    : QObject(adapter)
+    , d(new Private(this))
+{
     d->m_adapter = adapter;
+    d->ensureDeviceCreated(devicePath);
+    const QVariantMap data = d->m_bluezDeviceInterface->GetProperties().value();
+    d->m_address = data["Address"].toString();
+    d->m_alias = data["Alias"].toString();
+    d->m_deviceClass = data["Class"].toUInt();
+    d->m_icon = data["Icon"].toString();
+    d->m_legacyPairing = data["LegacyPairing"].toBool();
+    d->m_name = data["Name"].toString();
+    d->m_paired = data["Paired"].toBool();
 }
 
 Device::~Device()

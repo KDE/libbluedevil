@@ -297,9 +297,12 @@ Device *Adapter::deviceForAddress(const QString &address) const
     return d->m_devicesMap[address];
 }
 
-Device *Adapter::deviceForUBI(const QString &UBI) const
+Device *Adapter::deviceForUBI(const QString &UBI)
 {
-    return d->m_devicesMapUBIKey[UBI];
+    if (d->m_devicesMapUBIKey.contains(UBI)) {
+        return d->m_devicesMapUBIKey[UBI];
+    }
+    return new Device(UBI, this);
 }
 
 QString Adapter::findDevice(const QString &address) const
@@ -322,9 +325,9 @@ QString Adapter::createDevice(const QString &address) const
     return QString();
 }
 
-void Adapter::addDeviceWithUBI(const QString &ubi, Device *device)
+void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)
 {
-    d->m_devicesMapUBIKey.insert(ubi, device);
+    d->m_devicesMapUBIKey.insert(UBI, device);
 }
 
 }

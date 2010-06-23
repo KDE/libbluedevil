@@ -283,6 +283,7 @@ private:
      */
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
            bool legacyPairing, const QString &name, bool paired, Adapter *adapter);
+    Device(const QString &devicePath, Adapter *adapter);
 
     class Private;
     Private *const d;
