@@ -188,12 +188,17 @@ Device::Device(const QString &address, const QString &alias, quint32 deviceClass
     qDBusRegisterMetaType<BlueDevil::QUInt32StringMap>();
 }
 
-Device::Device(const QString &devicePath, Adapter *adapter)
+Device::Device(const QString &pathOrAddress, Type type, Adapter *adapter)
     : QObject(adapter)
     , d(new Private(this))
 {
     d->m_adapter = adapter;
-    d->ensureDeviceCreated(devicePath);
+    if (type == DevicePath) {
+        d->ensureDeviceCreated(pathOrAddress);
+    } else {
+        d->m_address = pathOrAddress;
+        d->ensureDeviceCreated();
+    }
     const QVariantMap data = d->m_bluezDeviceInterface->GetProperties().value();
     d->m_address = data["Address"].toString();
     d->m_alias = data["Alias"].toString();

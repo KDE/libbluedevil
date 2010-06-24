@@ -279,9 +279,12 @@ void Adapter::unregisterAgent(const QString &agentPath)
     d->m_bluezAdapterInterface->UnregisterAgent(QDBusObjectPath(agentPath));
 }
 
-Device *Adapter::deviceForAddress(const QString &address) const
+Device *Adapter::deviceForAddress(const QString &address)
 {
-    return d->m_devicesMap[address];
+    if (d->m_devicesMap.contains(address)) {
+        return d->m_devicesMap[address];
+    }
+    return new Device(address, Device::DeviceAddress, this);
 }
 
 Device *Adapter::deviceForUBI(const QString &UBI)
@@ -289,7 +292,7 @@ Device *Adapter::deviceForUBI(const QString &UBI)
     if (d->m_devicesMapUBIKey.contains(UBI)) {
         return d->m_devicesMapUBIKey[UBI];
     }
-    return new Device(UBI, this);
+    return new Device(UBI, Device::DevicePath, this);
 }
 
 void Adapter::startDiscovery() const

@@ -153,7 +153,7 @@ public:
     /**
      * @return A device defined by its hardware address.
      */
-    Device *deviceForAddress(const QString &address) const;
+    Device *deviceForAddress(const QString &address);
 
     /**
      * @return A device defined by its UBI.
