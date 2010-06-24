@@ -64,7 +64,7 @@ public:
     /**
      * @return The default adapter. NULL if there is no default adapter.
      */
-    Adapter *defaultAdapter() const;
+    Adapter *defaultAdapter();
 
     /**
      * @return A list with all the connected adapters.

@@ -61,21 +61,24 @@ void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
     Adapter *const adapter = new Adapter(objectPath.path(), m_q);
     m_adaptersHash.insert(objectPath.path(), adapter);
+    if (!m_defaultAdapter) {
+        m_defaultAdapter = adapter;
+    }
     emit m_q->adapterAdded(adapter);
 }
 
 void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
 {
     Adapter *const adapter = m_adaptersHash.take(objectPath.path()); // return and remove it from the hash
+    if (m_adaptersHash.isEmpty()) {
+        m_defaultAdapter = 0;
+    }
     if (adapter) {
-        if (adapter == m_defaultAdapter) {
-            m_defaultAdapter = 0;
-        }
         emit m_q->adapterRemoved(adapter);
         delete adapter;
     }
     if (m_adaptersHash.isEmpty()) {
-        m_defaultAdapter = 0;
+        emit m_q->defaultAdapterChanged(0);
     }
 }
 
@@ -133,7 +136,7 @@ void Manager::release()
     instance = 0;
 }
 
-Adapter *Manager::defaultAdapter() const
+Adapter *Manager::defaultAdapter()
 {
     if (!QDBusConnection::systemBus().isConnected()) {
         return 0;
@@ -142,7 +145,8 @@ Adapter *Manager::defaultAdapter() const
     if (!d->m_defaultAdapter) {
         const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
         if (!adapterPath.isEmpty()) {
-            d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
+            d->m_defaultAdapter = new Adapter(adapterPath, this);
+            d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
         }
     }
 

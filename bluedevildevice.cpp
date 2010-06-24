@@ -44,6 +44,7 @@ public:
     Private(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
             bool legacyPairing, const QString &name, bool paired, Device *q);
     Private(Device *q);
+    ~Private();
 
     bool ensureDeviceCreated(const QString &busDevicePath = QString());
     void fetchProperties();
@@ -98,6 +99,12 @@ Device::Private::Private(Device *q)
     , m_registrationOnBusRejected(false)
     , m_q(q)
 {
+}
+
+Device::Private::~Private()
+{
+    QDBusConnection::systemBus().unregisterObject(m_bluezDeviceInterface->path());
+    delete m_bluezDeviceInterface;
 }
 
 bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
