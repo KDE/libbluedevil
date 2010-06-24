@@ -123,16 +123,22 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
 {
     if (property == "Name") {
         m_name = value.variant().toString();
+        emit m_q->nameChanged(m_name);
     } else if (property == "Powered") {
         m_powered = value.variant().toBool();
+        emit m_q->poweredChanged(m_powered);
     } else if (property == "Discoverable") {
         m_discoverable = value.variant().toBool();
+        emit m_q->discoverableChanged(m_discoverable);
     } else if (property == "Pairable") {
         m_pairable = value.variant().toBool();
+        emit m_q->pairableChanged(m_pairable);
     } else if (property == "PairableTimeout") {
         m_pairableTimeout = value.variant().toUInt();
+        emit m_q->pairableTimeoutChanged(m_pairableTimeout);
     } else if (property == "DiscoverableTimeout") {
         m_discoverableTimeout = value.variant().toUInt();
+        emit m_q->discoverableTimeoutChanged(m_discoverableTimeout);
     }
 }
 

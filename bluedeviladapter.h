@@ -174,6 +174,12 @@ public Q_SLOTS:
 Q_SIGNALS:
     void deviceFound(Device *device);
     void deviceDisappeared(Device *device);
+    void nameChanged(const QString &name);
+    void poweredChanged(bool powered);
+    void discoverableChanged(bool discoverable);
+    void pairableChanged(bool pairable);
+    void pairableTimeoutChanged(quint32 pairableTimeout);
+    void discoverableTimeoutChanged(quint32 discoverableTimeout);
 
 private:
     /**
