@@ -47,16 +47,18 @@ public:
     QMap<QString, Device*>    m_devicesMapUBIKey;
 
     // Bluez cached properties
-    QString m_address;
-    QString m_name;
-    quint32 m_class;
-    bool    m_powered;
-    bool    m_discoverable;
-    bool    m_pairable;
-    quint32 m_pairableTimeout;
-    quint32 m_discoverableTimeout;
-    bool    m_discovering;
-    bool    m_propertiesFetched;
+    QString        m_address;
+    QString        m_name;
+    quint32        m_class;
+    bool           m_powered;
+    bool           m_discoverable;
+    bool           m_pairable;
+    quint32        m_pairableTimeout;
+    quint32        m_discoverableTimeout;
+    bool           m_discovering;
+    QList<Device*> m_devices;
+    QStringList    m_UUIDs;
+    bool           m_propertiesFetched;
 
     Adapter *const m_q;
 };
@@ -85,6 +87,11 @@ void Adapter::Private::fetchProperties()
     m_pairableTimeout = properties["PairableTimeout"].toUInt();
     m_discoverableTimeout = properties["DiscoverableTimeout"].toUInt();
     m_discovering = properties["Discovering"].toBool();
+    const QVariantList devices = properties["Devices"].toList();
+    Q_FOREACH (const QVariant &device, devices) {
+        m_devices << new Device(device.value<QDBusObjectPath>().path(), Device::DevicePath, m_q);
+    }
+    m_UUIDs = properties["UUIDs"].toStringList();
     m_propertiesFetched = true;
 }
 
@@ -140,6 +147,17 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
     } else if (property == "DiscoverableTimeout") {
         m_discoverableTimeout = value.variant().toUInt();
         emit m_q->discoverableTimeoutChanged(m_discoverableTimeout);
+    } else if (property == "Devices") {
+        m_devices.clear();
+        const QVariantList devices = value.variant().toList();
+        Q_FOREACH (const QVariant &devicePath, devices) {
+            const QString device = devicePath.value<QDBusObjectPath>().path();
+            if (m_devicesMapUBIKey.contains(device)) {
+                m_devices << m_devicesMapUBIKey[device];
+            } else {
+                m_devices << new Device(device, Device::DevicePath, m_q);
+            }
+        }
     }
 }
 
@@ -300,6 +318,18 @@ Device *Adapter::deviceForUBI(const QString &UBI)
         return d->m_devicesMapUBIKey[UBI];
     }
     return new Device(UBI, Device::DevicePath, this);
+}
+
+QList<Device*> Adapter::devices()
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_devices;
+}
+
+QStringList Adapter::UUIDs()
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_UUIDs;
 }
 
 void Adapter::startDiscovery() const

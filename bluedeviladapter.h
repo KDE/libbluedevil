@@ -160,6 +160,17 @@ public:
      */
     Device *deviceForUBI(const QString &UBI);
 
+    /**
+     * @return All known devices by this adapter. They haven't been necessarily discovered in this
+     *         session.
+     */
+    QList<Device*> devices();
+
+    /**
+     * @return Services provided by this adapter.
+     */
+    QStringList UUIDs();
+
 public Q_SLOTS:
     /**
      * Starts device discovery. deviceFound signal will be emitted for each device found.
