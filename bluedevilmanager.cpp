@@ -74,6 +74,9 @@ void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
         emit m_q->adapterRemoved(adapter);
         delete adapter;
     }
+    if (m_adaptersHash.isEmpty()) {
+        m_defaultAdapter = 0;
+    }
 }
 
 void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
@@ -132,16 +135,15 @@ void Manager::release()
 
 Adapter *Manager::defaultAdapter() const
 {
-    delete d->m_defaultAdapter;
-    d->m_defaultAdapter = 0;
-
     if (!QDBusConnection::systemBus().isConnected()) {
-        return d->m_defaultAdapter;
+        return 0;
     }
 
-    const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
-    if (!adapterPath.isEmpty()) {
-        d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
+    if (!d->m_defaultAdapter) {
+        const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
+        if (!adapterPath.isEmpty()) {
+            d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
+        }
     }
 
     return d->m_defaultAdapter;
