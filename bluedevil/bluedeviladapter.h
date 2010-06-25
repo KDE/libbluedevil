@@ -220,6 +220,11 @@ private:
     /**
      * @internal
      */
+    void createPairedDevice(const QString &address, const QString& path, const QString& options) const;
+
+    /**
+     * @internal
+     */
     void addDeviceWithUBI(const QString &UBI, Device *device);
 
     class Private;

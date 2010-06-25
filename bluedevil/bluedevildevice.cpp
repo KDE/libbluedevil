@@ -221,6 +221,11 @@ Device::~Device()
     delete d;
 }
 
+void* Device::pair(const QString& dbusPath, const QString& options) const
+{
+    d->m_adapter->createPairedDevice(d->m_address, dbusPath, options);
+}
+
 Adapter *Device::adapter() const
 {
     return d->m_adapter;

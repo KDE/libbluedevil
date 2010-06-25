@@ -378,6 +378,12 @@ QString Adapter::createDevice(const QString &address) const
     return QString();
 }
 
+void Adapter::createPairedDevice(const QString& address, const QString& path, const QString& options) const
+{
+    const QDBusObjectPath dbusPath(path);
+    d->m_bluezAdapterInterface->CreatePairedDevice(address, dbusPath, options);
+}
+
 void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)
 {
     d->m_devicesMapUBIKey.insert(UBI, device);
