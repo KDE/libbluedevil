@@ -71,7 +71,6 @@ Adapter::Private::Private(Adapter *q)
 
 Adapter::Private::~Private()
 {
-    QDBusConnection::systemBus().unregisterObject(m_bluezAdapterInterface->path());
     delete m_bluezAdapterInterface;
 }
 

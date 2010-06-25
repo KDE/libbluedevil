@@ -103,7 +103,6 @@ Device::Private::Private(Device *q)
 
 Device::Private::~Private()
 {
-    QDBusConnection::systemBus().unregisterObject(m_bluezDeviceInterface->path());
     delete m_bluezDeviceInterface;
 }
 
