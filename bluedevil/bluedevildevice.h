@@ -90,7 +90,7 @@ public:
     /**
      * Starts the pairing process, the pairedChange signal will be emitted if succeed
      */
-    void pair(const QString& dbusPath, const QString& options) const;
+    void pair(const QString &dbusPath, const QString &options) const;
 
     /**
      * @return The adapter that discovered this remote device.

@@ -220,7 +220,7 @@ private:
     /**
      * @internal
      */
-    void createPairedDevice(const QString &address, const QString& path, const QString& options) const;
+    void createPairedDevice(const QString &address, const QString &path, const QString &options) const;
 
     /**
      * @internal

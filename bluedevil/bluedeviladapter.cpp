@@ -378,7 +378,7 @@ QString Adapter::createDevice(const QString &address) const
     return QString();
 }
 
-void Adapter::createPairedDevice(const QString& address, const QString& path, const QString& options) const
+void Adapter::createPairedDevice(const QString &address, const QString &path, const QString &options) const
 {
     const QDBusObjectPath dbusPath(path);
     d->m_bluezAdapterInterface->CreatePairedDevice(address, dbusPath, options);
