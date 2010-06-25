@@ -190,6 +190,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void deviceFound(Device *device);
     void deviceDisappeared(Device *device);
+    void deviceCreated(Device *device);
+    void deviceRemoved(Device *device);
     void nameChanged(const QString &name);
     void poweredChanged(bool powered);
     void discoverableChanged(bool discoverable);
