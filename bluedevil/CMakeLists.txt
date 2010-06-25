@@ -4,6 +4,7 @@ set(libbluedevil_SRCS
     bluedevilmanager.cpp
     bluedeviladapter.cpp
     bluedevildevice.cpp
+    bluedevilutils.cpp
 )
 
 QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-manager.xml bluezmanager)
@@ -28,7 +29,8 @@ install(FILES bluedevilmanager.h
               bluedeviladapter.h
               bluedevildevice.h
               bluedevil_export.h
-              bluedevil.h DESTINATION include/bluedevil)
+              bluedevil.h
+              bluedevilutils.h DESTINATION include/bluedevil)
 
 add_subdirectory(test)
 
