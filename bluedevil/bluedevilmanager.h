@@ -73,9 +73,26 @@ public:
 
 
 Q_SIGNALS:
+    /**
+     * This signal will be emitted when an adapter has been connected.
+     */
     void adapterAdded(Adapter *adapter);
+
+    /**
+     * This signal will be emitted when an adapter has been disconnected.
+     */
     void adapterRemoved(Adapter *adapter);
+
+    /**
+     * This signal will be emitted when the default adapter has changed. It also will be emitted
+     * when all adapters have been removed, placing 0 at @p adapter.
+     */
     void defaultAdapterChanged(Adapter *adapter);
+
+    /**
+     * This signal will be emitted when all adapters have been disconnected.
+     */
+    void allAdaptersRemoved();
 
 private:
     /**

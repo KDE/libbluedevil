@@ -79,6 +79,7 @@ void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
     }
     if (m_adaptersHash.isEmpty()) {
         emit m_q->defaultAdapterChanged(0);
+        emit m_q->allAdaptersRemoved();
     }
 }
 
