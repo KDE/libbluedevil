@@ -23,5 +23,6 @@
 #include <bluedevil/bluedevildevice.h>
 #include <bluedevil/bluedeviladapter.h>
 #include <bluedevil/bluedevilmanager.h>
+#include <bluedevil/bluedevilutils.h>
 
 #endif // BLUEDEVIL_H
