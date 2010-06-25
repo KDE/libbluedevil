@@ -20,7 +20,7 @@
 #include "bluedeviladapter.h"
 #include "bluedevildevice.h"
 
-#include <bluezadapter.h>
+#include "bluedevil/bluezadapter.h"
 
 #define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
                                       d->fetchProperties();      \

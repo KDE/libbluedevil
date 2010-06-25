@@ -20,7 +20,7 @@
 #include "bluedevilmanager.h"
 #include "bluedeviladapter.h"
 
-#include <bluezmanager.h>
+#include "bluedevil/bluezmanager.h"
 
 #include <QtCore/QHash>
 

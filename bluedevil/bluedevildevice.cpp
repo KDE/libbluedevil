@@ -20,7 +20,7 @@
 #include "bluedevildevice.h"
 #include "bluedeviladapter.h"
 
-#include <bluezdevice.h>
+#include "bluedevil/bluezdevice.h"
 
 #include <QtCore/QString>
 #include <QtCore/QThread>
