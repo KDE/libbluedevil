@@ -305,6 +305,11 @@ void Adapter::unregisterAgent(const QString &agentPath)
     d->m_bluezAdapterInterface->UnregisterAgent(QDBusObjectPath(agentPath));
 }
 
+void Adapter::removeDevice(Device *device)
+{
+    d->m_bluezAdapterInterface->RemoveDevice(QDBusObjectPath(device->UBI()));
+}
+
 Device *Adapter::deviceForAddress(const QString &address)
 {
     if (d->m_devicesMap.contains(address)) {

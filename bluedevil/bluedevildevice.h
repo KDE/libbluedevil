@@ -141,6 +141,11 @@ public:
      */
     bool hasLegacyPairing() const;
 
+    /**
+     * @return UBI for this device.
+     */
+    QString UBI() const;
+
 public Q_SLOTS:
     /**
      * It is not mandatory to call to this method. If you are just retrieving some information that

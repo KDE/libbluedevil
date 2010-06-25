@@ -151,6 +151,11 @@ public:
     void unregisterAgent(const QString &agentPath);
 
     /**
+     * Removes device.
+     */
+    void removeDevice(Device *device);
+
+    /**
      * @return A device defined by its hardware address.
      */
     Device *deviceForAddress(const QString &address);

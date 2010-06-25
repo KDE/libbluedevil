@@ -264,6 +264,14 @@ bool Device::hasLegacyPairing() const
     return d->m_legacyPairing;
 }
 
+QString Device::UBI() const
+{
+    if (!d->ensureDeviceCreated()) {
+        return QString();
+    }
+    return d->m_bluezDeviceInterface->path();
+}
+
 bool Device::registerDevice()
 {
     const bool res = d->ensureDeviceCreated();
