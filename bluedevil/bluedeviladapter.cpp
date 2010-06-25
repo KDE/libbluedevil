@@ -159,6 +159,7 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
         }
         emit m_q->devicesChanged(m_devices);
     }
+    emit m_q->propertyChanged(property, value.variant());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

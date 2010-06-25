@@ -179,6 +179,7 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
         m_alias = value.variant().toString();
         emit m_q->aliasChanged(m_alias);
     }
+    emit m_q->propertyChanged(property, value.variant());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

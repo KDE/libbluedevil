@@ -264,6 +264,7 @@ Q_SIGNALS:
     void trustedChanged(bool trusted);
     void blockedChanged(bool blocked);
     void aliasChanged(const QString &alias);
+    void propertyChanged(const QString &property, const QVariant &value);
     void disconnectRequested();
 
 /*
