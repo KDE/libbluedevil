@@ -191,6 +191,7 @@ Q_SIGNALS:
     void pairableChanged(bool pairable);
     void pairableTimeoutChanged(quint32 pairableTimeout);
     void discoverableTimeoutChanged(quint32 discoverableTimeout);
+    void devicesChanged(const QList<Device*> &devices);
 
 private:
     /**

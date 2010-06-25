@@ -158,6 +158,7 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
                 m_devices << new Device(device, Device::DevicePath, m_q);
             }
         }
+        emit m_q->devicesChanged(m_devices);
     }
 }
 
