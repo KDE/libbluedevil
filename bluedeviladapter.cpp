@@ -87,9 +87,9 @@ void Adapter::Private::fetchProperties()
     m_pairableTimeout = properties["PairableTimeout"].toUInt();
     m_discoverableTimeout = properties["DiscoverableTimeout"].toUInt();
     m_discovering = properties["Discovering"].toBool();
-    const QVariantList devices = properties["Devices"].toList();
-    Q_FOREACH (const QVariant &device, devices) {
-        m_devices << new Device(device.value<QDBusObjectPath>().path(), Device::DevicePath, m_q);
+    const QList<QDBusObjectPath> devices = qdbus_cast<QList<QDBusObjectPath> >(properties["Devices"].value<QDBusArgument>());
+    Q_FOREACH (const QDBusObjectPath &device, devices) {
+        m_devices << new Device(device.path(), Device::DevicePath, m_q);
     }
     m_UUIDs = properties["UUIDs"].toStringList();
     m_propertiesFetched = true;
@@ -149,9 +149,9 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
         emit m_q->discoverableTimeoutChanged(m_discoverableTimeout);
     } else if (property == "Devices") {
         m_devices.clear();
-        const QVariantList devices = value.variant().toList();
-        Q_FOREACH (const QVariant &devicePath, devices) {
-            const QString device = devicePath.value<QDBusObjectPath>().path();
+        const QList<QDBusObjectPath> devices = qdbus_cast<QList<QDBusObjectPath> >(value.variant().value<QDBusArgument>());
+        Q_FOREACH (const QDBusObjectPath &devicePath, devices) {
+            const QString device = devicePath.path();
             if (m_devicesMapUBIKey.contains(device)) {
                 m_devices << m_devicesMapUBIKey[device];
             } else {
