@@ -27,8 +27,8 @@
 
 namespace BlueDevil {
 
-    quint32 classToType(quint32 classNum);
-    quint32 stringToType(const QString& stringType);
+    quint32 BLUEDEVIL_EXPORT classToType(quint32 classNum);
+    quint32 BLUEDEVIL_EXPORT stringToType(const QString& stringType);
 
     enum BluetoothType {
         BLUETOOTH_TYPE_ANY         = 1 << 0,
