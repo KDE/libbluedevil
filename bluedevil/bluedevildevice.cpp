@@ -237,6 +237,9 @@ QString Device::name() const
 
 QString Device::icon() const
 {
+    if (d->m_icon.isEmpty()) {
+        return "preferences-system-bluetooth";
+    }
     return d->m_icon;
 }
 
