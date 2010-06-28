@@ -204,10 +204,14 @@ Device::Device(const QString &pathOrAddress, Type type, Adapter *adapter)
 {
     d->m_adapter = adapter;
     if (type == DevicePath) {
-        d->ensureDeviceCreated(pathOrAddress);
+        if (!d->ensureDeviceCreated(pathOrAddress)) {
+            return;
+        }
     } else {
         d->m_address = pathOrAddress;
-        d->ensureDeviceCreated();
+        if (!d->ensureDeviceCreated()) {
+            return;
+        }
     }
     const QVariantMap data = d->m_bluezDeviceInterface->GetProperties().value();
     d->m_address = data["Address"].toString();
