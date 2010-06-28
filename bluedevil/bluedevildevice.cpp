@@ -221,7 +221,7 @@ Device::~Device()
     delete d;
 }
 
-void Device::pair(const QString &dbusPath, Adapter::RegisterCapability registerCapability) const
+void Device::pair(const QString &agentPath, Adapter::RegisterCapability registerCapability) const
 {
     QString capability;
 
