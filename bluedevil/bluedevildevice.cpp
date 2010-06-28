@@ -242,7 +242,7 @@ void Device::pair(const QString &agentPath, Adapter::RegisterCapability register
             return;
     }
 
-    d->m_adapter->createPairedDevice(d->m_address, dbusPath, capability);
+    d->m_adapter->createPairedDevice(d->m_address, agentPath, capability);
 }
 
 Adapter *Device::adapter() const
