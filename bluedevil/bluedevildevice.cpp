@@ -221,9 +221,28 @@ Device::~Device()
     delete d;
 }
 
-void Device::pair(const QString &dbusPath, const QString &options) const
+void Device::pair(const QString &dbusPath, Adapter::RegisterCapability registerCapability) const
 {
-    d->m_adapter->createPairedDevice(d->m_address, dbusPath, options);
+    QString capability;
+
+    switch (registerCapability) {
+        case Adapter::DisplayOnly:
+            capability = "DisplayOnly";
+            break;
+        case Adapter::DisplayYesNo:
+            capability = "DisplayYesNo";
+            break;
+        case Adapter::KeyboardOnly:
+            capability = "KeyboardOnly";
+            break;
+        case Adapter::NoInputNoOutput:
+            capability = "NoInputNoOutput";
+            break;
+        default:
+            return;
+    }
+
+    d->m_adapter->createPairedDevice(d->m_address, dbusPath, capability);
 }
 
 Adapter *Device::adapter() const

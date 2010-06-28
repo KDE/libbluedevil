@@ -21,6 +21,7 @@
 #define BLUEDEVILDEVICE_H
 
 #include <bluedevil/bluedevil_export.h>
+#include <bluedevil/bluedeviladapter.h>
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -89,8 +90,12 @@ public:
 
     /**
      * Starts the pairing process, the pairedChange signal will be emitted if succeed
+     *
+     * @param agentPath  The path where the agent has been registered.
+     * @param capability The same capability attribute set when registering the agent with
+     *                   registerAgent.
      */
-    void pair(const QString &dbusPath, const QString &options) const;
+    void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
 
     /**
      * @return The adapter that discovered this remote device.

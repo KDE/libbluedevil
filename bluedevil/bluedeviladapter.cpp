@@ -380,7 +380,7 @@ QString Adapter::createDevice(const QString &address) const
 
 void Adapter::createPairedDevice(const QString &address, const QString &path, const QString &options) const
 {
-    d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options);
+    d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options).waitForFinished();
 }
 
 void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)
