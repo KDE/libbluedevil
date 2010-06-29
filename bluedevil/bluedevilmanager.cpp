@@ -121,7 +121,7 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
     if (QDBusConnection::systemBus().isConnected()) {
-        QVariantMap properties = d->m_bluezManagerInterface->GetProperties().value();
+        const QVariantMap properties = d->m_bluezManagerInterface->GetProperties().value();
         const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
         Q_FOREACH (const QDBusObjectPath &path, adapters) {
             Adapter *const adapter = new Adapter(path.path(), this);

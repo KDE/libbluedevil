@@ -79,7 +79,7 @@ Adapter::Private::~Private()
 
 void Adapter::Private::fetchProperties()
 {
-    QVariantMap properties = m_bluezAdapterInterface->GetProperties().value();
+    const QVariantMap properties = m_bluezAdapterInterface->GetProperties().value();
     m_address = properties["Address"].toString();
     m_name = properties["Name"].toString();
     m_class = properties["Class"].toUInt();
