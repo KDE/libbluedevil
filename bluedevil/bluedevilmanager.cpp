@@ -119,6 +119,15 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_defaultAdapterChanged(QDBusObjectPath)));
     connect(d->m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
+
+    if (QDBusConnection::systemBus().isConnected()) {
+        QVariantMap properties = d->m_bluezManagerInterface->GetProperties().value();
+        const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
+        Q_FOREACH (const QDBusObjectPath &path, adapters) {
+            Adapter *const adapter = new Adapter(path.path(), this);
+            d->m_adaptersHash.insert(path.path(), adapter);
+        }
+    }
 }
 
 Manager::~Manager()
@@ -157,7 +166,7 @@ Adapter *Manager::defaultAdapter()
     return d->m_defaultAdapter;
 }
 
-QList<Adapter*> Manager::listAdapters() const
+QList<Adapter*> Manager::adapters() const
 {
     if (!QDBusConnection::systemBus().isConnected()) {
         return QList<Adapter*>();

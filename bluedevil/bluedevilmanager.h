@@ -72,7 +72,7 @@ public:
     /**
      * @return A list with all the connected adapters.
      */
-    QList<Adapter*> listAdapters() const;
+    QList<Adapter*> adapters() const;
 
 
 Q_SIGNALS:
