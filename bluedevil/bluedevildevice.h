@@ -97,6 +97,8 @@ public:
      * @param agentPath  The path where the agent has been registered.
      * @param capability The same capability attribute set when registering the agent with
      *                   registerAgent.
+     *
+     * @note the device must be registered before call pair @see registerDevice, isRegistered
      */
     void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
 
