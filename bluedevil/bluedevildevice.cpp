@@ -309,10 +309,7 @@ bool Device::registerDevice()
 
 bool Device::isRegistered() const
 {
-    if (!d->m_bluezDeviceInterface) {
-        return false;
-    }
-    return true;
+    return d->m_bluezDeviceInterface;
 }
 
 QStringList Device::UUIDs()
