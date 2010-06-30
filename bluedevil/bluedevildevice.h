@@ -154,11 +154,6 @@ public:
      */
     bool hasLegacyPairing() const;
 
-    /**
-     * @return UBI for this device.
-     */
-    QString UBI() const;
-
 public Q_SLOTS:
     /**
      * It is not mandatory to call to this method. If you are just retrieving some information that
@@ -187,6 +182,17 @@ public Q_SLOTS:
      *       will be emitted with the result.
      */
     QStringList UUIDs();
+
+    /**
+     * @return UBI for this device
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. UBIResult signal
+     *       will be emitted with the result.
+     */
+    QString UBI();
 
     /**
      * @return Whether this remote device is connected or not.
@@ -291,6 +297,7 @@ Q_SIGNALS:
 Q_SIGNALS:
     void registerDeviceResult(Device *device, bool deviceRegistered);
     void UUIDsResult(Device *device, const QStringList &UUIDs);
+    void UBIResult(Device *device, const QString &UBI);
     void isConnectedResult(Device *device, bool connected);
     void isTrustedResult(Device *device, bool trusted);
     void isBlockedResult(Device *device, bool blocked);

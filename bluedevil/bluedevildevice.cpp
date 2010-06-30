@@ -298,14 +298,6 @@ bool Device::hasLegacyPairing() const
     return d->m_legacyPairing;
 }
 
-QString Device::UBI() const
-{
-    if (!d->ensureDeviceCreated()) {
-        return QString();
-    }
-    return d->m_bluezDeviceInterface->path();
-}
-
 bool Device::registerDevice()
 {
     const bool res = d->ensureDeviceCreated();
@@ -322,6 +314,19 @@ QStringList Device::UUIDs()
         emit UUIDsResult(this, d->m_UUIDs);
     }
     return d->m_UUIDs;
+}
+
+QString Device::UBI()
+{
+    if (!d->ensureDeviceCreated()) {
+        return QString();
+    }
+
+    const QString path = d->m_bluezDeviceInterface->path();
+    if (sender()) {
+        emit UBIResult(this, path);
+    }
+    return path;
 }
 
 bool Device::isConnected()
