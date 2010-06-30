@@ -211,7 +211,7 @@ QString Adapter::name() const
 
 void Adapter::setName(const QString &name)
 {
-    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name));
 }
 
 quint32 Adapter::adapterClass() const
@@ -228,7 +228,7 @@ bool Adapter::isPowered() const
 
 void Adapter::setPowered(bool powered)
 {
-    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered));
 }
 
 bool Adapter::isDiscoverable() const
@@ -239,7 +239,7 @@ bool Adapter::isDiscoverable() const
 
 void Adapter::setDiscoverable(bool discoverable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable));
 }
 
 bool Adapter::isPairable() const
@@ -250,7 +250,7 @@ bool Adapter::isPairable() const
 
 void Adapter::setPairable(bool pairable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable));
 }
 
 quint32 Adapter::paireableTimeout() const
@@ -261,7 +261,7 @@ quint32 Adapter::paireableTimeout() const
 
 void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout));
 }
 
 quint32 Adapter::discoverableTimeout() const
@@ -272,7 +272,7 @@ quint32 Adapter::discoverableTimeout() const
 
 void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout)).waitForFinished();
+    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout));
 }
 
 bool Adapter::isDiscovering() const
@@ -353,12 +353,12 @@ void Adapter::startDiscovery() const
     qDeleteAll(d->m_devicesMap);
     d->m_devicesMap.clear();
     d->m_devicesMapUBIKey.clear();
-    d->m_bluezAdapterInterface->StartDiscovery().waitForFinished();
+    d->m_bluezAdapterInterface->StartDiscovery();
 }
 
 void Adapter::stopDiscovery() const
 {
-    d->m_bluezAdapterInterface->StopDiscovery().waitForFinished();
+    d->m_bluezAdapterInterface->StopDiscovery();
 }
 
 QString Adapter::findDevice(const QString &address) const
@@ -383,7 +383,7 @@ QString Adapter::createDevice(const QString &address) const
 
 void Adapter::createPairedDevice(const QString &address, const QString &path, const QString &options) const
 {
-    d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options).waitForFinished();
+    d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options);
 }
 
 void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)

@@ -344,7 +344,7 @@ void Device::setTrusted(bool trusted)
     if (!d->ensureDeviceCreated()) {
         return;
     }
-    d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted)).waitForFinished();
+    d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted));
 }
 
 bool Device::isBlocked()
@@ -361,7 +361,7 @@ void Device::setBlocked(bool blocked)
     if (!d->ensureDeviceCreated()) {
         return;
     }
-    d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked)).waitForFinished();
+    d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked));
 }
 
 void Device::setAlias(const QString& alias)
@@ -369,7 +369,7 @@ void Device::setAlias(const QString& alias)
     if (!d->ensureDeviceCreated()) {
         return;
     }
-    d->m_bluezDeviceInterface->SetProperty("Alias", QDBusVariant(alias)).waitForFinished();
+    d->m_bluezDeviceInterface->SetProperty("Alias", QDBusVariant(alias));
 }
 
 QUInt32StringMap Device::discoverServices(const QString &pattern)
