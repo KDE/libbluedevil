@@ -141,6 +141,13 @@ public:
     bool isPaired() const;
 
     /**
+     * @return Whether the device is registered or not, @see registerDevice
+     *
+     * @note This request will not trigger a connection to the device
+     */
+    bool isRegistered() const;
+
+    /**
      * @return The alias of the remote device.
      *
      * @note This request will not trigger a connection to the device.

@@ -307,6 +307,14 @@ bool Device::registerDevice()
     return res;
 }
 
+bool Device::isRegistered() const
+{
+    if (!d->m_bluezDeviceInterface) {
+        return false;
+    }
+    return true;
+}
+
 QStringList Device::UUIDs()
 {
     ENSURE_PROPERTIES_FETCHED
