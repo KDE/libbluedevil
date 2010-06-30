@@ -193,8 +193,8 @@ public Q_SLOTS:
     QStringList UUIDs();
 
     /**
-     * @return UBI for this device. In case that the connection with the device fails, an empty string
-     *          will be returned
+     * @return UBI for this device. In case that the connection with the device fails, an empty
+     *         string will be returned.
      *
      * @note This request will trigger a connection to the device with the consequent registration
      *       on the bus.
