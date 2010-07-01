@@ -144,6 +144,15 @@ bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
         m_adapter->addDeviceWithUBI(devicePath, m_q);
+
+        const QVariantMap data = m_bluezDeviceInterface->GetProperties().value();
+        m_address = data["Address"].toString();
+        m_alias = data["Alias"].toString();
+        m_deviceClass = data["Class"].toUInt();
+        m_icon = data["Icon"].toString();
+        m_legacyPairing = data["LegacyPairing"].toBool();
+        m_name = data["Name"].toString();
+        m_paired = data["Paired"].toBool();
     }
     return true;
 }
@@ -216,14 +225,6 @@ Device::Device(const QString &pathOrAddress, Type type, Adapter *adapter)
             return;
         }
     }
-    const QVariantMap data = d->m_bluezDeviceInterface->GetProperties().value();
-    d->m_address = data["Address"].toString();
-    d->m_alias = data["Alias"].toString();
-    d->m_deviceClass = data["Class"].toUInt();
-    d->m_icon = data["Icon"].toString();
-    d->m_legacyPairing = data["LegacyPairing"].toBool();
-    d->m_name = data["Name"].toString();
-    d->m_paired = data["Paired"].toBool();
 }
 
 Device::~Device()
