@@ -44,6 +44,7 @@ public:
     void _k_deviceDisappeared(const QString &address);
     void _k_deviceRemoved(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
+    void _k_createPairedDeviceReply(QDBusPendingCallWatcher *call);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QMap<QString, Device*>    m_devicesMap;
@@ -170,6 +171,18 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
         emit m_q->devicesChanged(m_devices);
     }
     emit m_q->propertyChanged(property, value.variant());
+}
+
+void Adapter::Private::_k_createPairedDeviceReply(QDBusPendingCallWatcher *call)
+{
+    const QDBusPendingReply<QDBusObjectPath> reply = *call;
+    if (reply.isError()) {
+        qDebug() << "Error response: " << reply.error().message();
+    } else {
+        emit m_q->pairedDeviceCreated(reply.value().path());
+    }
+
+    call->deleteLater();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,7 +396,10 @@ QString Adapter::createDevice(const QString &address) const
 
 void Adapter::createPairedDevice(const QString &address, const QString &path, const QString &options) const
 {
-    d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options);
+    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
+
+    connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createPairedDeviceReply(QDBusPendingCallWatcher*)));
 }
 
 void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)

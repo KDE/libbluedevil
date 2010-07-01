@@ -114,6 +114,10 @@ Device::Private::~Private()
 
 bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
 {
+    if (m_q->sender()) {
+        static_cast<QObject*>(m_q)->disconnect(m_adapter, SIGNAL(pairedDeviceCreated(QString)), m_q, SLOT(ensureDeviceCreated(QString)));
+    }
+
     if (m_registrationOnBusRejected) {
         return false;
     }
@@ -143,8 +147,6 @@ bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
         connect(m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
-        m_adapter->addDeviceWithUBI(devicePath, m_q);
-
         const QVariantMap data = m_bluezDeviceInterface->GetProperties().value();
         m_address = data["Address"].toString();
         m_alias = data["Alias"].toString();
@@ -153,6 +155,8 @@ bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
         m_legacyPairing = data["LegacyPairing"].toBool();
         m_name = data["Name"].toString();
         m_paired = data["Paired"].toBool();
+
+        m_adapter->addDeviceWithUBI(devicePath, m_q);
     }
     return true;
 }
@@ -253,6 +257,7 @@ void Device::pair(const QString &agentPath, Adapter::RegisterCapability register
             return;
     }
 
+    connect(d->m_adapter, SIGNAL(pairedDeviceCreated(QString)), this, SLOT(ensureDeviceCreated(QString)));
     d->m_adapter->createPairedDevice(d->m_address, agentPath, capability);
 }
 

@@ -98,7 +98,8 @@ public:
      * @param capability The same capability attribute set when registering the agent with
      *                   registerAgent.
      *
-     * @note the device must be registered before call pair @see registerDevice, isRegistered
+     * @note If the device is registered moments before this funciton is called, then it might
+     *      do not work in some devices
      */
     void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
 
@@ -330,6 +331,7 @@ private:
     Private *const d;
 
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
+    Q_PRIVATE_SLOT(d, bool ensureDeviceCreated(QString));
 };
 
 }

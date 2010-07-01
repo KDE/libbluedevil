@@ -27,6 +27,7 @@
 
 #include <QtCore/QObject>
 #include <QtDBus/QDBusObjectPath>
+#include <QtDBus/QDBusPendingCallWatcher>
 
 namespace BlueDevil {
 
@@ -195,6 +196,7 @@ Q_SIGNALS:
     void deviceDisappeared(Device *device);
     void deviceCreated(Device *device);
     void deviceRemoved(Device *device);
+    void pairedDeviceCreated(const QString &path);
     void nameChanged(const QString &name);
     void poweredChanged(bool powered);
     void discoverableChanged(bool discoverable);
@@ -238,6 +240,7 @@ private:
     Q_PRIVATE_SLOT(d, void _k_deviceDisappeared(QString))
     Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
+    Q_PRIVATE_SLOT(d, void _k_createPairedDeviceReply(QDBusPendingCallWatcher*))
 };
 
 }
