@@ -52,9 +52,9 @@ public:
     Private(Device *q);
     ~Private();
 
-    bool ensureDeviceCreated(const QString &busDevicePath = QString());
     void fetchProperties();
 
+    bool _k_ensureDeviceCreated(const QString &busDevicePath = QString());
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     OrgBluezDeviceInterface *m_bluezDeviceInterface;
@@ -112,10 +112,10 @@ Device::Private::~Private()
     delete m_bluezDeviceInterface;
 }
 
-bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
+bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
 {
     if (m_q->sender()) {
-        static_cast<QObject*>(m_q)->disconnect(m_adapter, SIGNAL(pairedDeviceCreated(QString)), m_q, SLOT(ensureDeviceCreated(QString)));
+        static_cast<QObject*>(m_q)->disconnect(m_adapter, SIGNAL(pairedDeviceCreated(QString)), m_q, SLOT(_k_ensureDeviceCreated(QString)));
     }
 
     if (m_registrationOnBusRejected) {
@@ -163,7 +163,7 @@ bool Device::Private::ensureDeviceCreated(const QString &busDevicePath)
 
 void Device::Private::fetchProperties()
 {
-    if (!ensureDeviceCreated()) {
+    if (!_k_ensureDeviceCreated()) {
         return;
     }
 
@@ -220,12 +220,12 @@ Device::Device(const QString &pathOrAddress, Type type, Adapter *adapter)
 {
     d->m_adapter = adapter;
     if (type == DevicePath) {
-        if (!d->ensureDeviceCreated(pathOrAddress)) {
+        if (!d->_k_ensureDeviceCreated(pathOrAddress)) {
             return;
         }
     } else {
         d->m_address = pathOrAddress;
-        if (!d->ensureDeviceCreated()) {
+        if (!d->_k_ensureDeviceCreated()) {
             return;
         }
     }
@@ -257,7 +257,7 @@ void Device::pair(const QString &agentPath, Adapter::RegisterCapability register
             return;
     }
 
-    connect(d->m_adapter, SIGNAL(pairedDeviceCreated(QString)), this, SLOT(ensureDeviceCreated(QString)));
+    connect(d->m_adapter, SIGNAL(pairedDeviceCreated(QString)), this, SLOT(_k_ensureDeviceCreated(QString)));
     d->m_adapter->createPairedDevice(d->m_address, agentPath, capability);
 }
 
@@ -306,7 +306,7 @@ bool Device::hasLegacyPairing() const
 
 bool Device::registerDevice()
 {
-    const bool res = d->ensureDeviceCreated();
+    const bool res = d->_k_ensureDeviceCreated();
     if (sender()) {
         emit registerDeviceResult(this, res);
     }
@@ -329,7 +329,7 @@ QStringList Device::UUIDs()
 
 QString Device::UBI()
 {
-    if (!d->ensureDeviceCreated()) {
+    if (!d->_k_ensureDeviceCreated()) {
         return QString();
     }
 
@@ -360,7 +360,7 @@ bool Device::isTrusted()
 
 void Device::setTrusted(bool trusted)
 {
-    if (!d->ensureDeviceCreated()) {
+    if (!d->_k_ensureDeviceCreated()) {
         return;
     }
     d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted));
@@ -377,7 +377,7 @@ bool Device::isBlocked()
 
 void Device::setBlocked(bool blocked)
 {
-    if (!d->ensureDeviceCreated()) {
+    if (!d->_k_ensureDeviceCreated()) {
         return;
     }
     d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked));
@@ -385,7 +385,7 @@ void Device::setBlocked(bool blocked)
 
 void Device::setAlias(const QString& alias)
 {
-    if (!d->ensureDeviceCreated()) {
+    if (!d->_k_ensureDeviceCreated()) {
         return;
     }
     d->m_bluezDeviceInterface->SetProperty("Alias", QDBusVariant(alias));
@@ -393,7 +393,7 @@ void Device::setAlias(const QString& alias)
 
 QUInt32StringMap Device::discoverServices(const QString &pattern)
 {
-    if (!d->ensureDeviceCreated()) {
+    if (!d->_k_ensureDeviceCreated()) {
         return QUInt32StringMap();
     }
     const QUInt32StringMap res = d->m_bluezDeviceInterface->DiscoverServices(pattern).value();

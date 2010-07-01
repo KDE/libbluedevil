@@ -333,7 +333,7 @@ private:
     Private *const d;
 
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
-    Q_PRIVATE_SLOT(d, bool ensureDeviceCreated(QString));
+    Q_PRIVATE_SLOT(d, bool _k_ensureDeviceCreated(QString));
 };
 
 }
