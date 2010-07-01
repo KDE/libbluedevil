@@ -100,6 +100,8 @@ public:
      *
      * @note If the device is registered moments before this funciton is called, then it might
      *      do not work in some devices
+     *
+     * @see pairedChange
      */
     void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
 
@@ -194,8 +196,8 @@ public Q_SLOTS:
     QStringList UUIDs();
 
     /**
-     * @return UBI for this device. In case that the connection with the device fails, an empty string
-     *          will be returned
+     * @return UBI for this device. In case that the connection with the device fails, an empty
+     *         string will be returned.
      *
      * @note This request will trigger a connection to the device with the consequent registration
      *       on the bus.
