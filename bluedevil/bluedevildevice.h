@@ -98,7 +98,13 @@ public:
      * @param capability The same capability attribute set when registering the agent with
      *                   registerAgent.
      *
-     * @note the device must be registered before call pair @see registerDevice, isRegistered
+     * @warning Since you will probably connect to pairedChanged signal or similars when using this
+     *          method, have present that you need to call beforehand explicitly to registerDevice
+     *          method, or this signals will never be delivered, so you will be never notified when
+     *          the pairing actually happened.
+     *
+     * @see registerDevice
+     * @see isRegistered
      */
     void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
 
