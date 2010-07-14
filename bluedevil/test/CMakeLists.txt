@@ -1,9 +1,9 @@
-FIND_PACKAGE (Qt4 REQUIRED)
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-SET (bluedeviltest_SRCS bluedeviltest.cpp)
+set (bluedeviltest_SRCS bluedeviltest.cpp)
 
-QT4_AUTOMOC(${bluedeviltest_SRCS})
-ADD_EXECUTABLE (bluedeviltest ${bluedeviltest_SRCS})
+qt4_automoc(${bluedeviltest_SRCS})
 
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_SOURCE_DIR}/.. ${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
-TARGET_LINK_LIBRARIES (bluedeviltest ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDECORE_LIBRARY} ${QT_QTDBUS_LIBRARY} bluedevil)
+add_executable(bluedeviltest ${bluedeviltest_SRCS})
+
+target_link_libraries(bluedeviltest ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTDBUS_LIBRARY} bluedevil)
