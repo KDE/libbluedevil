@@ -1,4 +1,6 @@
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+add_subdirectory(test)
+
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${QT_INCLUDES})
 
 set(libbluedevil_SRCS
     bluedevilmanager.cpp
@@ -31,8 +33,6 @@ install(FILES bluedevilmanager.h
               bluedevil_export.h
               bluedevil.h
               bluedevilutils.h DESTINATION include/bluedevil)
-
-add_subdirectory(test)
 
 if(NOT WIN32) # pkgconfig file
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/bluedevil.pc.in ${CMAKE_CURRENT_BINARY_DIR}/bluedevil.pc @ONLY)
