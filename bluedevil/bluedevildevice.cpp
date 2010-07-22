@@ -219,6 +219,8 @@ Device::Device(const QString &pathOrAddress, Type type, Adapter *adapter)
     , d(new Private(this))
 {
     d->m_adapter = adapter;
+    qRegisterMetaType<BlueDevil::QUInt32StringMap>("BlueDevil::QUInt32StringMap");
+    qDBusRegisterMetaType<BlueDevil::QUInt32StringMap>();
     if (type == DevicePath) {
         if (!d->_k_ensureDeviceCreated(pathOrAddress)) {
             return;
