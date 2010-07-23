@@ -278,6 +278,14 @@ QString Device::name() const
     return d->m_name;
 }
 
+QString Device::friendlyName() const
+{
+    if (d->m_alias.isEmpty() || d->m_alias == d->m_name) {
+        return d->m_name;
+    }
+    return QString("%1 (%2)").arg(d->m_alias).arg(d->m_name);
+}
+
 QString Device::icon() const
 {
     if (d->m_icon.isEmpty()) {
