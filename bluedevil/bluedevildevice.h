@@ -125,6 +125,17 @@ public:
     QString name() const;
 
     /**
+     * @return If there is any alias set, it returns the alias for this device along with its name
+     *         in the form of "Alias (Name)". If no alias for this device was set, the name is
+     *         directly returned.
+     *
+     * @note If the name and the alias are the same, "Name" is returned instead of "Name (Name)".
+     *
+     * @note This request will not trigger a connection to the device.
+     */
+    QString friendlyName() const;
+
+    /**
      * @return The suggested icon for the remote device.
      *
      * @note This request will not trigger a connection to the device.
