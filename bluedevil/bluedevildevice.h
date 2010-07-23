@@ -185,7 +185,7 @@ public Q_SLOTS:
     bool registerDevice();
 
     /**
-     * @return The list of supported services by the remote device.
+     * @return The list of supported services by the remote device always in uppercase.
      *
      * @note This request will trigger a connection to the device with the consequent registration
      *       on the bus.

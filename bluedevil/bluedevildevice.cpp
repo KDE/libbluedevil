@@ -174,7 +174,7 @@ void Device::Private::fetchProperties()
     m_blocked = properties["Blocked"].toBool();
     const QVariantList UUIDs = properties["UUIDs"].toList();
     Q_FOREACH (const QVariant &UUID, UUIDs) {
-        m_UUIDs << UUID.toString();
+        m_UUIDs << UUID.toString().toUpper();
     }
 
     m_propertiesFetched = true;
