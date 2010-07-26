@@ -148,6 +148,9 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
         const QVariantMap data = m_bluezDeviceInterface->GetProperties().value();
+        m_connected = data["Connected"].toBool();
+        m_trusted = data["Trusted"].toBool();
+        m_blocked = data["Blocked"].toBool();
         m_address = data["Address"].toString();
         m_alias = data["Alias"].toString();
         m_deviceClass = data["Class"].toUInt();
@@ -155,7 +158,10 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
         m_legacyPairing = data["LegacyPairing"].toBool();
         m_name = data["Name"].toString();
         m_paired = data["Paired"].toBool();
-
+        m_UUIDs.clear();
+        Q_FOREACH (const QString &UUID, data["UUIDs"].toStringList()) {
+            m_UUIDs << UUID.toUpper();
+        }
         m_adapter->addDeviceWithUBI(devicePath, m_q);
     }
     return true;
@@ -166,17 +172,6 @@ void Device::Private::fetchProperties()
     if (!_k_ensureDeviceCreated()) {
         return;
     }
-
-    QVariantMap properties = m_bluezDeviceInterface->GetProperties().value();
-
-    m_connected = properties["Connected"].toBool();
-    m_trusted = properties["Trusted"].toBool();
-    m_blocked = properties["Blocked"].toBool();
-    const QVariantList UUIDs = properties["UUIDs"].toList();
-    Q_FOREACH (const QVariant &UUID, UUIDs) {
-        m_UUIDs << UUID.toString().toUpper();
-    }
-
     m_propertiesFetched = true;
 }
 
@@ -197,6 +192,12 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
     } else if (property == "Alias") {
         m_alias = value.variant().toString();
         emit m_q->aliasChanged(m_alias);
+    } else if (property == "UUIDs") {
+        m_UUIDs.clear();
+        Q_FOREACH (const QString &UUID, value.variant().toStringList()) {
+            m_UUIDs << UUID.toUpper();
+        }
+        emit m_q->UUIDsChanged(m_UUIDs);
     }
     emit m_q->propertyChanged(property, value.variant());
 }
