@@ -148,6 +148,7 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
         const QVariantMap data = m_bluezDeviceInterface->GetProperties().value();
+        m_paired = data["Paired"].toBool();
         m_connected = data["Connected"].toBool();
         m_trusted = data["Trusted"].toBool();
         m_blocked = data["Blocked"].toBool();
@@ -157,7 +158,6 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
         m_icon = data["Icon"].toString();
         m_legacyPairing = data["LegacyPairing"].toBool();
         m_name = data["Name"].toString();
-        m_paired = data["Paired"].toBool();
         m_UUIDs.clear();
         Q_FOREACH (const QString &UUID, data["UUIDs"].toStringList()) {
             m_UUIDs << UUID.toUpper();
@@ -192,6 +192,9 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
     } else if (property == "Alias") {
         m_alias = value.variant().toString();
         emit m_q->aliasChanged(m_alias);
+    } else if (property == "Name") {
+        m_name = value.variant().toString();
+        emit m_q->nameChanged(m_name);
     } else if (property == "UUIDs") {
         m_UUIDs.clear();
         Q_FOREACH (const QString &UUID, value.variant().toStringList()) {
