@@ -175,6 +175,11 @@ QList<Adapter*> Manager::adapters() const
     return d->m_adaptersHash.values();
 }
 
+bool Manager::isBluetoothOperational() const
+{
+    return defaultAdapter() != 0;
+}
+
 }
 
 #include "bluedevilmanager.moc"

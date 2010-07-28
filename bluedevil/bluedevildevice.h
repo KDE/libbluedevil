@@ -92,16 +92,14 @@ public:
     virtual ~Device();
 
     /**
-     * Starts the pairing process, the pairedChange signal will be emitted if succeed
+     * Starts the pairing process, the pairedChanged signal will be emitted if succeeded.
      *
      * @param agentPath  The path where the agent has been registered.
      * @param capability The same capability attribute set when registering the agent with
      *                   registerAgent.
      *
-     * @note If the device is registered moments before this funciton is called, then it might
-     *      do not work in some devices
-     *
-     * @see pairedChange
+     * @note If the device is registered moments before this function is called, then it might
+     *       do not work in some devices.
      */
     void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
 

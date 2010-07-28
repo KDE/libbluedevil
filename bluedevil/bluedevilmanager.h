@@ -65,7 +65,8 @@ public:
     static void release();
 
     /**
-     * @return The default adapter. NULL if there is no default adapter.
+     * @return The default adapter. NULL if there is no default adapter or the system is not ready
+     *         (the bus is not accessible or there is no Bluetooth system running).
      */
     Adapter *defaultAdapter();
 
@@ -74,6 +75,17 @@ public:
      */
     QList<Adapter*> adapters() const;
 
+    /**
+     * @return Whether the bluetooth system is ready to be used, and there is a default adapter
+     *         connected and turned on at the system.
+     *
+     * @note After this check, if succeeded, you can freely access to all libbluedevil functionality
+     *       by retrieving the default adapter through a call to defaultAdapter().
+     *
+     * @note If this method returns false, you can connect to the defaultAdapterChanged signal, so
+     *       you can be notified when bluetooth is operational.
+     */
+    bool isBluetoothOperational() const;
 
 Q_SIGNALS:
     /**

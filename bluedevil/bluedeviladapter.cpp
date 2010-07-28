@@ -31,6 +31,9 @@
 
 namespace BlueDevil {
 
+/**
+ * @internal
+ */
 class Adapter::Private
 {
 public:
@@ -394,11 +397,10 @@ QString Adapter::createDevice(const QString &address) const
     return QString();
 }
 
-void Adapter::createPairedDevice(const QString &address, const QString &path, const QString &options) const
+void Adapter::createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const
 {
     QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options);
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
-
     connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createPairedDeviceReply(QDBusPendingCallWatcher*)));
 }
 

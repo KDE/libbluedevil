@@ -44,6 +44,9 @@ void asyncCall(Device *device, const char *slot)
     thread->start();
 }
 
+/**
+ * @internal
+ */
 class Device::Private
 {
 public:
