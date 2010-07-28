@@ -47,13 +47,52 @@
  *
  * All the libbluedevil classes are wrapped into a namespace called BlueDevil.
  *
- * You can have a look at @ref blueDevilExamples in order to see some examples.
+ * You can have a look at some @ref examples.
  */
 
 /*!
- * @page blueDevilExamples BlueDevil examples
+ * @page examples Examples
  *
- * WIP
+ * @section manager The Manager
+ *
+ * The Manager task is to serve as entry point to the library, being a singleton class. It will also
+ * inform about the service state (operational or not), provide the default adapter connected to the
+ * system, as well as notify of adapters being connected or disconnected.
+ *
+ * For brevity, we will directly include the whole namespace:
+ *
+ * @code
+ * using namespace BlueDevil;
+ * @endcode
+ *
+ * In order to include the Manager API, you have to perform:
+ *
+ * @code
+ * #include <bluedevil/bluedevilmanager.h>
+ * @endcode
+ *
+ * So, all the dance usually starts as:
+ *
+ * @code
+ * Manager *const manager = Manager::self();
+ *
+ * // If Bluetooth is operational, we can directly retrieve the default adapter, and start working
+ * // with it. Otherwise, we can connect to the defaultAdapterChanged signal, so we will be notified
+ * // when we have an adapter ready to be used.
+ * if (manager->isBluetoothOperational()) {
+ *     Adapter *const defaultAdapter = manager->defaultAdapter();
+ *     // Do something interesting with the adapter...
+ * } else {
+ *     connect(manager, SIGNAL(defaultAdapterChanged(Adapter*)), this, SLOT(defaultAdapterChanged(Adapter*)));
+ * }
+ * @endcode
+ *
+ * It is very common that in some few calls we will be using the Manager, Adapter and Device APIs.
+ * In order to decrease the number of includes that you need to do, you have a handy trick:
+ *
+ * @code
+ * #include <bluedevil/bluedevil.h>
+ * @endcode
  */
 
 #ifndef BLUEDEVIL_H
