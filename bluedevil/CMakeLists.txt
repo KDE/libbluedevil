@@ -26,7 +26,8 @@ set_target_properties(bluedevil PROPERTIES
    SOVERSION ${GENERIC_LIB_SOVERSION}
 )
 
-install(TARGETS bluedevil DESTINATION lib)
+install(TARGETS bluedevil ${INSTALL_TARGETS_DEFAULT_ARGS})
+
 install(FILES bluedevilmanager.h
               bluedeviladapter.h
               bluedevildevice.h
