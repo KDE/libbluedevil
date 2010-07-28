@@ -6,7 +6,7 @@ http://techbase.kde.org/Policies/Kdelibs_Coding_Style
 All copyright headers are unified with the following style:
 
 /*****************************************************************************
- * This file is part of the KDE project                                      *
+ * This file is part of the BlueDevil project                                *
  *                                                                           *
  * Copyright (C) 2010 AuthorName Surname Surname <author@server.org>         *
  *                                                                           *
