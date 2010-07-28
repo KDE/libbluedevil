@@ -1,5 +1,5 @@
 /*****************************************************************************
- * This file is part of the KDE project                                      *
+ * This file is part of the BlueDevil project                                *
  *                                                                           *
  * Copyright (C) 2010 Rafael Fernández López <ereslibre@kde.org>             *
  * Copyright (C) 2010 UFO Coders <info@ufocoders.com>                        *
@@ -62,6 +62,8 @@ typedef QMap<quint32, QString> QUInt32StringMap;
 class Adapter;
 
 /**
+ * @class Device bluedevildevice.h bluedevil/bluedevildevice.h
+ *
  * This class represents a remote device, discovered by an Adapter.
  *
  * This device has some information for free (this meaning there is no need to register the device

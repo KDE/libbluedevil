@@ -1,5 +1,5 @@
 /*****************************************************************************
- * This file is part of the KDE project                                      *
+ * This file is part of the BlueDevil project                                *
  *                                                                           *
  * Copyright (C) 2010 Rafael Fernández López <ereslibre@kde.org>             *
  * Copyright (C) 2010 UFO Coders <info@ufocoders.com>                        *
@@ -35,6 +35,8 @@ class Device;
 class Manager;
 
 /**
+ * @class Adapter bluedeviladapter.h bluedevil/bluedeviladapter.h
+ *
  * This class represents an adapter.
  *
  * The task of an adapter is basically to discover remote devices.

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * This file is part of the KDE project                                      *
+ * This file is part of the BlueDevil project                                *
  *                                                                           *
  * Copyright (C) 2010 Rafael Fernández López <ereslibre@kde.org>             *
  * Copyright (C) 2010 UFO Coders <info@ufocoders.com>                        *
@@ -33,6 +33,8 @@ namespace BlueDevil {
 class Adapter;
 
 /**
+ * @class Manager bluedevilmanager.h bluedevil/bluedevilmanager.h
+ *
  * Manager class. The entry point to BlueDevil exposed services.
  *
  * The typical way to proceed is to work with the default adapter, but you can also list all

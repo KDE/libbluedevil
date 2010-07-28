@@ -1,5 +1,5 @@
 /*****************************************************************************
- * This file is part of the KDE project                                      *
+ * This file is part of the BlueDevil project                                *
  *                                                                           *
  * Copyright (C) 2010 Rafael Fernández López <ereslibre@kde.org>             *
  * Copyright (C) 2010 UFO Coders <info@ufocoders.com>                        *
@@ -53,7 +53,7 @@
 /*!
  * @page examples Examples
  *
- * @section manager The Manager
+ * @section manager Manager
  *
  * The Manager task is to serve as entry point to the library, being a singleton class. It will also
  * inform about the service state (operational or not), provide the default adapter connected to the
@@ -93,6 +93,46 @@
  * @code
  * #include <bluedevil/bluedevil.h>
  * @endcode
+ *
+ * @section adapter Adapter
+ *
+ * An adapter is a device physically connected to the system. Its main job is to let other devices
+ * discover it as well as discover remote devices.
+ *
+ * As it has been described before, you can have access to the default adapter designated by the
+ * system by asking it to the manager. We can perform a very typical task as discover remote devices.
+ *
+ * @code
+ * Adapter *const adapter = Manager::self()->defaultAdapter();
+ * connect(adapter, SIGNAL(deviceFound(Device*)), this, SLOT(deviceFound(Device*)));
+ * adapter->startDiscovery();
+ * QTimer::singleShot(10000, adapter, SLOT(stopDiscovery())));
+ * @endcode
+ *
+ * This snippet will discover devices for 10 seconds. For each device discovered, the slot
+ * deviceFound() will be called.
+ *
+ * The Adapter API also allows you to set up other Adapter settings such as if the adapter is powered
+ * or not, its visibility, the visibility timeout...
+ *
+ * @section device Device
+ *
+ * This class represents a remote device. This class basically retrieves information, but it is also
+ * possible to set certain properties for this device, such as whether this device is trusted or not,
+ * or blocked, or the local alias for this device.
+ *
+ * We can have a look at the slot deviceFound() that we named early before on the Adapter example:
+ *
+ * @code
+ * void MyClass::deviceFound(Device *device)
+ * {
+ *     qDebug() << "Device found: " << device->name() << " (" << device->address() << ")";
+ *     qDebug() << "\tServices: " << device->UUIDs();
+ * }
+ * @endcode
+ *
+ * The UUIDs are the services supported by this device, so for each found device, we ask (and print)
+ * its name, its hardware address (MAC) and the supported services by this device.
  */
 
 #ifndef BLUEDEVIL_H
