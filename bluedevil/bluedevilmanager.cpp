@@ -121,6 +121,11 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
     if (QDBusConnection::systemBus().isConnected()) {
+        const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
+        if (!adapterPath.isEmpty()) {
+            d->m_defaultAdapter = new Adapter(adapterPath, this);
+            d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
+        }
         const QVariantMap properties = d->m_bluezManagerInterface->GetProperties().value();
         const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
         Q_FOREACH (const QDBusObjectPath &path, adapters) {
@@ -177,7 +182,7 @@ QList<Adapter*> Manager::adapters() const
 
 bool Manager::isBluetoothOperational() const
 {
-    return defaultAdapter() != 0;
+    return QDBusConnection::systemBus().isConnected() && d->m_defaultAdapter;
 }
 
 }

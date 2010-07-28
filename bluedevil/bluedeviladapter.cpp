@@ -399,7 +399,7 @@ QString Adapter::createDevice(const QString &address) const
 
 void Adapter::createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const
 {
-    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(path), options);
+    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(agentPath), options);
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
     connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createPairedDeviceReply(QDBusPendingCallWatcher*)));
 }
