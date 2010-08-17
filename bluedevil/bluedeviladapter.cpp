@@ -104,6 +104,7 @@ void Adapter::Private::fetchProperties()
 void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 {
     Device *const device = new Device(objectPath.path(), Device::DevicePath, m_q);
+    m_devices << device;
     m_devicesMapUBIKey.insert(objectPath.path(), device);
     emit m_q->deviceCreated(device);
 }
@@ -123,6 +124,7 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
 void Adapter::Private::_k_deviceDisappeared(const QString &address)
 {
     Device *const device = m_devicesMap.take(address);
+    m_devices.removeOne(device);
     m_devicesMapUBIKey.remove(m_devicesMapUBIKey.key(device));
     if (device) {
         emit m_q->deviceDisappeared(device);
@@ -133,6 +135,7 @@ void Adapter::Private::_k_deviceDisappeared(const QString &address)
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 {
     Device *const device = m_devicesMapUBIKey.take(objectPath.path());
+    m_devices.removeOne(device);
     m_devicesMap.remove(m_devicesMap.key(device));
     if (device) {
         emit m_q->deviceRemoved(device);
