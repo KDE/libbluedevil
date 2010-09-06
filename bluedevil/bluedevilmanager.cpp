@@ -143,7 +143,7 @@ Manager::~Manager()
     delete d;
 }
 
-Manager* Manager::self()
+Manager *Manager::self()
 {
     if (!instance) {
         instance = new Manager;
