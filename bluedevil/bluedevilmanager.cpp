@@ -121,16 +121,19 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
     if (QDBusConnection::systemBus().isConnected()) {
-        const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
-        if (!adapterPath.isEmpty()) {
-            d->m_defaultAdapter = new Adapter(adapterPath, this);
-            d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
-        }
-        const QVariantMap properties = d->m_bluezManagerInterface->GetProperties().value();
-        const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
-        Q_FOREACH (const QDBusObjectPath &path, adapters) {
-            Adapter *const adapter = new Adapter(path.path(), this);
-            d->m_adaptersHash.insert(path.path(), adapter);
+        const QDBusReply<QDBusObjectPath> reply = d->m_bluezManagerInterface->DefaultAdapter();
+        if (reply.isValid()) {
+            const QString adapterPath = reply.value().path();
+            if (!adapterPath.isEmpty()) {
+                d->m_defaultAdapter = new Adapter(adapterPath, this);
+                d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
+            }
+            const QVariantMap properties = d->m_bluezManagerInterface->GetProperties().value();
+            const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
+            Q_FOREACH (const QDBusObjectPath &path, adapters) {
+                Adapter *const adapter = new Adapter(path.path(), this);
+                d->m_adaptersHash.insert(path.path(), adapter);
+            }
         }
     }
 }
