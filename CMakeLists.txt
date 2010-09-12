@@ -18,8 +18,30 @@ set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
                                   ARCHIVE DESTINATION "${LIB_INSTALL_DIR}" COMPONENT Devel )
 
 
-set(GENERIC_LIB_VERSION "1.5")
+set(GENERIC_LIB_VERSION "1.8")
 set(GENERIC_LIB_SOVERSION "1")
 set(VERSION ${GENERIC_LIB_VERSION})
 
 add_subdirectory(bluedevil)
+
+option(LIBBLUEDEVIL_BUILD_API_DOCS "Build libbluedevil API documentation")
+
+##################  apidox ################################
+if(LIBBLUEDEVIL_BUILD_API_DOCS)
+  find_package(Doxygen)
+
+  if(DOXYGEN_EXECUTABLE)
+    configure_file(${libbluedevil_SOURCE_DIR}/Doxyfile.cmake ${libbluedevil_BINARY_DIR}/Doxyfile)
+
+    if(EXISTS ${QT_DOC_DIR}/html)
+      set(QTDOCS "${QT_DOC_DIR}/html")
+    else(EXISTS ${QT_DOC_DIR}/html)
+      set(QTDOCS "http://doc.trolltech.com/4.3/")
+    endif(EXISTS ${QT_DOC_DIR}/html)
+
+    add_custom_target(
+      apidox ALL
+      COMMAND ${DOXYGEN_EXECUTABLE} Doxyfile
+      COMMAND doc/html/installdox -l qt4.tag@${QTDOCS} doc/html/*.html)
+  endif(DOXYGEN_EXECUTABLE)
+endif(LIBBLUEDEVIL_BUILD_API_DOCS)
