@@ -36,7 +36,7 @@ if(LIBBLUEDEVIL_BUILD_API_DOCS)
     if(EXISTS ${QT_DOC_DIR}/html)
       set(QTDOCS "${QT_DOC_DIR}/html")
     else(EXISTS ${QT_DOC_DIR}/html)
-      set(QTDOCS "http://doc.trolltech.com/4.3/")
+      set(QTDOCS "http://doc.trolltech.com/4.6/")
     endif(EXISTS ${QT_DOC_DIR}/html)
 
     add_custom_target(
