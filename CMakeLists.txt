@@ -31,7 +31,7 @@ if(LIBBLUEDEVIL_BUILD_API_DOCS)
   find_package(Doxygen)
 
   if(DOXYGEN_EXECUTABLE)
-    configure_file(${libbluedevil_SOURCE_DIR}/Doxyfile.cmake ${libbluedevil_BINARY_DIR}/Doxyfile)
+    configure_file(${libbluedevil_SOURCE_DIR}/.Doxyfile.cmake ${libbluedevil_BINARY_DIR}/Doxyfile)
 
     if(EXISTS ${QT_DOC_DIR}/html)
       set(QTDOCS "${QT_DOC_DIR}/html")
