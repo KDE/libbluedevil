@@ -136,7 +136,8 @@ public:
     /**
      * @return The name of the remote device.
      *
-     * @note This request will not trigger a connection to the device.
+     * @note This request will not trigger a connection to the device, unless the name couldn't
+     *       yet be retrieved (is empty).
      */
     QString name() const;
 
@@ -147,7 +148,8 @@ public:
      *
      * @note If the name and the alias are the same, "Name" is returned instead of "Name (Name)".
      *
-     * @note This request will not trigger a connection to the device.
+     * @note This request will not trigger a connection to the device, unless the name couldn't
+     *       yet be retrieved (is empty).
      */
     QString friendlyName() const;
 

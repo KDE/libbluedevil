@@ -26,7 +26,7 @@
 #include "bluedevil/bluezdevice.h"
 
 #include <QtCore/QString>
-#include <QtCore/QThread>
+#include <QtCore/QThreadPool>
 
 #define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
                                       d->fetchProperties();      \
@@ -34,14 +34,31 @@
 
 namespace BlueDevil {
 
+class Task
+    : public QRunnable
+{
+public:
+    Task(Device *device, const char *slot)
+        : m_device(device)
+        , m_slot(slot)
+    {
+    }
+
+    void run() {
+        // We happen to be cool, so asyncCall is called: asyncCall(device, SLOT(method())). This
+        // makes slot to be "1method()", and invokeMethod does not like this, so we have to transform
+        // it to "method".
+        QMetaObject::invokeMethod(m_device, m_slot.mid(1, m_slot.count() - 2).toLatin1().data(), Qt::QueuedConnection);
+    }
+
+private:
+    Device  *m_device;
+    QString  m_slot;
+};
+
 void asyncCall(Device *device, const char *slot)
 {
-    QThread *thread = new QThread(device);
-    QObject::connect(device->parent(), SIGNAL(destroyed(QObject*)), device, SLOT(deleteLater()));
-    device->setParent(0);
-    device->moveToThread(thread);
-    QObject::connect(thread, SIGNAL(started()), device, slot);
-    thread->start();
+    QThreadPool::globalInstance()->start(new Task(device, slot));
 }
 
 /**
@@ -282,11 +299,17 @@ QString Device::address() const
 
 QString Device::name() const
 {
+    if (d->m_name.isEmpty() && !d->_k_ensureDeviceCreated()) {
+        return QString();
+    }
     return d->m_name;
 }
 
 QString Device::friendlyName() const
 {
+    if (d->m_name.isEmpty() && !d->_k_ensureDeviceCreated()) {
+        return QString();
+    }
     if (d->m_alias.isEmpty() || d->m_alias == d->m_name) {
         return d->m_name;
     }

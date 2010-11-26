@@ -111,7 +111,7 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    if (m_devicesMap[address] != 0) {
+    if (m_devicesMap.contains(address)) {
         return;
     }
     Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
@@ -124,9 +124,9 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
 void Adapter::Private::_k_deviceDisappeared(const QString &address)
 {
     Device *const device = m_devicesMap.take(address);
-    m_devices.removeOne(device);
-    m_devicesMapUBIKey.remove(m_devicesMapUBIKey.key(device));
     if (device) {
+        m_devices.removeOne(device);
+        m_devicesMapUBIKey.remove(m_devicesMapUBIKey.key(device));
         emit m_q->deviceDisappeared(device);
         delete device;
     }
@@ -135,9 +135,9 @@ void Adapter::Private::_k_deviceDisappeared(const QString &address)
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
 {
     Device *const device = m_devicesMapUBIKey.take(objectPath.path());
-    m_devices.removeOne(device);
-    m_devicesMap.remove(m_devicesMap.key(device));
     if (device) {
+        m_devices.removeOne(device);
+        m_devicesMap.remove(m_devicesMap.key(device));
         emit m_q->deviceRemoved(device);
         delete device;
     }
@@ -372,6 +372,7 @@ void Adapter::startDiscovery() const
     qDeleteAll(d->m_devicesMap);
     d->m_devicesMap.clear();
     d->m_devicesMapUBIKey.clear();
+    d->m_devices.clear();
     d->m_bluezAdapterInterface->StartDiscovery();
 }
 
