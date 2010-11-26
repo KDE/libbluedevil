@@ -228,11 +228,6 @@ QString Adapter::name() const
     return d->m_name;
 }
 
-void Adapter::setName(const QString &name)
-{
-    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name));
-}
-
 quint32 Adapter::adapterClass() const
 {
     ENSURE_PROPERTIES_FETCHED
@@ -245,20 +240,10 @@ bool Adapter::isPowered() const
     return d->m_powered;
 }
 
-void Adapter::setPowered(bool powered)
-{
-    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered));
-}
-
 bool Adapter::isDiscoverable() const
 {
     ENSURE_PROPERTIES_FETCHED
     return d->m_discoverable;
-}
-
-void Adapter::setDiscoverable(bool discoverable)
-{
-    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable));
 }
 
 bool Adapter::isPairable() const
@@ -267,31 +252,16 @@ bool Adapter::isPairable() const
     return d->m_pairable;
 }
 
-void Adapter::setPairable(bool pairable)
-{
-    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable));
-}
-
 quint32 Adapter::paireableTimeout() const
 {
     ENSURE_PROPERTIES_FETCHED
     return d->m_pairableTimeout;
 }
 
-void Adapter::setPaireableTimeout(quint32 paireableTimeout)
-{
-    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout));
-}
-
 quint32 Adapter::discoverableTimeout() const
 {
     ENSURE_PROPERTIES_FETCHED
     return d->m_discoverableTimeout;
-}
-
-void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
-{
-    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout));
 }
 
 bool Adapter::isDiscovering() const
@@ -303,6 +273,34 @@ bool Adapter::isDiscovering() const
 QList<Device*> Adapter::foundDevices() const
 {
     return d->m_devicesMap.values();
+}
+
+Device *Adapter::deviceForAddress(const QString &address)
+{
+    if (d->m_devicesMap.contains(address)) {
+        return d->m_devicesMap[address];
+    }
+    return new Device(address, Device::DeviceAddress, this);
+}
+
+Device *Adapter::deviceForUBI(const QString &UBI)
+{
+    if (d->m_devicesMapUBIKey.contains(UBI)) {
+        return d->m_devicesMapUBIKey[UBI];
+    }
+    return new Device(UBI, Device::DevicePath, this);
+}
+
+QList<Device*> Adapter::devices()
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_devices;
+}
+
+QStringList Adapter::UUIDs()
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_UUIDs;
 }
 
 void Adapter::registerAgent(const QString &agentPath, RegisterCapability registerCapability)
@@ -334,37 +332,39 @@ void Adapter::unregisterAgent(const QString &agentPath)
     d->m_bluezAdapterInterface->UnregisterAgent(QDBusObjectPath(agentPath));
 }
 
+void Adapter::setName(const QString &name)
+{
+    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name));
+}
+
+void Adapter::setPowered(bool powered)
+{
+    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered));
+}
+
+void Adapter::setDiscoverable(bool discoverable)
+{
+    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable));
+}
+
+void Adapter::setPairable(bool pairable)
+{
+    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable));
+}
+
+void Adapter::setPaireableTimeout(quint32 paireableTimeout)
+{
+    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout));
+}
+
+void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
+{
+    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout));
+}
+
 void Adapter::removeDevice(Device *device)
 {
     d->m_bluezAdapterInterface->RemoveDevice(QDBusObjectPath(device->UBI()));
-}
-
-Device *Adapter::deviceForAddress(const QString &address)
-{
-    if (d->m_devicesMap.contains(address)) {
-        return d->m_devicesMap[address];
-    }
-    return new Device(address, Device::DeviceAddress, this);
-}
-
-Device *Adapter::deviceForUBI(const QString &UBI)
-{
-    if (d->m_devicesMapUBIKey.contains(UBI)) {
-        return d->m_devicesMapUBIKey[UBI];
-    }
-    return new Device(UBI, Device::DevicePath, this);
-}
-
-QList<Device*> Adapter::devices()
-{
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_devices;
-}
-
-QStringList Adapter::UUIDs()
-{
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_UUIDs;
 }
 
 void Adapter::startDiscovery() const

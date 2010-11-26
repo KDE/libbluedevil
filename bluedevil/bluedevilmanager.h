@@ -51,6 +51,11 @@ class BLUEDEVIL_EXPORT Manager
 {
     Q_OBJECT
 
+    Q_PROPERTY(Manager* self READ self)
+    Q_PROPERTY(Adapter* defaultAdapter READ defaultAdapter)
+    Q_PROPERTY(QList<Adapter*> adapters READ adapters)
+    Q_PROPERTY(bool isBluetoothOperational READ isBluetoothOperational)
+
 public:
     virtual ~Manager();
 

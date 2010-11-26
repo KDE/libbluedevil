@@ -311,6 +311,11 @@ bool Device::isPaired() const
     return d->m_paired;
 }
 
+bool Device::isRegistered() const
+{
+    return d->m_bluezDeviceInterface;
+}
+
 QString Device::alias() const
 {
     return d->m_alias;
@@ -319,20 +324,6 @@ QString Device::alias() const
 bool Device::hasLegacyPairing() const
 {
     return d->m_legacyPairing;
-}
-
-bool Device::registerDevice()
-{
-    const bool res = d->_k_ensureDeviceCreated();
-    if (sender()) {
-        emit registerDeviceResult(this, res);
-    }
-    return res;
-}
-
-bool Device::isRegistered() const
-{
-    return d->m_bluezDeviceInterface;
 }
 
 QStringList Device::UUIDs()
@@ -375,14 +366,6 @@ bool Device::isTrusted()
     return d->m_trusted;
 }
 
-void Device::setTrusted(bool trusted)
-{
-    if (!d->_k_ensureDeviceCreated()) {
-        return;
-    }
-    d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted));
-}
-
 bool Device::isBlocked()
 {
     ENSURE_PROPERTIES_FETCHED
@@ -390,6 +373,23 @@ bool Device::isBlocked()
         emit isBlockedResult(this, d->m_blocked);
     }
     return d->m_blocked;
+}
+
+bool Device::registerDevice()
+{
+    const bool res = d->_k_ensureDeviceCreated();
+    if (sender()) {
+        emit registerDeviceResult(this, res);
+    }
+    return res;
+}
+
+void Device::setTrusted(bool trusted)
+{
+    if (!d->_k_ensureDeviceCreated()) {
+        return;
+    }
+    d->m_bluezDeviceInterface->SetProperty("Trusted", QDBusVariant(trusted));
 }
 
 void Device::setBlocked(bool blocked)
