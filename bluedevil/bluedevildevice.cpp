@@ -48,7 +48,7 @@ public:
         // We happen to be cool, so asyncCall is called: asyncCall(device, SLOT(method())). This
         // makes slot to be "1method()", and invokeMethod does not like this, so we have to transform
         // it to "method".
-        QMetaObject::invokeMethod(m_device, m_slot.mid(1, m_slot.count() - 2).toLatin1().data(), Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_device, m_slot.mid(1, m_slot.count() - 3).toLatin1().data(), Qt::QueuedConnection);
     }
 
 private:
@@ -184,6 +184,7 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
         }
         m_adapter->addDeviceWithUBI(devicePath, m_q);
     }
+
     return true;
 }
 
@@ -401,9 +402,7 @@ bool Device::isBlocked()
 bool Device::registerDevice()
 {
     const bool res = d->_k_ensureDeviceCreated();
-    if (sender()) {
-        emit registerDeviceResult(this, res);
-    }
+    emit registerDeviceResult(this, res);
     return res;
 }
 

@@ -406,19 +406,23 @@ void Adapter::stopDiscovery() const
 QString Adapter::findDevice(const QString &address) const
 {
     QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->FindDevice(address);
-    res.waitForFinished();
-    if (res.isValid()) {
-        return res.value().path();
-    }
-    return QString();
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
+    watcher->waitForFinished();
+    return res.value().path();
 }
 
 QString Adapter::createDevice(const QString &address) const
 {
     QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreateDevice(address);
-    res.waitForFinished();
-    if (res.isValid()) {
-        return res.value().path();
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
+    watcher->waitForFinished();
+    const QString ret = res.value().path();
+    if (!ret.isEmpty()) {
+        return ret;
+    }
+    const QString lastCall = findDevice(address);
+    if (!lastCall.isEmpty()) {
+        return lastCall;
     }
     return QString();
 }
