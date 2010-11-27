@@ -88,6 +88,22 @@ class BLUEDEVIL_EXPORT Device
 {
     Q_OBJECT
 
+    Q_PROPERTY(Adapter* adapter READ adapter)
+    Q_PROPERTY(QString address READ address)
+    Q_PROPERTY(QString name READ name)
+    Q_PROPERTY(QString friendlyName READ friendlyName)
+    Q_PROPERTY(QString icon READ icon)
+    Q_PROPERTY(quint32 deviceClass READ deviceClass)
+    Q_PROPERTY(bool isPaired READ isPaired)
+    Q_PROPERTY(bool isRegistered READ isRegistered)
+    Q_PROPERTY(QString alias READ alias WRITE setAlias)
+    Q_PROPERTY(bool hasLegacyPairing READ hasLegacyPairing)
+    Q_PROPERTY(QStringList UUIDs READ UUIDs)
+    Q_PROPERTY(QString UBI READ UBI)
+    Q_PROPERTY(bool isConnected READ isConnected)
+    Q_PROPERTY(bool trusted READ isTrusted WRITE setTrusted)
+    Q_PROPERTY(bool blocked READ isBlocked WRITE setBlocked)
+
     friend class Adapter;
 
 public:
@@ -120,7 +136,8 @@ public:
     /**
      * @return The name of the remote device.
      *
-     * @note This request will not trigger a connection to the device.
+     * @note This request will not trigger a connection to the device, unless the name couldn't
+     *       yet be retrieved (is empty).
      */
     QString name() const;
 
@@ -131,7 +148,8 @@ public:
      *
      * @note If the name and the alias are the same, "Name" is returned instead of "Name (Name)".
      *
-     * @note This request will not trigger a connection to the device.
+     * @note This request will not trigger a connection to the device, unless the name couldn't
+     *       yet be retrieved (is empty).
      */
     QString friendlyName() const;
 
@@ -176,24 +194,6 @@ public:
      * @note This request will not trigger a connection to the device.
      */
     bool hasLegacyPairing() const;
-
-public Q_SLOTS:
-    /**
-     * It is not mandatory to call to this method. If you are just retrieving some information that
-     * will not trigger a connection to the device, and you do not need to check if some properties
-     * were updated, please do not call to this method, since it is expensive (it will force a
-     * registration of the device on the bus).
-     *
-     * On the other hand, if what you want is to receive signals of properties being updated and
-     * you have not called a method that triggers a connection to the device, you should explicitly
-     * call to this method, so the device is registered.
-     *
-     * @return Whether it was possible to correctly register this remote device on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. registerDeviceResult
-     *       signal will be emitted with the result.
-     */
-    bool registerDevice();
 
     /**
      * @return The list of supported services by the remote device always in uppercase.
@@ -241,16 +241,6 @@ public Q_SLOTS:
     bool isTrusted();
 
     /**
-     * Sets whether this remote device is trusted or not.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall.
-     */
-    void setTrusted(bool trusted);
-
-    /**
      * @return Whether this remote device is blocked or not.
      *
      * @note This request will trigger a connection to the device with the consequent registration
@@ -260,6 +250,34 @@ public Q_SLOTS:
      *       signal will be emitted with the result.
      */
     bool isBlocked();
+
+public Q_SLOTS:
+    /**
+     * It is not mandatory to call to this method. If you are just retrieving some information that
+     * will not trigger a connection to the device, and you do not need to check if some properties
+     * were updated, please do not call to this method, since it is expensive (it will force a
+     * registration of the device on the bus).
+     *
+     * On the other hand, if what you want is to receive signals of properties being updated and
+     * you have not called a method that triggers a connection to the device, you should explicitly
+     * call to this method, so the device is registered.
+     *
+     * @return Whether it was possible to correctly register this remote device on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall. registerDeviceResult
+     *       signal will be emitted with the result.
+     */
+    bool registerDevice();
+
+    /**
+     * Sets whether this remote device is trusted or not.
+     *
+     * @note This request will trigger a connection to the device with the consequent registration
+     *       on the bus.
+     *
+     * @note Allows being called with the asynchronous API through asyncCall.
+     */
+    void setTrusted(bool trusted);
 
     /**
      * Sets whether this remote device is blocked or not.

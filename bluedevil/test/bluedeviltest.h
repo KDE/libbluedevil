@@ -25,8 +25,6 @@
 
 #include <QtCore/QObject>
 
-#define ASYNCHRONOUS_API
-
 namespace BlueDevil {
     class Adapter;
     class Device;
@@ -47,10 +45,8 @@ public:
 
 public Q_SLOTS:
     void deviceFound(Device *device);
+    void devicePropertyChanged(const QString &property, const QVariant &value);
     void adapterAdded(Adapter *adapter);
-#ifdef ASYNCHRONOUS_API
-    void deviceRegistered(Device *device, bool registered);
-#endif
 };
 
 #endif // BLUEDEVILTEST_H

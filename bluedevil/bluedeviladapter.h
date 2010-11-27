@@ -48,8 +48,28 @@ class BLUEDEVIL_EXPORT Adapter
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString address READ address)
+    Q_PROPERTY(QString name READ name WRITE setName)
+    Q_PROPERTY(quint32 adapterClass READ adapterClass)
+    Q_PROPERTY(bool powered READ isPowered WRITE setPowered)
+    Q_PROPERTY(bool discoverable READ isDiscoverable WRITE setDiscoverable)
+    Q_PROPERTY(bool pairable READ isPairable WRITE setPairable)
+    Q_PROPERTY(quint32 paireableTimeout READ paireableTimeout WRITE setPaireableTimeout)
+    Q_PROPERTY(quint32 discoverableTimeout READ discoverableTimeout WRITE setDiscoverableTimeout)
+    Q_PROPERTY(bool isDiscovering READ isDiscovering)
+    Q_PROPERTY(QList<Device*> foundDevices READ foundDevices)
+    Q_PROPERTY(QList<Device*> devices READ devices)
+    Q_PROPERTY(QStringList UUIDs READ UUIDs)
+
     friend class Manager;
     friend class Device;
+
+    enum RegisterCapability {
+        DisplayOnly = 0,
+        DisplayYesNo = 1,
+        KeyboardOnly = 2,
+        NoInputNoOutput = 3
+    };
 
 public:
     virtual ~Adapter();
@@ -65,13 +85,6 @@ public:
     QString name() const;
 
     /**
-     * Sets the name of this adapter to @p name.
-     *
-     * This is the friendly name of the adapter.
-     */
-    void setName(const QString &name);
-
-    /**
      * @return The class of the adapter.
      */
     quint32 adapterClass() const;
@@ -82,19 +95,9 @@ public:
     bool isPowered() const;
 
     /**
-     * Sets whether this adapter is consuming energy or not.
-     */
-    void setPowered(bool powered);
-
-    /**
      * @return Whether this adapter is discoverable or not.
      */
     bool isDiscoverable() const;
-
-    /**
-     * Sets whether this adapter is discoverable or not.
-     */
-    void setDiscoverable(bool discoverable);
 
     /**
      * @return Whether this adapter is pairable or not.
@@ -102,33 +105,14 @@ public:
     bool isPairable() const;
 
     /**
-     * Sets whether this adapter is pairable or not.
-     */
-    void setPairable(bool pairable);
-
-    /**
      * @return The timeout for the pairing process for this adapter in seconds.
      */
     quint32 paireableTimeout() const;
 
     /**
-     * Sets the timeout for the pairing process for this adapter in seconds.
-     *
-     * @note A @p paireableTimeout of 0 means that this adapter can be paired forever.
-     */
-    void setPaireableTimeout(quint32 paireableTimeout);
-
-    /**
      * @return The timeout for this adapter to be discovered in seconds.
      */
     quint32 discoverableTimeout() const;
-
-    /**
-     * Sets the timeout for this adapter to be discovered in seconds.
-     *
-     * @note A @p discoverableTimeout of 0 means that this adapter can be discovered forever.
-     */
-    void setDiscoverableTimeout(quint32 discoverableTimeout);
 
     /**
      * @return Whether this adapter is discovering at the moment or not.
@@ -139,27 +123,6 @@ public:
      * @return A list with all found devices on the discovery phase.
      */
     QList<Device*> foundDevices() const;
-
-    enum RegisterCapability {
-        DisplayOnly = 0,
-        DisplayYesNo = 1,
-        KeyboardOnly = 2,
-        NoInputNoOutput = 3
-    };
-    /**
-     * Registers agent.
-     */
-    void registerAgent(const QString &agentPath, RegisterCapability registerCapability);
-
-    /**
-     * Unregisters agent.
-     */
-    void unregisterAgent(const QString &agentPath);
-
-    /**
-     * Removes device.
-     */
-    void removeDevice(Device *device);
 
     /**
      * @return A device defined by its hardware address.
@@ -184,9 +147,74 @@ public:
 
 public Q_SLOTS:
     /**
+     * Registers agent.
+     */
+    void registerAgent(const QString &agentPath, RegisterCapability registerCapability);
+
+    /**
+     * Unregisters agent.
+     */
+    void unregisterAgent(const QString &agentPath);
+
+    /**
+     * Sets the name of this adapter to @p name.
+     *
+     * This is the friendly name of the adapter.
+     */
+    void setName(const QString &name);
+
+    /**
+     * Sets whether this adapter is consuming energy or not.
+     */
+    void setPowered(bool powered);
+
+    /**
+     * Sets whether this adapter is discoverable or not.
+     */
+    void setDiscoverable(bool discoverable);
+
+    /**
+     * Sets whether this adapter is pairable or not.
+     */
+    void setPairable(bool pairable);
+
+    /**
+     * Sets the timeout for the pairing process for this adapter in seconds.
+     *
+     * @note A @p paireableTimeout of 0 means that this adapter can be paired forever.
+     */
+    void setPaireableTimeout(quint32 paireableTimeout);
+
+    /**
+     * Sets the timeout for this adapter to be discovered in seconds.
+     *
+     * @note A @p discoverableTimeout of 0 means that this adapter can be discovered forever.
+     */
+    void setDiscoverableTimeout(quint32 discoverableTimeout);
+
+    /**
+     * Removes device.
+     */
+    void removeDevice(Device *device);
+
+    /**
      * Starts device discovery. deviceFound signal will be emitted for each device found.
+     *
+     * @note It is possible that when discovering devices appear back and forth. This call will also
+     *       allow the adapter to signal when devices have disappeared when discovering, what could
+     *       not be exactly what you want. If the desired behavior is to only be notified of new
+     *       discovered devices, please see startStableDiscovery.
      */
     void startDiscovery() const;
+
+    /**
+     * Starts device discovery. deviceFound signal will be emitted for each device found.
+     *
+     * @note This discovery type will never trigger deviceDisappeared signal while discovering, so
+     *       you will only get deviceFound signals emitted. This also ensures that you will never get
+     *       deviceFound repeated emissions for the same devices, in this sense is more stable.
+     */
+    void startStableDiscovery() const;
 
     /**
      * Stops device discovery.
