@@ -41,6 +41,7 @@ public:
     ~Private();
 
     void fetchProperties();
+    void startDiscovery();
 
     void _k_deviceCreated(const QDBusObjectPath &objectPath);
     void _k_deviceFound(const QString &address, const QVariantMap &map);
@@ -52,6 +53,7 @@ public:
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QMap<QString, Device*>    m_devicesMap;
     QMap<QString, Device*>    m_devicesMapUBIKey;
+    QStringList               m_knownDevices;
 
     // Bluez cached properties
     QString        m_address;
@@ -66,12 +68,14 @@ public:
     QList<Device*> m_devices;
     QStringList    m_UUIDs;
     bool           m_propertiesFetched;
+    bool           m_stableDiscovering;
 
     Adapter *const m_q;
 };
 
 Adapter::Private::Private(Adapter *q)
     : m_propertiesFetched(false)
+    , m_stableDiscovering(false)
     , m_q(q)
 {
 }
@@ -101,6 +105,16 @@ void Adapter::Private::fetchProperties()
     m_propertiesFetched = true;
 }
 
+void Adapter::Private::startDiscovery()
+{
+    qDeleteAll(m_devicesMap);
+    m_devicesMap.clear();
+    m_devicesMapUBIKey.clear();
+    m_knownDevices.clear();
+    m_devices.clear();
+    m_bluezAdapterInterface->StartDiscovery();
+}
+
 void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 {
     Device *const device = new Device(objectPath.path(), Device::DevicePath, m_q);
@@ -111,18 +125,22 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    if (m_devicesMap.contains(address)) {
+    if (m_devicesMap.contains(address) || (m_stableDiscovering && m_knownDevices.contains(address))) {
         return;
     }
     Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
                                       map["Icon"].toString(), map["LegacyPairing"].toBool(),
                                       map["Name"].toString(), map["Paired"].toBool(), m_q);
     m_devicesMap.insert(address, device);
+    m_knownDevices << address;
     emit m_q->deviceFound(device);
 }
 
 void Adapter::Private::_k_deviceDisappeared(const QString &address)
 {
+    if (m_stableDiscovering) {
+        return;
+    }
     Device *const device = m_devicesMap.take(address);
     if (device) {
         m_devices.removeOne(device);
@@ -369,15 +387,19 @@ void Adapter::removeDevice(Device *device)
 
 void Adapter::startDiscovery() const
 {
-    qDeleteAll(d->m_devicesMap);
-    d->m_devicesMap.clear();
-    d->m_devicesMapUBIKey.clear();
-    d->m_devices.clear();
-    d->m_bluezAdapterInterface->StartDiscovery();
+    d->m_stableDiscovering = false;
+    d->startDiscovery();
+}
+
+void Adapter::startStableDiscovery() const
+{
+    d->m_stableDiscovering = true;
+    d->startDiscovery();
 }
 
 void Adapter::stopDiscovery() const
 {
+    d->m_stableDiscovering = false;
     d->m_bluezAdapterInterface->StopDiscovery();
 }
 

@@ -199,8 +199,22 @@ public Q_SLOTS:
 
     /**
      * Starts device discovery. deviceFound signal will be emitted for each device found.
+     *
+     * @note It is possible that when discovering devices appear back and forth. This call will also
+     *       allow the adapter to signal when devices have disappeared when discovering, what could
+     *       not be exactly what you want. If the desired behavior is to only be notified of new
+     *       discovered devices, please see startStableDiscovery.
      */
     void startDiscovery() const;
+
+    /**
+     * Starts device discovery. deviceFound signal will be emitted for each device found.
+     *
+     * @note This discovery type will never trigger deviceDisappeared signal while discovering, so
+     *       you will only get deviceFound signals emitted. This also ensures that you will never get
+     *       deviceFound repeated emissions for the same devices, in this sense is more stable.
+     */
+    void startStableDiscovery() const;
 
     /**
      * Stops device discovery.
