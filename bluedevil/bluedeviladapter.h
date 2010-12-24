@@ -64,6 +64,8 @@ class BLUEDEVIL_EXPORT Adapter
     friend class Manager;
     friend class Device;
 
+public:
+
     enum RegisterCapability {
         DisplayOnly = 0,
         DisplayYesNo = 1,
@@ -71,7 +73,6 @@ class BLUEDEVIL_EXPORT Adapter
         NoInputNoOutput = 3
     };
 
-public:
     virtual ~Adapter();
 
     /**
