@@ -75,7 +75,14 @@ public:
      * @return The default adapter. NULL if there is no default adapter or the system is not ready
      *         (the bus is not accessible or there is no Bluetooth system running).
      */
-    Adapter *defaultAdapter();
+    Adapter *defaultAdapter() const;
+
+    /**
+     * @return The default adapter if present. Otherwise it will return the first adapter that is
+     *         ready to be used (is powered). If there are no usable adapters, NULL will be
+     *         returned.
+     */
+    Adapter *usableAdapter() const;
 
     /**
      * @return A list with all the connected adapters.

@@ -163,7 +163,7 @@ void Manager::release()
     instance = 0;
 }
 
-Adapter *Manager::defaultAdapter()
+Adapter *Manager::defaultAdapter() const
 {
     if (!QDBusConnection::systemBus().isConnected()) {
         return 0;
@@ -172,12 +172,26 @@ Adapter *Manager::defaultAdapter()
     if (!d->m_defaultAdapter) {
         const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
         if (!adapterPath.isEmpty()) {
-            d->m_defaultAdapter = new Adapter(adapterPath, this);
+            d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
             d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
         }
     }
 
     return d->m_defaultAdapter;
+}
+
+Adapter *Manager::usableAdapter() const
+{
+    Adapter *const defAdapter = defaultAdapter();
+    if (defAdapter) {
+        return defAdapter;
+    }
+    Q_FOREACH (Adapter *const adapter, adapters()) {
+        if (adapter->isPowered()) {
+            return adapter;
+        }
+    }
+    return 0;
 }
 
 QList<Adapter*> Manager::adapters() const
