@@ -231,7 +231,7 @@ void Manager::release()
     instance = 0;
 }
 
-Adapter *Manager::defaultAdapter() const
+Adapter *Manager::defaultAdapter()
 {
     if (!QDBusConnection::systemBus().isConnected() || !d->m_bluezServiceRunning) {
         return 0;
