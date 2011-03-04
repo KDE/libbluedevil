@@ -153,6 +153,8 @@ private:
     Q_PRIVATE_SLOT(d, void _k_adapterRemoved(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_defaultAdapterChanged(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
+    Q_PRIVATE_SLOT(d, void _k_bluezServiceRegistered())
+    Q_PRIVATE_SLOT(d, void _k_bluezServiceUnregistered())
 };
 
 }
