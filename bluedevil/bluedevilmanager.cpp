@@ -170,6 +170,13 @@ Manager::Manager(QObject *parent)
     : QObject(parent)
     , d(new Private(this))
 {
+    // Keep an eye open if bluez stops running
+    QDBusServiceWatcher *const watcher = new QDBusServiceWatcher("org.bluez", QDBusConnection::systemBus(),
+                                                                 QDBusServiceWatcher::WatchForRegistration |
+                                                                 QDBusServiceWatcher::WatchForUnregistration, this);
+    connect(watcher, SIGNAL(serviceRegistered(QString)), this, SLOT(_k_bluezServiceRegistered()));
+    connect(watcher, SIGNAL(serviceUnregistered(QString)), this, SLOT(_k_bluezServiceUnregistered()));
+
     d->m_bluezManagerInterface = new OrgBluezManagerInterface("org.bluez", "/", QDBusConnection::systemBus(), this);
 
     connect(d->m_bluezManagerInterface, SIGNAL(AdapterAdded(QDBusObjectPath)),
@@ -180,15 +187,6 @@ Manager::Manager(QObject *parent)
             this, SLOT(_k_defaultAdapterChanged(QDBusObjectPath)));
     connect(d->m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
-
-    // Keep an eye open if bluez stops running
-    QDBusServiceWatcher *const watcher = new QDBusServiceWatcher("org.bluez", QDBusConnection::systemBus(),
-                                                                 QDBusServiceWatcher::WatchForRegistration |
-                                                                 QDBusServiceWatcher::WatchForUnregistration, this);
-    connect(watcher, SIGNAL(serviceRegistered(QString)),
-            this, SLOT(_k_bluezServiceRegistered()));
-    connect(watcher, SIGNAL(serviceUnregistered(QString)),
-            this, SLOT(_k_bluezServiceUnregistered()));
 
     if (QDBusConnection::systemBus().isConnected() && d->m_bluezServiceRunning) {
         QString defaultAdapterPath;
