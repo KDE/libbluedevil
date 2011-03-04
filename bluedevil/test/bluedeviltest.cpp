@@ -24,7 +24,7 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
-#include <QtGui/QApplication>
+#include <QtCore/QCoreApplication>
 
 #include <bluedevil/bluedeviladapter.h>
 #include <bluedevil/bluedevilmanager.h>
@@ -93,7 +93,7 @@ static void stopDiscovering()
 
 int main(int argc, char **argv)
 {
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
     qAddPostRoutine(stopDiscovering);
 

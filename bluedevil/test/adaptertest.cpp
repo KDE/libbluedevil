@@ -23,7 +23,7 @@
 #include "adaptertest.h"
 
 #include <QtCore/QDebug>
-#include <QtGui/QApplication>
+#include <QtCore/QCoreApplication>
 
 #include <bluedevil/bluedeviladapter.h>
 #include <bluedevil/bluedevilmanager.h>
@@ -98,7 +98,7 @@ void AdapterTest::run()
 
 int main(int argc, char **argv)
 {
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
     qDebug() << "Looping until stopped";
 
