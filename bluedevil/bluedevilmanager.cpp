@@ -37,6 +37,8 @@ public:
     Private(Manager *q);
     ~Private();
 
+    Adapter *findUsableAdapter();
+
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
     void _k_adapterRemoved(const QDBusObjectPath &objectPath);
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
@@ -44,6 +46,7 @@ public:
 
     OrgBluezManagerInterface *m_bluezManagerInterface;
     Adapter                  *m_defaultAdapter;
+    Adapter                  *m_usableAdapter;
     QHash<QString, Adapter*>  m_adaptersHash;
 
     Manager *const m_q;
@@ -51,6 +54,7 @@ public:
 
 Manager::Private::Private(Manager *q)
     : m_defaultAdapter(0)
+    , m_usableAdapter(0)
     , m_q(q)
 {
 }
@@ -58,6 +62,22 @@ Manager::Private::Private(Manager *q)
 Manager::Private::~Private()
 {
     delete m_bluezManagerInterface;
+}
+
+Adapter *Manager::Private::findUsableAdapter()
+{
+    Adapter *const defAdapter = m_q->defaultAdapter();
+    if (defAdapter && defAdapter->isPowered()) {
+        m_usableAdapter = defAdapter;
+        return defAdapter;
+    }
+    Q_FOREACH (Adapter *const adapter, m_q->adapters()) {
+        if (adapter->isPowered()) {
+            m_usableAdapter = adapter;
+            return adapter;
+        }
+    }
+    return 0;
 }
 
 void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
@@ -68,6 +88,13 @@ void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
         m_defaultAdapter = adapter;
     }
     emit m_q->adapterAdded(adapter);
+    if (!m_usableAdapter || !m_usableAdapter->isPowered()) {
+        Adapter *const oldUsableAdapter = m_usableAdapter;
+        Adapter *const usableAdapter = findUsableAdapter();
+        if (usableAdapter != oldUsableAdapter) {
+            emit m_q->usableAdapterChanged(usableAdapter);
+        }
+    }
 }
 
 void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
@@ -83,6 +110,14 @@ void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
     if (m_adaptersHash.isEmpty()) {
         emit m_q->defaultAdapterChanged(0);
         emit m_q->allAdaptersRemoved();
+    } else {
+        if (m_usableAdapter) {
+            Adapter *const oldUsableAdapter = m_usableAdapter;
+            Adapter *const usableAdapter = findUsableAdapter();
+            if (usableAdapter != oldUsableAdapter) {
+                emit m_q->usableAdapterChanged(usableAdapter);
+            }
+        }
     }
 }
 
@@ -182,16 +217,10 @@ Adapter *Manager::defaultAdapter() const
 
 Adapter *Manager::usableAdapter() const
 {
-    Adapter *const defAdapter = defaultAdapter();
-    if (defAdapter) {
-        return defAdapter;
+    if (d->m_usableAdapter && d->m_usableAdapter->isPowered()) {
+        return d->m_usableAdapter;
     }
-    Q_FOREACH (Adapter *const adapter, adapters()) {
-        if (adapter->isPowered()) {
-            return adapter;
-        }
-    }
-    return 0;
+    return d->findUsableAdapter();
 }
 
 QList<Adapter*> Manager::adapters() const
@@ -205,7 +234,7 @@ QList<Adapter*> Manager::adapters() const
 
 bool Manager::isBluetoothOperational() const
 {
-    return QDBusConnection::systemBus().isConnected() && d->m_defaultAdapter;
+    return QDBusConnection::systemBus().isConnected() && usableAdapter();
 }
 
 }

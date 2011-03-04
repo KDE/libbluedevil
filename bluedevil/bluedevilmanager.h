@@ -78,9 +78,9 @@ public:
     Adapter *defaultAdapter() const;
 
     /**
-     * @return The default adapter if present. Otherwise it will return the first adapter that is
-     *         ready to be used (is powered). If there are no usable adapters, NULL will be
-     *         returned.
+     * @return The default adapter if present and ready to be used. Otherwise it will return
+     *         the first adapter that is ready to be used (is powered). If there are no usable
+     *         adapters, NULL will be returned.
      */
     Adapter *usableAdapter() const;
 
@@ -117,6 +117,23 @@ Q_SIGNALS:
      * when all adapters have been removed, placing 0 at @p adapter.
      */
     void defaultAdapterChanged(Adapter *adapter);
+
+    /**
+     * This signal will be emitted when the current usable adapter has changed. This basically
+     * means two cases:
+     *
+     *     - There were no usable adapters (powered off, or not present), and a new one has been
+     *       connected and is powered on.
+     *     - The adapter that was considered usable has been removed or powered off.
+     *
+     * If any of those cases happen, and it was possible to find a usable adapter, this signal
+     * will report the new adapter. If no usable adapter could be found, 0 will be placed at @p
+     * adapter.
+     *
+     * @note Default adapter will be always given priority. This is, the first adapter that is
+     *       checked to be usable is the default one (if present).
+     */
+    void usableAdapterChanged(Adapter *adapter);
 
     /**
      * This signal will be emitted when all adapters have been disconnected.
