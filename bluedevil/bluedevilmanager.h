@@ -75,7 +75,7 @@ public:
      * @return The default adapter. NULL if there is no default adapter or the system is not ready
      *         (the bus is not accessible or there is no Bluetooth system running).
      */
-    Adapter *defaultAdapter() const;
+    Adapter *defaultAdapter();
 
     /**
      * @return The default adapter if present and ready to be used. Otherwise it will return
@@ -153,6 +153,8 @@ private:
     Q_PRIVATE_SLOT(d, void _k_adapterRemoved(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_defaultAdapterChanged(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
+    Q_PRIVATE_SLOT(d, void _k_bluezServiceRegistered())
+    Q_PRIVATE_SLOT(d, void _k_bluezServiceUnregistered())
 };
 
 }
