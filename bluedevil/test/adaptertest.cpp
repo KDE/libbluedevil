@@ -103,6 +103,14 @@ int main(int argc, char **argv)
     qDebug() << "Looping until stopped";
 
     AdapterTest *const adapterTest = new AdapterTest;
+
+    Manager *const manager = Manager::self();
+    QObject::connect(manager, SIGNAL(adapterAdded(Adapter*)), adapterTest, SLOT(adapterAdded(Adapter*)));
+    QObject::connect(manager, SIGNAL(adapterRemoved(Adapter*)), adapterTest, SLOT(adapterRemoved(Adapter*)));
+    QObject::connect(manager, SIGNAL(defaultAdapterChanged(Adapter*)), adapterTest, SLOT(defaultAdapterChanged(Adapter*)));
+    QObject::connect(manager, SIGNAL(usableAdapterChanged(Adapter*)), adapterTest, SLOT(usableAdapterChanged(Adapter*)));
+    QObject::connect(manager, SIGNAL(allAdaptersRemoved()), adapterTest, SLOT(allAdaptersRemoved()));
+
     adapterTest->start();
 
     return app.exec();
