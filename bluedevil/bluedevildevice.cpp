@@ -422,7 +422,7 @@ void Device::setBlocked(bool blocked)
     d->m_bluezDeviceInterface->SetProperty("Blocked", QDBusVariant(blocked));
 }
 
-void Device::setAlias(const QString& alias)
+void Device::setAlias(const QString &alias)
 {
     if (!d->_k_ensureDeviceCreated()) {
         return;
