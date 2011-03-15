@@ -48,7 +48,7 @@ public:
         // We happen to be cool, so asyncCall is called: asyncCall(device, SLOT(method())). This
         // makes slot to be "1method()", and invokeMethod does not like this, so we have to transform
         // it to "method".
-        QMetaObject::invokeMethod(m_device, m_slot.mid(1, m_slot.count() - 3).toLatin1().data(), Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_device, m_slot.mid(1, m_slot.count() - 3).toLatin1().data(), Qt::DirectConnection);
     }
 
 private:
