@@ -120,18 +120,16 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    if (m_devicesMap.contains(address)) {
-        Device *const device = m_devicesMap[address];
-        if (device) {
-            device->setProperties(map);
-        }
+    Device *const device = m_devicesMap[address];
+    if (device) {
+        device->setProperties(map);
         return;
     }
-    Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
-                                      map["Icon"].toString(), map["LegacyPairing"].toBool(),
-                                      map["Name"].toString(), map["Paired"].toBool(), m_q);
-    m_devicesMap.insert(address, device);
-    emit m_q->deviceFound(device);
+    Device *const newDevice = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
+                                         map["Icon"].toString(), map["LegacyPairing"].toBool(),
+                                         map["Name"].toString(), map["Paired"].toBool(), m_q);
+    m_devicesMap.insert(address, newDevice);
+    emit m_q->deviceFound(newDevice);
 }
 
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
