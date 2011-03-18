@@ -63,10 +63,16 @@ Manager::Private::Private(Manager *q)
     : m_bluezManagerInterface(0)
     , m_defaultAdapter(0)
     , m_usableAdapter(0)
-    , m_bluezServiceRunning(QDBusConnection::systemBus().isConnected() &&
-                            QDBusConnection::systemBus().interface()->isServiceRegistered("org.bluez").value())
     , m_q(q)
 {
+    m_bluezServiceRunning = false;
+    if (QDBusConnection::systemBus().isConnected()) {
+        QDBusReply<bool> reply = QDBusConnection::systemBus().interface()->isServiceRegistered("org.bluez");
+
+	if (reply.isValid()) {
+	    m_bluezServiceRunning = reply.value();
+	}
+    }
 }
 
 Manager::Private::~Private()
