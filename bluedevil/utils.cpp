@@ -20,7 +20,7 @@
  * Boston, MA 02110-1301, USA.                                               *
  *****************************************************************************/
 
-#include "bluedevilutils.h"
+#include "utils.h"
 
 #include <QtCore/QString>
 

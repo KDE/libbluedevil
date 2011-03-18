@@ -33,7 +33,7 @@ namespace BlueDevil {
 class Adapter;
 
 /**
- * @class Manager bluedevilmanager.h bluedevil/bluedevilmanager.h
+ * @class Manager manager.h bluedevil/manager.h
  *
  * Manager class. The entry point to BlueDevil exposed services.
  *

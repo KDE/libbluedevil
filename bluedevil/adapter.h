@@ -35,7 +35,7 @@ class Device;
 class Manager;
 
 /**
- * @class Adapter bluedeviladapter.h bluedevil/bluedeviladapter.h
+ * @class Adapter adapter.h bluedevil/adapter.h
  *
  * This class represents an adapter.
  *

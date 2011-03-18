@@ -25,9 +25,9 @@
 #include <QtCore/QDebug>
 #include <QtCore/QCoreApplication>
 
-#include <bluedevil/bluedeviladapter.h>
-#include <bluedevil/bluedevilmanager.h>
-#include <bluedevil/bluedevildevice.h>
+#include <bluedevil/adapter.h>
+#include <bluedevil/manager.h>
+#include <bluedevil/device.h>
 
 using namespace BlueDevil;
 

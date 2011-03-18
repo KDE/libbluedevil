@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.                                               *
  *****************************************************************************/
 
-#include "bluedevilmanager.h"
-#include "bluedeviladapter.h"
+#include "manager.h"
+#include "adapter.h"
 
 #include "bluedevil/bluezmanager.h"
 
@@ -294,4 +294,4 @@ bool Manager::isBluetoothOperational() const
 
 }
 
-#include "bluedevilmanager.moc"
+#include "manager.moc"

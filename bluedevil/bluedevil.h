@@ -68,7 +68,7 @@
  * In order to include the Manager API, you have to perform:
  *
  * @code
- * #include <bluedevil/bluedevilmanager.h>
+ * #include <bluedevil/manager.h>
  * @endcode
  *
  * So, all the dance usually starts as:
@@ -138,9 +138,9 @@
 #ifndef BLUEDEVIL_H
 #define BLUEDEVIL_H
 
-#include <bluedevil/bluedevildevice.h>
-#include <bluedevil/bluedeviladapter.h>
-#include <bluedevil/bluedevilmanager.h>
-#include <bluedevil/bluedevilutils.h>
+#include <bluedevil/device.h>
+#include <bluedevil/adapter.h>
+#include <bluedevil/manager.h>
+#include <bluedevil/utils.h>
 
 #endif // BLUEDEVIL_H

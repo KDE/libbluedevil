@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.                                               *
  *****************************************************************************/
 
-#include "bluedevildevice.h"
-#include "bluedeviladapter.h"
+#include "device.h"
+#include "adapter.h"
 
 #include "bluedevil/bluezdevice.h"
 
@@ -468,5 +468,5 @@ void Device::setProperties(const QVariantMap &properties)
 
 }
 
-#include "bluedevildevice.moc"
+#include "device.moc"
 

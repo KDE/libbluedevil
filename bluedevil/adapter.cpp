@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.                                               *
  *****************************************************************************/
 
-#include "bluedeviladapter.h"
-#include "bluedevildevice.h"
+#include "adapter.h"
+#include "device.h"
 
 #include "bluedevil/bluezadapter.h"
 
@@ -416,4 +416,4 @@ void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)
 
 }
 
-#include "bluedeviladapter.moc"
+#include "adapter.moc"

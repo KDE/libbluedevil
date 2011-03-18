@@ -24,7 +24,7 @@
 #define BLUEDEVILDEVICE_H
 
 #include <bluedevil/bluedevil_export.h>
-#include <bluedevil/bluedeviladapter.h>
+#include <bluedevil/adapter.h>
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -62,7 +62,7 @@ typedef QMap<quint32, QString> QUInt32StringMap;
 class Adapter;
 
 /**
- * @class Device bluedevildevice.h bluedevil/bluedevildevice.h
+ * @class Device device.h bluedevil/device.h
  *
  * This class represents a remote device, discovered by an Adapter.
  *
