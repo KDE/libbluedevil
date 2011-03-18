@@ -125,6 +125,7 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
+    emit m_q->deviceFound(map);
     if (m_devicesMap.contains(address) || (m_stableDiscovering && m_knownDevices.contains(address))) {
         return;
     }

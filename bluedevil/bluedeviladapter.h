@@ -224,6 +224,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void deviceFound(Device *device);
+    void deviceFound(const QVariantMap &info); // ###: Remove on new version
     void deviceDisappeared(Device *device);
     void deviceCreated(Device *device);
     void deviceRemoved(Device *device);
