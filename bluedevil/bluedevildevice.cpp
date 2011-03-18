@@ -28,10 +28,6 @@
 #include <QtCore/QString>
 #include <QtCore/QThreadPool>
 
-#define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
-                                      d->fetchProperties();      \
-                                  }
-
 namespace BlueDevil {
 
 class Task
@@ -72,8 +68,6 @@ public:
     Private(Device *q);
     ~Private();
 
-    void fetchProperties();
-
     bool _k_ensureDeviceCreated(const QString &busDevicePath = QString());
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
@@ -92,7 +86,6 @@ public:
     bool        m_blocked;
     QString     m_alias;
     bool        m_legacyPairing;
-    bool        m_propertiesFetched;
     bool        m_registrationOnBusRejected; // used for avoid trying to register this device more
                                              // than one time on the bus.
 
@@ -113,7 +106,6 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
     , m_trusted(false)
     , m_blocked(false)
     , m_legacyPairing(legacyPairing)
-    , m_propertiesFetched(false)
     , m_registrationOnBusRejected(false)
     , m_q(q)
 {
@@ -121,7 +113,6 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
 
 Device::Private::Private(Device *q)
     : m_bluezDeviceInterface(0)
-    , m_propertiesFetched(false)
     , m_registrationOnBusRejected(false)
     , m_q(q)
 {
@@ -186,14 +177,6 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
     }
 
     return true;
-}
-
-void Device::Private::fetchProperties()
-{
-    if (!_k_ensureDeviceCreated()) {
-        return;
-    }
-    m_propertiesFetched = true;
 }
 
 void Device::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
