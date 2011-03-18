@@ -56,7 +56,17 @@ void DeviceReceiver::scanDevices()
 void DeviceReceiver::deviceFound(Device *device)
 {
     qDebug() << "*** Remote device found:" << device->name() << "(" << device->address() << ")";
-    qDebug();
+    qDebug() << "\tAddress:\t" << device->address();
+    qDebug() << "\tAlias:\t\t" << device->alias();
+    qDebug() << "\tClass:\t\t" << device->deviceClass();
+    qDebug() << "\tIcon:\t\t" << device->icon();
+    qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
+    qDebug() << "\tName:\t\t" << device->name();
+    qDebug() << "\tConnected:\t" << device->isConnected();
+    qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
+    qDebug() << "\tBlocked:\t" << (device->isBlocked() ? "yes" : "no");
+    qDebug() << "\tTrusted:\t" << (device->isTrusted() ? "yes" : "no");
+    qDebug() << "\tServices:\n" << device->UUIDs();
     connect(device, SIGNAL(propertyChanged(QString,QVariant)), this, SLOT(devicePropertyChanged(QString,QVariant)));
 }
 
@@ -71,7 +81,9 @@ void DeviceReceiver::devicePropertyChanged(const QString &property, const QVaria
     qDebug() << "\tIcon:\t\t" << device->icon();
     qDebug() << "\tLegacy Pairing:\t" << (device->hasLegacyPairing() ? "yes" : "no");
     qDebug() << "\tName:\t\t" << device->name();
+    qDebug() << "\tConnected:\t" << device->isConnected();
     qDebug() << "\tPaired:\t\t" << (device->isPaired() ? "yes" : "no");
+    qDebug() << "\tBlocked:\t" << (device->isBlocked() ? "yes" : "no");
     qDebug() << "\tTrusted:\t" << (device->isTrusted() ? "yes" : "no");
     qDebug() << "\tServices:\n" << device->UUIDs();
     qDebug();

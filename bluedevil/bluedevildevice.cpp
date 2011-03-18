@@ -300,19 +300,16 @@ QString Device::address() const
 
 QString Device::name() const
 {
-    if (d->m_name.isEmpty() && !d->_k_ensureDeviceCreated()) {
-        return QString();
-    }
     return d->m_name;
 }
 
 QString Device::friendlyName() const
 {
-    if (d->m_name.isEmpty() && !d->_k_ensureDeviceCreated()) {
-        return QString();
-    }
     if (d->m_alias.isEmpty() || d->m_alias == d->m_name) {
         return d->m_name;
+    }
+    if (d->m_name.isEmpty()) {
+        return d->m_alias;
     }
     return QString("%1 (%2)").arg(d->m_alias).arg(d->m_name);
 }
@@ -352,50 +349,29 @@ bool Device::hasLegacyPairing() const
 
 QStringList Device::UUIDs()
 {
-    ENSURE_PROPERTIES_FETCHED
-    if (sender()) {
-        emit UUIDsResult(this, d->m_UUIDs);
-    }
     return d->m_UUIDs;
 }
 
 QString Device::UBI()
 {
-    if (!d->_k_ensureDeviceCreated()) {
-        return QString();
+    if (d->m_bluezDeviceInterface) {
+        return d->m_bluezDeviceInterface->path();
     }
-
-    const QString path = d->m_bluezDeviceInterface->path();
-    if (sender()) {
-        emit UBIResult(this, path);
-    }
-    return path;
+    return QString();
 }
 
 bool Device::isConnected()
 {
-    ENSURE_PROPERTIES_FETCHED
-    if (sender()) {
-        emit isConnectedResult(this, d->m_connected);
-    }
     return d->m_connected;
 }
 
 bool Device::isTrusted()
 {
-    ENSURE_PROPERTIES_FETCHED
-    if (sender()) {
-        emit isTrustedResult(this, d->m_trusted);
-    }
     return d->m_trusted;
 }
 
 bool Device::isBlocked()
 {
-    ENSURE_PROPERTIES_FETCHED
-    if (sender()) {
-        emit isBlockedResult(this, d->m_blocked);
-    }
     return d->m_blocked;
 }
 
@@ -435,11 +411,7 @@ QUInt32StringMap Device::discoverServices(const QString &pattern)
     if (!d->_k_ensureDeviceCreated()) {
         return QUInt32StringMap();
     }
-    const QUInt32StringMap res = d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
-    if (sender()) {
-        emit discoverServicesResult(this, res);
-    }
-    return res;
+    return d->m_bluezDeviceInterface->DiscoverServices(pattern).value();
 }
 
 void Device::cancelDiscovery()
@@ -453,6 +425,61 @@ void Device::disconnect()
 {
     if (d->m_bluezDeviceInterface) {
         d->m_bluezDeviceInterface->Disconnect();
+    }
+}
+
+void Device::setProperties(const QVariantMap &properties)
+{
+    if (d->m_alias != properties["Alias"].toString()) {
+        d->m_alias = properties["Alias"].toString();
+        emit aliasChanged(d->m_alias);
+        emit propertyChanged("Alias", d->m_alias);
+    }
+    if (d->m_deviceClass != properties["Class"].toUInt()) {
+        d->m_deviceClass = properties["Class"].toUInt();
+        emit deviceClassChanged(d->m_deviceClass);
+        emit propertyChanged("Class", d->m_deviceClass);
+    }
+    if (d->m_icon != properties["Icon"].toString()) {
+        d->m_icon = properties["Icon"].toString();
+        emit iconChanged(d->m_icon);
+        emit propertyChanged("Icon", d->m_icon);
+    }
+    if (d->m_legacyPairing != properties["LegacyPairing"].toBool()) {
+        d->m_legacyPairing = properties["LegacyPairing"].toBool();
+        emit legacyPairingChanged(d->m_legacyPairing);
+        emit propertyChanged("LegacyPairing", d->m_legacyPairing);
+    }
+    if (d->m_name != properties["Name"].toString()) {
+        qDebug() << properties;
+        d->m_name = properties["Name"].toString();
+        emit nameChanged(d->m_name);
+        emit propertyChanged("Name", d->m_name);
+    }
+    if (d->m_paired != properties["Paired"].toBool()) {
+        d->m_paired = properties["Paired"].toBool();
+        emit pairedChanged(d->m_paired);
+        emit propertyChanged("Paired", d->m_paired);
+    }
+    if (d->m_connected != properties["Connected"].toBool()) {
+        d->m_connected = properties["Connected"].toBool();
+        emit connectedChanged(d->m_connected);
+        emit propertyChanged("Connected", d->m_connected);
+    }
+    if (d->m_trusted != properties["Trusted"].toBool()) {
+        d->m_trusted = properties["Trusted"].toBool();
+        emit pairedChanged(d->m_trusted);
+        emit propertyChanged("Trusted", d->m_trusted);
+    }
+    if (d->m_blocked != properties["Blocked"].toBool()) {
+        d->m_blocked = properties["Blocked"].toBool();
+        emit blockedChanged(d->m_blocked);
+        emit propertyChanged("Blocked", d->m_blocked);
+    }
+    if (d->m_UUIDs != properties["UUIDs"].toStringList()) {
+        d->m_UUIDs = properties["UUIDs"].toStringList();
+        emit UUIDsChanged(d->m_UUIDs);
+        emit propertyChanged("UUIDs", d->m_UUIDs);
     }
 }
 

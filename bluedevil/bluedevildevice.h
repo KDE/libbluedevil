@@ -136,8 +136,7 @@ public:
     /**
      * @return The name of the remote device.
      *
-     * @note This request will not trigger a connection to the device, unless the name couldn't
-     *       yet be retrieved (is empty).
+     * @note This request will not trigger a connection to the device.
      */
     QString name() const;
 
@@ -148,8 +147,7 @@ public:
      *
      * @note If the name and the alias are the same, "Name" is returned instead of "Name (Name)".
      *
-     * @note This request will not trigger a connection to the device, unless the name couldn't
-     *       yet be retrieved (is empty).
+     * @note This request will not trigger a connection to the device.
      */
     QString friendlyName() const;
 
@@ -198,11 +196,7 @@ public:
     /**
      * @return The list of supported services by the remote device always in uppercase.
      *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. UUIDsResult signal
-     *       will be emitted with the result.
+     * @note This request will not trigger a connection to the device.
      */
     QStringList UUIDs();
 
@@ -210,44 +204,28 @@ public:
      * @return UBI for this device. In case that the connection with the device fails, an empty
      *         string will be returned.
      *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. UBIResult signal
-     *       will be emitted with the result.
+     * @note This request will not trigger a connection to the device.
      */
     QString UBI();
 
     /**
      * @return Whether this remote device is connected or not.
      *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. isConnectedResult
-     *       signal will be emitted with the result.
+     * @note This request will not trigger a connection to the device.
      */
     bool isConnected();
 
     /**
      * @return Whether this remote device is trusted or not.
      *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. isTrustedResult
-     *       signal will be emitted with the result.
+     * @note This request will not trigger a connection to the device.
      */
     bool isTrusted();
 
     /**
      * @return Whether this remote device is blocked or not.
      *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. isBlockedResult
-     *       signal will be emitted with the result.
+     * @note This request will not trigger a connection to the device.
      */
     bool isBlocked();
 
@@ -325,6 +303,7 @@ public Q_SLOTS:
     void disconnect();
 
 Q_SIGNALS:
+    void iconChanged(const QString &icon);
     void pairedChanged(bool paired);
     void connectedChanged(bool connected);
     void trustedChanged(bool trusted);
@@ -332,6 +311,8 @@ Q_SIGNALS:
     void aliasChanged(const QString &alias);
     void nameChanged(const QString &name);
     void UUIDsChanged(const QStringList &UUIDs);
+    void deviceClassChanged(quint32 deviceClass);
+    void legacyPairingChanged(bool legacyPairing);
     void propertyChanged(const QString &property, const QVariant &value);
     void disconnectRequested();
 
@@ -340,12 +321,6 @@ Q_SIGNALS:
  */
 Q_SIGNALS:
     void registerDeviceResult(Device *device, bool deviceRegistered);
-    void UUIDsResult(Device *device, const QStringList &UUIDs);
-    void UBIResult(Device *device, const QString &UBI);
-    void isConnectedResult(Device *device, bool connected);
-    void isTrustedResult(Device *device, bool trusted);
-    void isBlockedResult(Device *device, bool blocked);
-    void discoverServicesResult(Device *device, const QUInt32StringMap &services);
 
 private:
     enum Type {
@@ -359,6 +334,8 @@ private:
     Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
            bool legacyPairing, const QString &name, bool paired, Adapter *adapter);
     Device(const QString &pathOrAddress, Type type, Adapter *adapter);
+
+    void setProperties(const QVariantMap &properties);
 
     class Private;
     Private *const d;

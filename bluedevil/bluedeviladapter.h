@@ -224,6 +224,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void deviceFound(Device *device);
+    /**
+     * @warning After this signal has been emitted (only emitted if you are using not stable
+     *          discovery), the device will be deleted and will no longer be valid.
+     */
     void deviceDisappeared(Device *device);
     void deviceCreated(Device *device);
     void deviceRemoved(Device *device);

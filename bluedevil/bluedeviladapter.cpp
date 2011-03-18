@@ -125,7 +125,14 @@ void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
 
 void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
 {
-    if (m_devicesMap.contains(address) || (m_stableDiscovering && m_knownDevices.contains(address))) {
+    if (m_stableDiscovering && m_knownDevices.contains(address)) {
+        Device *const device = m_devicesMap[address];
+        if (device) {
+            device->setProperties(map);
+        }
+        return;
+    }
+    if (m_devicesMap.contains(address)) {
         return;
     }
     Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
