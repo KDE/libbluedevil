@@ -193,6 +193,9 @@ void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVa
             }
         }
         emit m_q->devicesChanged(m_devices);
+    } else if (property == "Discovering") {
+        m_discovering = value.variant().toBool();
+        emit m_q->discoveringChanged(m_discovering);
     }
     emit m_q->propertyChanged(property, value.variant());
 }
