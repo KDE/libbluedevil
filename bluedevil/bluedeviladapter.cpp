@@ -45,7 +45,6 @@ public:
 
     void _k_deviceCreated(const QDBusObjectPath &objectPath);
     void _k_deviceFound(const QString &address, const QVariantMap &map);
-    void _k_deviceDisappeared(const QString &address);
     void _k_deviceRemoved(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
     void _k_createPairedDeviceReply(QDBusPendingCallWatcher *call);
@@ -68,14 +67,12 @@ public:
     QList<Device*> m_devices;
     QStringList    m_UUIDs;
     bool           m_propertiesFetched;
-    bool           m_stableDiscovering;
 
     Adapter *const m_q;
 };
 
 Adapter::Private::Private(Adapter *q)
     : m_propertiesFetched(false)
-    , m_stableDiscovering(false)
     , m_q(q)
 {
 }
@@ -141,20 +138,6 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
     m_devicesMap.insert(address, device);
     m_knownDevices << address;
     emit m_q->deviceFound(device);
-}
-
-void Adapter::Private::_k_deviceDisappeared(const QString &address)
-{
-    if (m_stableDiscovering) {
-        return;
-    }
-    Device *const device = m_devicesMap.take(address);
-    if (device) {
-        m_devices.removeOne(device);
-        m_devicesMapUBIKey.remove(m_devicesMapUBIKey.key(device));
-        emit m_q->deviceDisappeared(device);
-        delete device;
-    }
 }
 
 void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
@@ -231,8 +214,6 @@ Adapter::Adapter(const QString &adapterPath, QObject *parent)
             this, SLOT(_k_deviceCreated(QDBusObjectPath)));
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceFound(QString,QVariantMap)),
             this, SLOT(_k_deviceFound(QString,QVariantMap)));
-    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceDisappeared(QString)),
-            this, SLOT(_k_deviceDisappeared(QString)));
     connect(d->m_bluezAdapterInterface, SIGNAL(DeviceRemoved(QDBusObjectPath)),
             this, SLOT(_k_deviceRemoved(QDBusObjectPath)));
     connect(d->m_bluezAdapterInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
@@ -397,19 +378,11 @@ void Adapter::removeDevice(Device *device)
 
 void Adapter::startDiscovery() const
 {
-    d->m_stableDiscovering = false;
-    d->startDiscovery();
-}
-
-void Adapter::startStableDiscovery() const
-{
-    d->m_stableDiscovering = true;
     d->startDiscovery();
 }
 
 void Adapter::stopDiscovery() const
 {
-    d->m_stableDiscovering = false;
     d->m_bluezAdapterInterface->StopDiscovery();
 }
 

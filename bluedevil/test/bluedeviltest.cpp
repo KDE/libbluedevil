@@ -50,7 +50,7 @@ void DeviceReceiver::scanDevices()
 
     QObject::connect(defaultAdapter, SIGNAL(deviceFound(Device*)), this, SLOT(deviceFound(Device*)));
 
-    defaultAdapter->startStableDiscovery();
+    defaultAdapter->startDiscovery();
 }
 
 void DeviceReceiver::deviceFound(Device *device)

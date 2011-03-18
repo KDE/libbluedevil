@@ -200,22 +200,8 @@ public Q_SLOTS:
 
     /**
      * Starts device discovery. deviceFound signal will be emitted for each device found.
-     *
-     * @note It is possible that when discovering devices appear back and forth. This call will also
-     *       allow the adapter to signal when devices have disappeared when discovering, what could
-     *       not be exactly what you want. If the desired behavior is to only be notified of new
-     *       discovered devices, please see startStableDiscovery.
      */
     void startDiscovery() const;
-
-    /**
-     * Starts device discovery. deviceFound signal will be emitted for each device found.
-     *
-     * @note This discovery type will never trigger deviceDisappeared signal while discovering, so
-     *       you will only get deviceFound signals emitted. This also ensures that you will never get
-     *       deviceFound repeated emissions for the same devices, in this sense is more stable.
-     */
-    void startStableDiscovery() const;
 
     /**
      * Stops device discovery.
@@ -224,11 +210,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void deviceFound(Device *device);
-    /**
-     * @warning After this signal has been emitted (only emitted if you are using not stable
-     *          discovery), the device will be deleted and will no longer be valid.
-     */
-    void deviceDisappeared(Device *device);
+    void deviceFound(const QVariantMap &info); // ###: Remove on new version
     void deviceCreated(Device *device);
     void deviceRemoved(Device *device);
     void pairedDeviceCreated(const QString &path);
@@ -273,7 +255,6 @@ private:
 
     Q_PRIVATE_SLOT(d, void _k_deviceCreated(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_deviceFound(QString,QVariantMap))
-    Q_PRIVATE_SLOT(d, void _k_deviceDisappeared(QString))
     Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
     Q_PRIVATE_SLOT(d, void _k_createPairedDeviceReply(QDBusPendingCallWatcher*))
