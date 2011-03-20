@@ -65,6 +65,7 @@ public:
     bool           m_discovering;
     QList<Device*> m_devices;
     QStringList    m_UUIDs;
+    QStringList    m_discoveredDevices;
     bool           m_propertiesFetched;
 
     Adapter *const m_q;
@@ -78,6 +79,7 @@ Adapter::Private::Private(Adapter *q)
 
 Adapter::Private::~Private()
 {
+    qDeleteAll(m_devicesMap);
     delete m_bluezAdapterInterface;
 }
 
@@ -103,10 +105,18 @@ void Adapter::Private::fetchProperties()
 
 void Adapter::Private::startDiscovery()
 {
-    qDeleteAll(m_devicesMap);
-    m_devicesMap.clear();
-    m_devicesMapUBIKey.clear();
-    m_devices.clear();
+    foreach (const QString &discoveredDevice, m_discoveredDevices) {
+        Device *const device = m_devicesMap[discoveredDevice];
+        if (device) {
+            m_devicesMap.remove(discoveredDevice);
+            if (!device->UBI().isEmpty()) {
+                m_devicesMapUBIKey.remove(device->UBI());
+            }
+            m_devices.removeOne(device);
+            delete device;
+        }
+    }
+    m_discoveredDevices.clear();
     m_bluezAdapterInterface->StartDiscovery();
 }
 
@@ -128,6 +138,7 @@ void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap 
     Device *const newDevice = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
                                          map["Icon"].toString(), map["LegacyPairing"].toBool(),
                                          map["Name"].toString(), map["Paired"].toBool(), m_q);
+    m_discoveredDevices << address;
     m_devicesMap.insert(address, newDevice);
     emit m_q->deviceFound(newDevice);
 }
@@ -281,7 +292,13 @@ Device *Adapter::deviceForAddress(const QString &address)
     if (d->m_devicesMap.contains(address)) {
         return d->m_devicesMap[address];
     }
-    return new Device(address, Device::DeviceAddress, this);
+    Device *const device = new Device(address, Device::DeviceAddress, this);
+    d->m_devices << device;
+    d->m_devicesMap.insert(address, device);
+    if (!device->UBI().isEmpty()) {
+        d->m_devicesMapUBIKey.insert(device->UBI(), device);
+    }
+    return device;
 }
 
 Device *Adapter::deviceForUBI(const QString &UBI)
@@ -289,7 +306,11 @@ Device *Adapter::deviceForUBI(const QString &UBI)
     if (d->m_devicesMapUBIKey.contains(UBI)) {
         return d->m_devicesMapUBIKey[UBI];
     }
-    return new Device(UBI, Device::DevicePath, this);
+    Device *const device = new Device(UBI, Device::DevicePath, this);
+    d->m_devices << device;
+    d->m_devicesMap.insert(device->address(), device);
+    d->m_devicesMapUBIKey.insert(UBI, device);
+    return device;
 }
 
 QList<Device*> Adapter::devices()
