@@ -301,18 +301,6 @@ Device *Adapter::deviceForAddress(const QString &address)
     return device;
 }
 
-Device *Adapter::deviceForUBI(const QString &UBI)
-{
-    if (d->m_devicesMapUBIKey.contains(UBI)) {
-        return d->m_devicesMapUBIKey[UBI];
-    }
-    Device *const device = new Device(UBI, Device::DevicePath, this);
-    d->m_devices << device;
-    d->m_devicesMap.insert(device->address(), device);
-    d->m_devicesMapUBIKey.insert(UBI, device);
-    return device;
-}
-
 QList<Device*> Adapter::devices()
 {
     ENSURE_PROPERTIES_FETCHED

@@ -131,11 +131,6 @@ public:
     Device *deviceForAddress(const QString &address);
 
     /**
-     * @return A device defined by its UBI.
-     */
-    Device *deviceForUBI(const QString &UBI);
-
-    /**
      * @return All known devices by this adapter. They haven't been necessarily discovered in this
      *         session.
      */
