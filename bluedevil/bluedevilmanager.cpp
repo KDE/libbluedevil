@@ -27,6 +27,8 @@
 
 #include <QtCore/QHash>
 
+#include <QtDBus/QDBusConnectionInterface>
+
 namespace BlueDevil {
 
 static Manager *instance = 0;
@@ -42,15 +44,21 @@ public:
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
+    void _k_bluezServiceRegistered();
+    void _k_bluezServiceUnregistered();
+
     OrgBluezManagerInterface *m_bluezManagerInterface;
     Adapter                  *m_defaultAdapter;
     QHash<QString, Adapter*>  m_adaptersHash;
+    bool                      m_bluezServiceRunning;
 
     Manager *const m_q;
 };
 
 Manager::Private::Private(Manager *q)
     : m_defaultAdapter(0)
+    , m_bluezServiceRunning(QDBusConnection::systemBus().isConnected() &&
+                            QDBusConnection::systemBus().interface()->isServiceRegistered("org.bluez").value())
     , m_q(q)
 {
 }
@@ -103,6 +111,20 @@ void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVa
     Q_UNUSED(value)
 }
 
+void Manager::Private::_k_bluezServiceRegistered()
+{
+    m_bluezServiceRunning = true;
+}
+
+void Manager::Private::_k_bluezServiceUnregistered()
+{
+    m_bluezServiceRunning = false;
+    if (m_defaultAdapter) {
+        m_defaultAdapter = 0;
+        emit m_q->defaultAdapterChanged(0);
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Manager::Manager(QObject *parent)
@@ -120,7 +142,16 @@ Manager::Manager(QObject *parent)
     connect(d->m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
             this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
-    if (QDBusConnection::systemBus().isConnected()) {
+    // Keep an eye open if bluez stops running
+    QDBusServiceWatcher *const watcher = new QDBusServiceWatcher("org.bluez", QDBusConnection::systemBus(),
+                                                                 QDBusServiceWatcher::WatchForRegistration |
+                                                                 QDBusServiceWatcher::WatchForUnregistration, this);
+    connect(watcher, SIGNAL(serviceRegistered(QString)),
+            this, SLOT(_k_bluezServiceRegistered()));
+    connect(watcher, SIGNAL(serviceUnregistered(QString)),
+            this, SLOT(_k_bluezServiceUnregistered()));
+
+    if (QDBusConnection::systemBus().isConnected() && d->m_bluezServiceRunning) {
         const QDBusReply<QDBusObjectPath> reply = d->m_bluezManagerInterface->DefaultAdapter();
         if (reply.isValid()) {
             const QString adapterPath = reply.value().path();
@@ -159,7 +190,7 @@ void Manager::release()
 
 Adapter *Manager::defaultAdapter()
 {
-    if (!QDBusConnection::systemBus().isConnected()) {
+    if (!QDBusConnection::systemBus().isConnected() || !d->m_bluezServiceRunning) {
         return 0;
     }
 
@@ -180,7 +211,7 @@ Adapter *Manager::defaultAdapter()
 
 QList<Adapter*> Manager::adapters() const
 {
-    if (!QDBusConnection::systemBus().isConnected()) {
+    if (!QDBusConnection::systemBus().isConnected() || !d->m_bluezServiceRunning) {
         return QList<Adapter*>();
     }
 
@@ -189,7 +220,7 @@ QList<Adapter*> Manager::adapters() const
 
 bool Manager::isBluetoothOperational() const
 {
-    return QDBusConnection::systemBus().isConnected() && d->m_defaultAdapter;
+    return QDBusConnection::systemBus().isConnected() && d->m_bluezServiceRunning;
 }
 
 }
