@@ -205,10 +205,8 @@ Adapter *Manager::defaultAdapter()
         if (!adapterPath.isEmpty()) {
             d->m_defaultAdapter = new Adapter(adapterPath, this);
             d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
-        } else {
-            if (!adapters().isEmpty()) {
-                return adapters().first();
-            }
+        } else if (!adapters().isEmpty()) {
+            return adapters().first();
         }
     }
 
