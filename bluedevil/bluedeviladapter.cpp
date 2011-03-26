@@ -208,7 +208,7 @@ void Adapter::Private::_k_createPairedDeviceReply(QDBusPendingCallWatcher *call)
     if (reply.isError()) {
         qDebug() << "Error response: " << reply.error().message();
     } else {
-        emit m_q->deviceCreated(reply.value().path());
+        emit m_q->pairedDeviceCreated(reply.value().path());
     }
 
     call->deleteLater();
