@@ -229,6 +229,7 @@ Q_SIGNALS:
     void deviceCreated(Device *device);
     void deviceRemoved(Device *device);
     void pairedDeviceCreated(const QString &path);
+    void deviceCreated(const QString &path);
     void nameChanged(const QString &name);
     void poweredChanged(bool powered);
     void discoverableChanged(bool discoverable);
@@ -258,6 +259,11 @@ private:
     /**
      * @internal
      */
+    void createDeviceAsync(const QString& address) const;
+
+    /**
+     * @internal
+     */
     void createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const;
 
     /**
@@ -274,6 +280,7 @@ private:
     Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
     Q_PRIVATE_SLOT(d, void _k_createPairedDeviceReply(QDBusPendingCallWatcher*))
+    Q_PRIVATE_SLOT(d, void _k_createDeviceReply(QDBusPendingCallWatcher*));
 };
 
 }

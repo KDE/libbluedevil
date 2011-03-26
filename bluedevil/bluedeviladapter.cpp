@@ -49,6 +49,7 @@ public:
     void _k_deviceRemoved(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
     void _k_createPairedDeviceReply(QDBusPendingCallWatcher *call);
+    void _k_createDeviceReply(QDBusPendingCallWatcher *call);
 
     OrgBluezAdapterInterface *m_bluezAdapterInterface;
     QMap<QString, Device*>    m_devicesMap;
@@ -207,12 +208,21 @@ void Adapter::Private::_k_createPairedDeviceReply(QDBusPendingCallWatcher *call)
     if (reply.isError()) {
         qDebug() << "Error response: " << reply.error().message();
     } else {
-        emit m_q->pairedDeviceCreated(reply.value().path());
+        emit m_q->deviceCreated(reply.value().path());
     }
 
     call->deleteLater();
 }
 
+void Adapter::Private::_k_createDeviceReply(QDBusPendingCallWatcher *call)
+{
+    const QDBusPendingReply<QDBusObjectPath> reply = *call;
+    if (reply.isError()) {
+        qDebug() << "Error response: " << reply.error().message();
+    } else {
+        emit m_q->deviceCreated(reply.value().path());
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Adapter::Adapter(const QString &adapterPath, QObject *parent)
@@ -429,6 +439,13 @@ QString Adapter::createDevice(const QString &address) const
         return lastCall;
     }
     return QString();
+}
+
+void Adapter::createDeviceAsync(const QString &address) const
+{
+    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreateDevice(address);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
+    connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createPairedDeviceReply(QDBusPendingCallWatcher*)));
 }
 
 void Adapter::createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const

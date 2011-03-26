@@ -76,6 +76,7 @@ public:
 
     bool _k_ensureDeviceCreated(const QString &busDevicePath = QString());
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
+    void _k_deviceRegistered(const QString &path);
 
     OrgBluezDeviceInterface *m_bluezDeviceInterface;
     Adapter                 *m_adapter;
@@ -224,6 +225,15 @@ void Device::Private::_k_propertyChanged(const QString &property, const QDBusVar
         emit m_q->UUIDsChanged(m_UUIDs);
     }
     emit m_q->propertyChanged(property, value.variant());
+}
+
+void Device::Private::_k_deviceRegistered(const QString &path)
+{
+    if (!_k_ensureDeviceCreated(path)) {
+        qDebug() << "Device can't be registered";
+        return;
+    }
+    emit m_q->registered(m_q);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,6 +414,17 @@ bool Device::registerDevice()
     const bool res = d->_k_ensureDeviceCreated();
     emit registerDeviceResult(this, res);
     return res;
+}
+
+void Device::registerDeviceAsync()
+{
+    QString devicePath = d->m_adapter->findDevice(d->m_address);
+    if (!devicePath.isEmpty()) {
+        d->_k_deviceRegistered(devicePath);
+        return;
+    }
+    connect(d->m_adapter, SIGNAL(deviceCreated(QString)), this, SLOT(_k_deviceRegistered(QString)));
+    d->m_adapter->createDeviceAsync(d->m_address);
 }
 
 void Device::setTrusted(bool trusted)

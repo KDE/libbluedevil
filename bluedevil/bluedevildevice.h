@@ -270,6 +270,14 @@ public Q_SLOTS:
     bool registerDevice();
 
     /**
+     * This is like registerDevice method but instead of returning bool to indicate wether the
+     * registration has succeed or not, this method will emit a registered signal.
+     *
+     * @see registerDevice
+     */
+    void registerDeviceAsync();
+
+    /**
      * Sets whether this remote device is trusted or not.
      *
      * @note This request will trigger a connection to the device with the consequent registration
@@ -346,6 +354,7 @@ Q_SIGNALS:
     void isTrustedResult(Device *device, bool trusted);
     void isBlockedResult(Device *device, bool blocked);
     void discoverServicesResult(Device *device, const QUInt32StringMap &services);
+    void registered(Device *device);
 
 private:
     enum Type {
@@ -365,6 +374,7 @@ private:
 
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
     Q_PRIVATE_SLOT(d, bool _k_ensureDeviceCreated(QString));
+    Q_PRIVATE_SLOT(d, void _k_deviceRegistered(QString));
 };
 
 }
