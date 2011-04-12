@@ -445,7 +445,7 @@ void Adapter::createDeviceAsync(const QString &address) const
 {
     QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreateDevice(address);
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
-    connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createPairedDeviceReply(QDBusPendingCallWatcher*)));
+    connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createDeviceReply(QDBusPendingCallWatcher*)));
 }
 
 void Adapter::createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const
