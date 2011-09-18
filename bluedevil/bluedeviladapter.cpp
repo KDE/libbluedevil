@@ -112,7 +112,6 @@ void Adapter::Private::startDiscovery()
     m_devicesMap.clear();
     m_devicesMapUBIKey.clear();
     m_knownDevices.clear();
-    m_devices.clear();
     m_bluezAdapterInterface->StartDiscovery();
 }
 
