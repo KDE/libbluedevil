@@ -41,6 +41,7 @@ public:
     ~Private();
 
     void fetchProperties();
+    void setDefaultProperties();
     void startDiscovery();
 
     void _k_deviceCreated(const QDBusObjectPath &objectPath);
@@ -88,7 +89,15 @@ Adapter::Private::~Private()
 
 void Adapter::Private::fetchProperties()
 {
-    const QVariantMap properties = m_bluezAdapterInterface->GetProperties().value();
+    QDBusPendingReply <QVariantMap > reply = m_bluezAdapterInterface->GetProperties();
+    //This may happen when the AdapterRemoved signal has been emitted but the adapter
+    //is still returned by Manager::defaultAdapter
+    if (!reply.isValid() || !reply.isError()) {
+        setDefaultProperties();
+        return;
+    }
+
+    const QVariantMap properties = reply.value();
     m_address = properties["Address"].toString();
     m_name = properties["Name"].toString();
     m_class = properties["Class"].toUInt();
@@ -104,6 +113,19 @@ void Adapter::Private::fetchProperties()
     }
     m_UUIDs = properties["UUIDs"].toStringList();
     m_propertiesFetched = true;
+}
+
+void Adapter::Private::setDefaultProperties()
+{
+    m_address = QString();
+    m_name = QString();
+    m_class = 0;
+    m_powered = false;
+    m_discoverable = false;
+    m_pairable = false;
+    m_pairableTimeout = 0;
+    m_discoverableTimeout = 0;
+    m_discovering = false;
 }
 
 void Adapter::Private::startDiscovery()
