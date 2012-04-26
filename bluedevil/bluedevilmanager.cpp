@@ -135,6 +135,7 @@ Adapter *Manager::Private::findUsableAdapter()
 
 void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
+    qDebug() << "Added: " << objectPath.path();
     Adapter *const adapter = new Adapter(objectPath.path(), m_q);
     m_adaptersHash.insert(objectPath.path(), adapter);
     if (!m_defaultAdapter) {
@@ -152,6 +153,7 @@ void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 
 void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
 {
+    qDebug() << "Removed: " << objectPath.path();
     Adapter *const adapter = m_adaptersHash.take(objectPath.path()); // return and remove it from the hash
     if (m_adaptersHash.isEmpty()) {
         m_defaultAdapter = 0;
@@ -203,15 +205,21 @@ void Manager::Private::_k_bluezServiceRegistered()
 
 void Manager::Private::_k_bluezServiceUnregistered()
 {
+    QHashIterator<QString, Adapter*> i(m_adaptersHash);
+    while (i.hasNext()) {
+        i.next();
+        Adapter *adapter = m_adaptersHash.take(i.key());
+        emit m_q->adapterRemoved(adapter);
+        delete adapter;
+    }
+
+    m_usableAdapter = 0;
+    m_defaultAdapter = 0;
+
+    emit m_q->usableAdapterChanged(0);
+    emit m_q->defaultAdapterChanged(0);
+
     m_bluezServiceRunning = false;
-    if (m_defaultAdapter) {
-        m_defaultAdapter = 0;
-        emit m_q->defaultAdapterChanged(0);
-    }
-    if (m_usableAdapter) {
-        m_usableAdapter = 0;
-        emit m_q->usableAdapterChanged(0);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
