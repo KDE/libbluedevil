@@ -37,7 +37,7 @@ class Adapter;
  *
  * Manager class. The entry point to BlueDevil exposed services.
  *
- * The typical way to proceed is to work with the default adapter, but you can also list all
+ * The typical way to proceed is to work with the first adapter, but you can also list all
  * bluetooth adapters and work with the one you want.
  *
  * The interface is a singleton with release-when-you-want capability.
@@ -52,7 +52,6 @@ class BLUEDEVIL_EXPORT Manager
     Q_OBJECT
 
     Q_PROPERTY(Manager* self READ self)
-    Q_PROPERTY(Adapter* defaultAdapter READ defaultAdapter)
     Q_PROPERTY(QList<Adapter*> adapters READ adapters)
     Q_PROPERTY(bool isBluetoothOperational READ isBluetoothOperational)
 
@@ -72,14 +71,7 @@ public:
     static void release();
 
     /**
-     * @return The default adapter. NULL if there is no default adapter or the system is not ready
-     *         (the bus is not accessible or there is no Bluetooth system running).
-     */
-    Adapter *defaultAdapter();
-
-    /**
-     * @return The default adapter if present and ready to be used. Otherwise it will return
-     *         the first adapter that is ready to be used (is powered). If there are no usable
+     * @return The first adapter that is ready to be used (is powered). If there are no usable
      *         adapters, NULL will be returned.
      */
     Adapter *usableAdapter() const;
@@ -90,13 +82,13 @@ public:
     QList<Adapter*> adapters() const;
 
     /**
-     * @return Whether the bluetooth system is ready to be used, and there is a default adapter
+     * @return Whether the bluetooth system is ready to be used, and there is a usable adapter
      *         connected and turned on at the system.
      *
      * @note After this check, if succeeded, you can freely access to all libbluedevil functionality
-     *       by retrieving the default adapter through a call to defaultAdapter().
+     *       by retrieving the an adapter through a call to usableAdapter().
      *
-     * @note If this method returns false, you can connect to the defaultAdapterChanged signal, so
+     * @note If this method returns false, you can connect to the usableAdapterChanged signal, so
      *       you can be notified when bluetooth is operational.
      */
     bool isBluetoothOperational() const;
@@ -113,12 +105,6 @@ Q_SIGNALS:
     void adapterRemoved(Adapter *adapter);
 
     /**
-     * This signal will be emitted when the default adapter has changed. It also will be emitted
-     * when all adapters have been removed, placing 0 at @p adapter.
-     */
-    void defaultAdapterChanged(Adapter *adapter);
-
-    /**
      * This signal will be emitted when the current usable adapter has changed. This basically
      * means two cases:
      *
@@ -130,8 +116,6 @@ Q_SIGNALS:
      * will report the new adapter. If no usable adapter could be found, 0 will be placed at @p
      * adapter.
      *
-     * @note Default adapter will be always given priority. This is, the first adapter that is
-     *       checked to be usable is the default one (if present).
      */
     void usableAdapterChanged(Adapter *adapter);
 
@@ -151,7 +135,6 @@ private:
 
     Q_PRIVATE_SLOT(d, void _k_adapterAdded(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_adapterRemoved(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_defaultAdapterChanged(QDBusObjectPath))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
     Q_PRIVATE_SLOT(d, void _k_bluezServiceRegistered())
     Q_PRIVATE_SLOT(d, void _k_bluezServiceUnregistered())

@@ -45,7 +45,6 @@ public:
 private Q_SLOTS:
     void adapterAdded(Adapter *adapter);
     void adapterRemoved(Adapter *adapter);
-    void defaultAdapterChanged(Adapter *adapter);
     void usableAdapterChanged(Adapter *adapter);
     void allAdaptersRemoved();
 

@@ -92,7 +92,7 @@ void Adapter::Private::fetchProperties()
     QDBusPendingReply <QVariantMap > reply = m_bluezAdapterInterface->GetProperties();
 
     //This may happen when the AdapterRemoved signal has been emitted but the adapter
-    //is still returned by Manager::defaultAdapter
+    //is still returned by Manager::usableAdapter
     reply.waitForFinished();
     if (!reply.isValid() || reply.isError()) {
         qDebug() << reply.error().name();

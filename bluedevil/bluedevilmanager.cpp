@@ -45,14 +45,12 @@ public:
 
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
     void _k_adapterRemoved(const QDBusObjectPath &objectPath);
-    void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     void _k_bluezServiceRegistered();
     void _k_bluezServiceUnregistered();
 
     OrgBluezManagerInterface *m_bluezManagerInterface;
-    Adapter                  *m_defaultAdapter;
     Adapter                  *m_usableAdapter;
     QHash<QString, Adapter*>  m_adaptersHash;
     bool                      m_bluezServiceRunning;
@@ -62,7 +60,6 @@ public:
 
 Manager::Private::Private(Manager *q)
     : m_bluezManagerInterface(0)
-    , m_defaultAdapter(0)
     , m_usableAdapter(0)
     , m_q(q)
 {
@@ -90,29 +87,15 @@ void Manager::Private::initialize()
                 m_q, SLOT(_k_adapterAdded(QDBusObjectPath)));
         connect(m_bluezManagerInterface, SIGNAL(AdapterRemoved(QDBusObjectPath)),
                 m_q, SLOT(_k_adapterRemoved(QDBusObjectPath)));
-        connect(m_bluezManagerInterface, SIGNAL(DefaultAdapterChanged(QDBusObjectPath)),
-                m_q, SLOT(_k_defaultAdapterChanged(QDBusObjectPath)));
         connect(m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
-        QString defaultAdapterPath;
-        const QDBusReply<QDBusObjectPath> reply = m_bluezManagerInterface->DefaultAdapter();
-        if (reply.isValid()) {
-            defaultAdapterPath = reply.value().path();
-            if (!defaultAdapterPath.isEmpty()) {
-                m_defaultAdapter = new Adapter(defaultAdapterPath, m_q);
-                m_adaptersHash.insert(defaultAdapterPath, m_defaultAdapter);
-                emit m_q->defaultAdapterChanged(m_defaultAdapter);
-            }
-        }
         const QVariantMap properties = m_bluezManagerInterface->GetProperties().value();
         const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
         if (adapters.count() > 1) {
             Q_FOREACH (const QDBusObjectPath &path, adapters) {
-                if (path.path() != defaultAdapterPath) {
-                    Adapter *const adapter = new Adapter(path.path(), m_q);
-                    m_adaptersHash.insert(path.path(), adapter);
-                }
+                Adapter *const adapter = new Adapter(path.path(), m_q);
+                m_adaptersHash.insert(path.path(), adapter);
             }
         }
         m_usableAdapter = findUsableAdapter();
@@ -133,18 +116,11 @@ void Manager::Private::clean()
     }
 
     m_usableAdapter = 0;
-    m_defaultAdapter = 0;
 
     emit m_q->usableAdapterChanged(0);
-    emit m_q->defaultAdapterChanged(0);
 }
 Adapter *Manager::Private::findUsableAdapter()
 {
-    Adapter *const defAdapter = m_q->defaultAdapter();
-    if (defAdapter && defAdapter->isPowered()) {
-        m_usableAdapter = defAdapter;
-        return defAdapter;
-    }
     Q_FOREACH (Adapter *const adapter, m_q->adapters()) {
         if (adapter->isPowered()) {
             m_usableAdapter = adapter;
@@ -159,10 +135,6 @@ void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
     qDebug() << "Added: " << objectPath.path();
     Adapter *const adapter = new Adapter(objectPath.path(), m_q);
     m_adaptersHash.insert(objectPath.path(), adapter);
-    if (!m_defaultAdapter) {
-        m_defaultAdapter = adapter;
-        emit m_q->defaultAdapterChanged(m_defaultAdapter);
-    }
     if (!m_usableAdapter || !m_usableAdapter->isPowered()) {
         Adapter *const oldUsableAdapter = m_usableAdapter;
         m_usableAdapter = findUsableAdapter();
@@ -178,7 +150,6 @@ void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
     qDebug() << "Removed: " << objectPath.path();
     Adapter *const adapter = m_adaptersHash.take(objectPath.path()); // return and remove it from the hash
     if (m_adaptersHash.isEmpty()) {
-        m_defaultAdapter = 0;
         m_usableAdapter = 0;
     }
     if (adapter) {
@@ -186,7 +157,6 @@ void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
         delete adapter;
     }
     if (m_adaptersHash.isEmpty()) {
-        emit m_q->defaultAdapterChanged(0);
         emit m_q->usableAdapterChanged(0);
         emit m_q->allAdaptersRemoved();
     } else {
@@ -198,17 +168,6 @@ void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
             }
         }
     }
-}
-
-void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
-{
-    Adapter *adapter = m_adaptersHash[objectPath.path()];
-    if (!adapter) {
-        adapter = new Adapter(objectPath.path(), m_q);
-        m_adaptersHash.insert(objectPath.path(), adapter);
-    }
-    m_defaultAdapter = adapter;
-    emit m_q->defaultAdapterChanged(adapter);
 }
 
 void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
@@ -262,23 +221,6 @@ void Manager::release()
 {
     delete instance;
     instance = 0;
-}
-
-Adapter *Manager::defaultAdapter()
-{
-    if (!QDBusConnection::systemBus().isConnected() || !d->m_bluezServiceRunning) {
-        return 0;
-    }
-
-    if (!d->m_defaultAdapter) {
-        const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
-        if (!adapterPath.isEmpty()) {
-            d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
-            d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
-        }
-    }
-
-    return d->m_defaultAdapter;
 }
 
 Adapter *Manager::usableAdapter() const

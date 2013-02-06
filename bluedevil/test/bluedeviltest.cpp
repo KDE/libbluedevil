@@ -46,11 +46,11 @@ void DeviceReceiver::scanDevices()
     qDebug() << "*** Will scan devices until stopped...";
     qDebug();
 
-    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
+    Adapter *usableAdapter = Manager::self()->usableAdapter();
 
-    QObject::connect(defaultAdapter, SIGNAL(deviceFound(Device*)), this, SLOT(deviceFound(Device*)));
+    QObject::connect(usableAdapter, SIGNAL(deviceFound(Device*)), this, SLOT(deviceFound(Device*)));
 
-    defaultAdapter->startStableDiscovery();
+    usableAdapter->startStableDiscovery();
 }
 
 void DeviceReceiver::deviceFound(Device *device)
@@ -99,8 +99,8 @@ int main(int argc, char **argv)
 
     DeviceReceiver *deviceReceiver = new DeviceReceiver;
 
-    Adapter *defaultAdapter = Manager::self()->defaultAdapter();
-    if (defaultAdapter) {
+    Adapter *usableAdapter = Manager::self()->usableAdapter();
+    if (usableAdapter) {
         deviceReceiver->scanDevices();
     } else {
         qDebug() << "!!! No bluetooth adapters were found. Waiting for bluetooth adapters. Ctrl + C to cancel...";
