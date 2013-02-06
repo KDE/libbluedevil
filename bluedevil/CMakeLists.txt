@@ -9,11 +9,15 @@ set(libbluedevil_SRCS
     bluedevilutils.cpp
 )
 
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-manager.xml bluezmanager)
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-adapter.xml bluezadapter)
-set(libbluedevil_xml ${CMAKE_CURRENT_SOURCE_DIR}/bluez/bluez-device.xml)
-set_source_files_properties(${libbluedevil_xml} PROPERTIES INCLUDE "bluedevil/bluedevildevice.h")
-QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${libbluedevil_xml} bluezdevice)
+set(dbusobjectmanager_xml ${CMAKE_CURRENT_SOURCE_DIR}/bluez/org.freedesktop.DBus.ObjectManager.xml)
+set_source_files_properties(${dbusobjectmanager_xml} PROPERTIES INCLUDE "bluedevil/bluedevildbustypes.h")
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${dbusobjectmanager_xml} dbusobjectmanager)
+
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/org.freedesktop.DBus.Properties.xml dbusproperties)
+
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/org.bluez.Adapter1.xml bluezadapter1)
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/org.bluez.AgentManager1.xml bluezagentmanager1)
+QT4_ADD_DBUS_INTERFACE(libbluedevil_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/bluez/org.bluez.Device1.xml bluezdevice1)
 
 QT4_AUTOMOC(${libbluedevil_SRCS})
 
@@ -30,6 +34,7 @@ install(TARGETS bluedevil ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES bluedevilmanager.h
               bluedeviladapter.h
+              bluedevildbustypes.h
               bluedevildevice.h
               bluedevil_export.h
               bluedevil.h
