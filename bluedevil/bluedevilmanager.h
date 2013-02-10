@@ -23,6 +23,8 @@
 #ifndef BLUEDEVILMANAGER_H
 #define BLUEDEVILMANAGER_H
 
+#include "bluedevildbustypes.h"
+
 #include <bluedevil/bluedevil_export.h>
 
 #include <QtCore/QObject>
@@ -56,6 +58,13 @@ class BLUEDEVIL_EXPORT Manager
     Q_PROPERTY(bool isBluetoothOperational READ isBluetoothOperational)
 
 public:
+    enum RegisterCapability {
+        DisplayOnly = 0,
+        DisplayYesNo = 1,
+        KeyboardOnly = 2,
+        NoInputNoOutput = 3
+    };
+
     virtual ~Manager();
 
     /**
@@ -92,6 +101,17 @@ public:
      *       you can be notified when bluetooth is operational.
      */
     bool isBluetoothOperational() const;
+
+public Q_SLOTS:
+    /**
+     * Registers agent.
+     */
+    void registerAgent(const QString &agentPath, RegisterCapability registerCapability);
+
+    /**
+     * Unregisters agent.
+     */
+    void unregisterAgent(const QString &agentPath);
 
 Q_SIGNALS:
     /**
@@ -133,9 +153,8 @@ private:
     class Private;
     Private *const d;
 
-    Q_PRIVATE_SLOT(d, void _k_adapterAdded(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_adapterRemoved(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
+    Q_PRIVATE_SLOT(d, void _k_interfacesAdded(QDBusObjectPath,QVariantMapMap))
+    Q_PRIVATE_SLOT(d, void _k_interfacesRemoved(QDBusObjectPath,QStringList))
     Q_PRIVATE_SLOT(d, void _k_bluezServiceRegistered())
     Q_PRIVATE_SLOT(d, void _k_bluezServiceUnregistered())
 };

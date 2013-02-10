@@ -24,7 +24,9 @@
 #define BLUEDEVILDEVICE_H
 
 #include <bluedevil/bluedevil_export.h>
-#include <bluedevil/bluedeviladapter.h>
+
+#include "bluedeviladapter.h"
+#include "bluedevilmanager.h"
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -95,7 +97,6 @@ class BLUEDEVIL_EXPORT Device
     Q_PROPERTY(QString icon READ icon)
     Q_PROPERTY(quint32 deviceClass READ deviceClass)
     Q_PROPERTY(bool isPaired READ isPaired)
-    Q_PROPERTY(bool isRegistered READ isRegistered)
     Q_PROPERTY(QString alias READ alias WRITE setAlias)
     Q_PROPERTY(bool hasLegacyPairing READ hasLegacyPairing)
     Q_PROPERTY(QStringList UUIDs READ UUIDs)
@@ -105,6 +106,7 @@ class BLUEDEVIL_EXPORT Device
     Q_PROPERTY(bool blocked READ isBlocked WRITE setBlocked)
 
     friend class Adapter;
+    friend class Manager;
 
 public:
     virtual ~Device();
@@ -112,14 +114,10 @@ public:
     /**
      * Starts the pairing process, the pairedChanged signal will be emitted if succeeded.
      *
-     * @param agentPath  The path where the agent has been registered.
-     * @param capability The same capability attribute set when registering the agent with
-     *                   registerAgent.
-     *
      * @note If the device is registered moments before this function is called, then it might
      *       do not work in some devices.
      */
-    void pair(const QString &agentPath, Adapter::RegisterCapability capability) const;
+    void pair() const;
 
     /**
      * @return The adapter that discovered this remote device.
@@ -173,13 +171,6 @@ public:
      * @note This request will not trigger a connection to the device.
      */
     bool isPaired() const;
-
-    /**
-     * @return Whether the device is registered or not, @see registerDevice
-     *
-     * @note This request will not trigger a connection to the device
-     */
-    bool isRegistered() const;
 
     /**
      * @return The alias of the remote device.
@@ -259,31 +250,6 @@ public:
     bool isReady();
 public Q_SLOTS:
     /**
-     * It is not mandatory to call to this method. If you are just retrieving some information that
-     * will not trigger a connection to the device, and you do not need to check if some properties
-     * were updated, please do not call to this method, since it is expensive (it will force a
-     * registration of the device on the bus).
-     *
-     * On the other hand, if what you want is to receive signals of properties being updated and
-     * you have not called a method that triggers a connection to the device, you should explicitly
-     * call to this method, so the device is registered.
-     *
-     * @return Whether it was possible to correctly register this remote device on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. registerDeviceResult
-     *       signal will be emitted with the result.
-     */
-    bool registerDevice();
-
-    /**
-     * This is like registerDevice method but instead of returning bool to indicate wether the
-     * registration has succeed or not, this method will emit a registered signal.
-     *
-     * @see registerDevice
-     */
-    void registerDeviceAsync();
-
-    /**
      * Sets whether this remote device is trusted or not.
      *
      * @note This request will trigger a connection to the device with the consequent registration
@@ -314,29 +280,16 @@ public Q_SLOTS:
     void setAlias(const QString &alias);
 
     /**
-     * @return A map with all supported services by this device.
-     *
-     * @note This request will trigger a connection to the device with the consequent registration
-     *       on the bus.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall. discoverServicesResult
-     *       signal will be emitted with the result.
-     */
-    QUInt32StringMap discoverServices(const QString &pattern = QString());
-
-    /**
-     * Cancels service discovery.
-     *
-     * @note Allows being called with the asynchronous API through asyncCall.
-     */
-    void cancelDiscovery();
-
-    /**
      * Disconnect from this remote device.
      *
      * @note Allows being called with the asynchronous API through asyncCall.
      */
     void disconnect();
+
+    /**
+     * Connect all profiles marked auto-connectable of this device.
+     */
+    void connectDevice();
 
 Q_SIGNALS:
     void pairedChanged(bool paired);
@@ -353,34 +306,22 @@ Q_SIGNALS:
  * Signals coming from asynchronous API.
  */
 Q_SIGNALS:
-    void registerDeviceResult(Device *device, bool deviceRegistered);
     void UUIDsResult(Device *device, const QStringList &UUIDs);
     void UBIResult(Device *device, const QString &UBI);
     void isConnectedResult(Device *device, bool connected);
     void isTrustedResult(Device *device, bool trusted);
     void isBlockedResult(Device *device, bool blocked);
-    void discoverServicesResult(Device *device, const QUInt32StringMap &services);
-    void registered(Device *device);
 
 private:
-    enum Type {
-        DevicePath = 0,
-        DeviceAddress
-    };
-
     /**
      * @internal
      */
-    Device(const QString &address, const QString &alias, quint32 deviceClass, const QString &icon,
-           bool legacyPairing, const QString &name, bool paired, Adapter *adapter);
-    Device(const QString &pathOrAddress, Type type, Adapter *adapter);
+    Device(const QString &path, Adapter *adapter);
 
     class Private;
     Private *const d;
 
-    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
-    Q_PRIVATE_SLOT(d, bool _k_ensureDeviceCreated(QString));
-    Q_PRIVATE_SLOT(d, void _k_deviceRegistered(QString));
+    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QVariantMap,QStringList))
 };
 
 }
