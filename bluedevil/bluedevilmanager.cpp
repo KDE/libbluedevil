@@ -67,6 +67,9 @@ Manager::Private::Private(Manager *q)
     , m_usableAdapter(0)
     , m_q(q)
 {
+    qDBusRegisterMetaType<DBusManagerStruct>();
+    qDBusRegisterMetaType<QVariantMapMap>();
+
     m_bluezServiceRunning = false;
     if (QDBusConnection::systemBus().isConnected()) {
         QDBusReply<bool> reply = QDBusConnection::systemBus().interface()->isServiceRegistered("org.bluez");
@@ -86,8 +89,6 @@ Manager::Private::~Private()
 void Manager::Private::initialize()
 {
     if (QDBusConnection::systemBus().isConnected() && m_bluezServiceRunning) {
-        qDBusRegisterMetaType<DBusManagerStruct>();
-        qDBusRegisterMetaType<QVariantMapMap>();
         m_dbusObjectManager = new org::freedesktop::DBus::ObjectManager("org.bluez", "/", QDBusConnection::systemBus(), m_q);
 
         connect(m_dbusObjectManager, SIGNAL(InterfacesAdded(QDBusObjectPath,QVariantMapMap)),
