@@ -54,7 +54,7 @@ public:
     org::freedesktop::DBus::ObjectManager *m_dbusObjectManager;
     org::bluez::AgentManager1             *m_bluezAgentManager;
     Adapter                               *m_usableAdapter;
-    QHash<QString, Adapter*>               m_adaptersHash;
+    QMap<QString, Adapter*>                m_adapters;
     QHash<QString, Adapter*>               m_devAdapter;
     bool                                   m_bluezServiceRunning;
 
@@ -107,7 +107,7 @@ void Manager::Private::initialize()
                 QVariantMapMap interfaces = managedObjectIt.value();
                 if(interfaces.contains("org.bluez.Adapter1")) {
                     Adapter *const adapter = new Adapter(path, m_q);
-                    m_adaptersHash.insert(managedObjectIt.key().path(), adapter);
+                    m_adapters.insert(managedObjectIt.key().path(), adapter);
                 } else if(interfaces.contains("org.bluez.Device1")) {
                     QString adapterPath = managedObjectIt.value().value("org.bluez.Device1").value("Adapter").value<QDBusObjectPath>().path();
                     devices.insert(path,adapterPath);
@@ -121,7 +121,7 @@ void Manager::Private::initialize()
                 QString devicePath = deviceIt.key();
                 QString adapterPath = deviceIt.value();
 
-                Adapter * const adapter = m_adaptersHash.value(adapterPath);
+                Adapter * const adapter = m_adapters.value(adapterPath);
                 adapter->addDevice(devicePath);
                 m_devAdapter.insert(devicePath,adapter);
             }
@@ -138,10 +138,10 @@ void Manager::Private::clean()
     qDebug() << "Private::clean";
     delete m_dbusObjectManager;
     delete m_bluezAgentManager;
-    QHashIterator<QString, Adapter*> i(m_adaptersHash);
+    QMapIterator<QString, Adapter*> i(m_adapters);
     while (i.hasNext()) {
         i.next();
-        Adapter *adapter = m_adaptersHash.take(i.key());
+        Adapter *adapter = m_adapters.take(i.key());
         emit m_q->adapterRemoved(adapter);
         delete adapter;
     }
@@ -199,7 +199,7 @@ void Manager::Private::_k_interfacesAdded(const QDBusObjectPath &objectPath, con
   for(i = interfaces.constBegin(); i != interfaces.constEnd(); ++i) {
     if(i.key() == "org.bluez.Adapter1") {
       Adapter * const adapter = new Adapter(objectPath.path(), m_q);
-      m_adaptersHash.insert(objectPath.path(), adapter);
+      m_adapters.insert(objectPath.path(), adapter);
       if (!m_usableAdapter || !m_usableAdapter->isPowered()) {
           Adapter *const oldUsableAdapter = m_usableAdapter;
           m_usableAdapter = findUsableAdapter();
@@ -210,7 +210,7 @@ void Manager::Private::_k_interfacesAdded(const QDBusObjectPath &objectPath, con
       emit m_q->adapterAdded(adapter);
     } else if(i.key() == "org.bluez.Device1") {
       QString adapterPath = i.value().value("Adapter").value<QDBusObjectPath>().path();
-      Adapter * const adapter = m_adaptersHash.value(adapterPath);
+      Adapter * const adapter = m_adapters.value(adapterPath);
       adapter->addDevice(objectPath.path());
       m_devAdapter.insert(objectPath.path(),adapter);
     }
@@ -222,15 +222,15 @@ void Manager::Private::_k_interfacesRemoved(const QDBusObjectPath &objectPath, c
     QString object = objectPath.path();
     Q_FOREACH(QString interface, interfaces) {
         if(interface == "org.bluez.Adapter1") {
-            Adapter *const adapter = m_adaptersHash.take(object); // return and remove it from the hash
-            if (m_adaptersHash.isEmpty()) {
+            Adapter *const adapter = m_adapters.take(object); // return and remove it from the map
+            if (m_adapters.isEmpty()) {
                 m_usableAdapter = 0;
             }
             if (adapter) {
                 emit m_q->adapterRemoved(adapter);
                 delete adapter;
             }
-            if (m_adaptersHash.isEmpty()) {
+            if (m_adapters.isEmpty()) {
                 emit m_q->usableAdapterChanged(0);
                 emit m_q->allAdaptersRemoved();
             } else {
@@ -314,7 +314,7 @@ QList<Adapter*> Manager::adapters() const
         return QList<Adapter*>();
     }
 
-    return d->m_adaptersHash.values();
+    return d->m_adapters.values();
 }
 
 bool Manager::isBluetoothOperational() const
