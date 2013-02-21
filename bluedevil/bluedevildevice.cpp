@@ -172,7 +172,14 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
         connect(m_bluezDeviceInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
                 m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
 
-        const QVariantMap data = m_bluezDeviceInterface->GetProperties().value();
+        QDBusPendingReply <QVariantMap > rep = m_bluezDeviceInterface->GetProperties();
+        rep.waitForFinished();
+
+        if (rep.isError() || !rep.isValid()) {
+            return false;
+        }
+
+        const QVariantMap data = rep.value();
         m_paired = data["Paired"].toBool();
         m_connected = data["Connected"].toBool();
         m_trusted = data["Trusted"].toBool();
