@@ -251,6 +251,12 @@ public:
      */
     bool isBlocked();
 
+    /**
+     * @return Whether the device is ready to be used or note
+     *
+     * @note If the given device address or path is incorrect this will stay false.
+     */
+    bool isReady();
 public Q_SLOTS:
     /**
      * It is not mandatory to call to this method. If you are just retrieving some information that

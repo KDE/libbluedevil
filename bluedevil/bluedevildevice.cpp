@@ -94,6 +94,7 @@ public:
     QString     m_alias;
     bool        m_legacyPairing;
     bool        m_propertiesFetched;
+    bool        m_deviceCreated;
     bool        m_registrationOnBusRejected; // used for avoid trying to register this device more
                                              // than one time on the bus.
 
@@ -115,6 +116,7 @@ Device::Private::Private(const QString &address, const QString &alias, quint32 d
     , m_blocked(false)
     , m_legacyPairing(legacyPairing)
     , m_propertiesFetched(false)
+    , m_deviceCreated(false)
     , m_registrationOnBusRejected(false)
     , m_q(q)
 {
@@ -140,6 +142,7 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
     }
 
     if (m_registrationOnBusRejected) {
+        m_deviceCreated = false;
         return false;
     }
 
@@ -152,6 +155,7 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
                 devicePath = m_adapter->createDevice(m_address);
                 if (devicePath.isEmpty()) {
                     m_registrationOnBusRejected = true;
+                    m_deviceCreated = false;
                     return false;
                 }
             }
@@ -186,6 +190,7 @@ bool Device::Private::_k_ensureDeviceCreated(const QString &busDevicePath)
         m_adapter->addDeviceWithUBI(devicePath, m_q);
     }
 
+    m_deviceCreated = true;
     return true;
 }
 
@@ -407,6 +412,12 @@ bool Device::isBlocked()
         emit isBlockedResult(this, d->m_blocked);
     }
     return d->m_blocked;
+}
+
+bool Device::isReady()
+{
+    ENSURE_PROPERTIES_FETCHED
+    return d->m_deviceCreated;
 }
 
 bool Device::registerDevice()
