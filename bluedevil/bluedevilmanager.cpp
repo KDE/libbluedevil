@@ -69,9 +69,9 @@ Manager::Private::Private(Manager *q)
     if (QDBusConnection::systemBus().isConnected()) {
         QDBusReply<bool> reply = QDBusConnection::systemBus().interface()->isServiceRegistered("org.bluez");
 
-	if (reply.isValid()) {
-	    m_bluezServiceRunning = reply.value();
-	}
+        if (reply.isValid()) {
+            m_bluezServiceRunning = reply.value();
+        }
     }
 }
 
