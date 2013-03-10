@@ -140,6 +140,7 @@ void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
     m_adaptersHash.insert(objectPath.path(), adapter);
     if (!m_defaultAdapter) {
         m_defaultAdapter = adapter;
+        emit m_q->defaultAdapterChanged(m_defaultAdapter);
     }
     if (!m_usableAdapter || !m_usableAdapter->isPowered()) {
         Adapter *const oldUsableAdapter = m_usableAdapter;
