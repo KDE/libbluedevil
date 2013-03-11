@@ -107,13 +107,12 @@ void Manager::Private::initialize()
         }
         const QVariantMap properties = m_bluezManagerInterface->GetProperties().value();
         const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
-        if (adapters.count() == 1) {
-            return;
-        }
-        Q_FOREACH (const QDBusObjectPath &path, adapters) {
-            if (path.path() != defaultAdapterPath) {
-                Adapter *const adapter = new Adapter(path.path(), m_q);
-                m_adaptersHash.insert(path.path(), adapter);
+        if (adapters.count() > 1) {
+            Q_FOREACH (const QDBusObjectPath &path, adapters) {
+                if (path.path() != defaultAdapterPath) {
+                    Adapter *const adapter = new Adapter(path.path(), m_q);
+                    m_adaptersHash.insert(path.path(), adapter);
+                }
             }
         }
         m_usableAdapter = findUsableAdapter();
