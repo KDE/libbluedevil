@@ -102,6 +102,7 @@ void Manager::Private::initialize()
             if (!defaultAdapterPath.isEmpty()) {
                 m_defaultAdapter = new Adapter(defaultAdapterPath, m_q);
                 m_adaptersHash.insert(defaultAdapterPath, m_defaultAdapter);
+                emit m_q->defaultAdapterChanged(m_defaultAdapter);
             }
         }
         const QVariantMap properties = m_bluezManagerInterface->GetProperties().value();
@@ -115,6 +116,8 @@ void Manager::Private::initialize()
                 m_adaptersHash.insert(path.path(), adapter);
             }
         }
+        m_usableAdapter = findUsableAdapter();
+        emit m_q->usableAdapterChanged(m_usableAdapter);
     }
 }
 
