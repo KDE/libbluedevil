@@ -40,6 +40,7 @@ public:
     ~Private();
 
     void initialize();
+    void clean();
     Adapter *findUsableAdapter();
 
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
@@ -117,6 +118,24 @@ void Manager::Private::initialize()
     }
 }
 
+void Manager::Private::clean()
+{
+    qDebug() << "Private::clean";
+    delete m_bluezManagerInterface;
+    QHashIterator<QString, Adapter*> i(m_adaptersHash);
+    while (i.hasNext()) {
+        i.next();
+        Adapter *adapter = m_adaptersHash.take(i.key());
+        emit m_q->adapterRemoved(adapter);
+        delete adapter;
+    }
+
+    m_usableAdapter = 0;
+    m_defaultAdapter = 0;
+
+    emit m_q->usableAdapterChanged(0);
+    emit m_q->defaultAdapterChanged(0);
+}
 Adapter *Manager::Private::findUsableAdapter()
 {
     Adapter *const defAdapter = m_q->defaultAdapter();
@@ -199,27 +218,12 @@ void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVa
 void Manager::Private::_k_bluezServiceRegistered()
 {
     m_bluezServiceRunning = true;
-    if (!m_bluezManagerInterface) {
-        initialize();
-    }
+    initialize();
 }
 
 void Manager::Private::_k_bluezServiceUnregistered()
 {
-    QHashIterator<QString, Adapter*> i(m_adaptersHash);
-    while (i.hasNext()) {
-        i.next();
-        Adapter *adapter = m_adaptersHash.take(i.key());
-        emit m_q->adapterRemoved(adapter);
-        delete adapter;
-    }
-
-    m_usableAdapter = 0;
-    m_defaultAdapter = 0;
-
-    emit m_q->usableAdapterChanged(0);
-    emit m_q->defaultAdapterChanged(0);
-
+    clean();
     m_bluezServiceRunning = false;
 }
 
