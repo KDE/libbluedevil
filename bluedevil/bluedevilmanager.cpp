@@ -226,8 +226,8 @@ void Manager::Private::_k_bluezServiceRegistered()
 
 void Manager::Private::_k_bluezServiceUnregistered()
 {
-    clean();
     m_bluezServiceRunning = false;
+    clean();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
