@@ -69,6 +69,7 @@ public:
 
     void _k_propertyChanged(const QString &interface_name, const QVariantMap &changed_values, const QStringList &invalidated_values);
     void _k_deviceRegistered(const QString &path);
+    QStringList _k_stringListToUpper(const QStringList & list);
 
     org::bluez::Device1                *m_bluezDeviceInterface;
     org::freedesktop::DBus::Properties *m_dbuspropertiesInterface;
@@ -101,6 +102,15 @@ Device::Private::~Private()
     delete m_dbuspropertiesInterface;
 }
 
+QStringList Device::Private::_k_stringListToUpper(const QStringList& list)
+{
+    QStringList upperList(list);
+    for(int i=0;i<upperList.size();i++) {
+      upperList[i] = upperList.value(i).toUpper();
+    }
+    return upperList;
+}
+
 void Device::Private::_k_propertyChanged(const QString &interface_name, const QVariantMap &changed_values, const QStringList &invalidated_values)
 {
   QVariantMap::const_iterator i;
@@ -120,7 +130,7 @@ void Device::Private::_k_propertyChanged(const QString &interface_name, const QV
     } else if (property == "Name") {
         emit m_q->nameChanged(value.toString());
     } else if (property == "UUIDs") {
-        emit m_q->UUIDsChanged(value.toStringList());
+        emit m_q->UUIDsChanged(_k_stringListToUpper(value.toStringList()));
     }
     emit m_q->propertyChanged(property, value);
   }
@@ -206,10 +216,7 @@ bool Device::hasLegacyPairing() const
 
 QStringList Device::UUIDs()
 {
-    QStringList UUIDs = d->m_bluezDeviceInterface->uUIDs();
-    for(int i=0;i<UUIDs.size();i++) {
-      UUIDs[i] = UUIDs.value(i).toUpper();
-    }
+    QStringList UUIDs = d->_k_stringListToUpper(d->m_bluezDeviceInterface->uUIDs());
     if (sender()) {
         emit UUIDsResult(this, UUIDs);
     }
