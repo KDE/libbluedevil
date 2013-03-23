@@ -183,8 +183,12 @@ void Manager::registerAgent(const QString &agentPath, RegisterCapability registe
     }
 
     QDBusObjectPath agentObjectPath = QDBusObjectPath(agentPath);
-    QDBusPendingReply<void> reply = d->m_bluezAgentManager->RegisterAgent(agentObjectPath, capability);
-    reply.waitForFinished(); // TODO: is it necessary to wait?
+    d->m_bluezAgentManager->RegisterAgent(agentObjectPath, capability);
+}
+
+void Manager::requestDefaultAgent(const QString& agentPath)
+{
+    QDBusObjectPath agentObjectPath = QDBusObjectPath(agentPath);
     d->m_bluezAgentManager->RequestDefaultAgent(agentObjectPath);
 }
 

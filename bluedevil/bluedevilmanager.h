@@ -113,6 +113,11 @@ public Q_SLOTS:
      */
     void unregisterAgent(const QString &agentPath);
 
+    /**
+     * Request to set Agent with agentPath as default agent.
+     */
+    void requestDefaultAgent(const QString &agentPath);
+
 Q_SIGNALS:
     /**
      * This signal will be emitted when an adapter has been connected.
