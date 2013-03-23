@@ -68,7 +68,6 @@ public:
     ~Private();
 
     void _k_propertyChanged(const QString &interface_name, const QVariantMap &changed_values, const QStringList &invalidated_values);
-    void _k_deviceRegistered(const QString &path);
     QStringList _k_stringListToUpper(const QStringList & list);
 
     org::bluez::Device1                *m_bluezDeviceInterface;
