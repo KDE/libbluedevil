@@ -46,6 +46,7 @@ public:
     void _k_adapterAdded(const QDBusObjectPath &objectPath);
     void _k_adapterRemoved(const QDBusObjectPath &objectPath);
     void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
+    void _k_adapterPoweredChanged(bool powered);
     void _k_propertyChanged(const QString &property, const QDBusVariant &value);
 
     void _k_bluezServiceRegistered();
@@ -101,6 +102,7 @@ void Manager::Private::initialize()
             defaultAdapterPath = reply.value().path();
             if (!defaultAdapterPath.isEmpty()) {
                 m_defaultAdapter = new Adapter(defaultAdapterPath, m_q);
+                connect(m_defaultAdapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
                 m_adaptersHash.insert(defaultAdapterPath, m_defaultAdapter);
                 emit m_q->defaultAdapterChanged(m_defaultAdapter);
             }
@@ -111,10 +113,12 @@ void Manager::Private::initialize()
             Q_FOREACH (const QDBusObjectPath &path, adapters) {
                 if (path.path() != defaultAdapterPath) {
                     Adapter *const adapter = new Adapter(path.path(), m_q);
+                    connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
                     m_adaptersHash.insert(path.path(), adapter);
                 }
             }
         }
+
         m_usableAdapter = findUsableAdapter();
         emit m_q->usableAdapterChanged(m_usableAdapter);
     }
@@ -158,6 +162,8 @@ void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
     qDebug() << "Added: " << objectPath.path();
     Adapter *const adapter = new Adapter(objectPath.path(), m_q);
+    connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
+
     m_adaptersHash.insert(objectPath.path(), adapter);
     if (!m_defaultAdapter) {
         m_defaultAdapter = adapter;
@@ -205,10 +211,33 @@ void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPat
     Adapter *adapter = m_adaptersHash[objectPath.path()];
     if (!adapter) {
         adapter = new Adapter(objectPath.path(), m_q);
+        connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
         m_adaptersHash.insert(objectPath.path(), adapter);
     }
     m_defaultAdapter = adapter;
     emit m_q->defaultAdapterChanged(adapter);
+}
+
+void Manager::Private::_k_adapterPoweredChanged(bool powered)
+{
+    Adapter *adapter = qobject_cast< Adapter* >(m_q->sender());
+    if (!adapter) {
+        qWarning("adapterPoweredChanged was called from a null adapter");
+        return;
+    }
+
+    if (m_usableAdapter && adapter != m_usableAdapter) {
+        return;//The modified adapter is not the usable one, ignore the event (we do not care)
+    }
+
+    if (m_defaultAdapter && !powered) {
+        m_defaultAdapter = 0;
+        emit m_q->usableAdapterChanged(0);
+        return;
+    }
+
+    m_defaultAdapter = adapter;
+    emit m_q->usableAdapterChanged(m_defaultAdapter);
 }
 
 void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
@@ -274,6 +303,7 @@ Adapter *Manager::defaultAdapter()
         const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
         if (!adapterPath.isEmpty()) {
             d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
+            connect(d->m_defaultAdapter, SIGNAL(poweredChanged(bool)), SLOT(_k_adapterPoweredChanged(bool)));
             d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
         }
     }
