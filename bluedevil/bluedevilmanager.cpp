@@ -161,6 +161,11 @@ Adapter *Manager::Private::findUsableAdapter()
 void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
 {
     qDebug() << "Added: " << objectPath.path();
+    if (m_adaptersHash.contains(objectPath.path())) {
+        qDebug() << "Already in the adapterHash";
+        return;
+    }
+
     Adapter *const adapter = new Adapter(objectPath.path(), m_q);
     connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
 
@@ -301,7 +306,7 @@ Adapter *Manager::defaultAdapter()
 
     if (!d->m_defaultAdapter) {
         const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
-        if (!adapterPath.isEmpty()) {
+        if (!adapterPath.isEmpty() && !d->m_adaptersHash.contains(adapterPath)) {
             d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
             connect(d->m_defaultAdapter, SIGNAL(poweredChanged(bool)), SLOT(_k_adapterPoweredChanged(bool)));
             d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
