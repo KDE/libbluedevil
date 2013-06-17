@@ -7,6 +7,8 @@ find_package(Qt4 REQUIRED)
 
 include(CheckCXXCompilerFlag)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+
 check_cxx_compiler_flag(-fvisibility=hidden _HAVE_VISIBILITY)
 if (_HAVE_VISIBILITY AND NOT WIN32)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
