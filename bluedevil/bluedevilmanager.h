@@ -23,8 +23,6 @@
 #ifndef BLUEDEVILMANAGER_H
 #define BLUEDEVILMANAGER_H
 
-#include "bluedevildbustypes.h"
-
 #include <bluedevil/bluedevil_export.h>
 
 #include <QtCore/QObject>
@@ -33,6 +31,7 @@
 namespace BlueDevil {
 
 class Adapter;
+class ManagerPrivate;
 
 /**
  * @class Manager bluedevilmanager.h bluedevil/bluedevilmanager.h
@@ -57,6 +56,7 @@ class BLUEDEVIL_EXPORT Manager
     Q_PROPERTY(QList<Adapter*> adapters READ adapters)
     Q_PROPERTY(bool isBluetoothOperational READ isBluetoothOperational)
 
+    friend class ManagerPrivate;
 public:
     enum RegisterCapability {
         DisplayOnly = 0,
@@ -155,13 +155,7 @@ private:
      */
     Manager(QObject *parent = 0);
 
-    class Private;
-    Private *const d;
-
-    Q_PRIVATE_SLOT(d, void _k_interfacesAdded(QDBusObjectPath,QVariantMapMap))
-    Q_PRIVATE_SLOT(d, void _k_interfacesRemoved(QDBusObjectPath,QStringList))
-    Q_PRIVATE_SLOT(d, void _k_bluezServiceRegistered())
-    Q_PRIVATE_SLOT(d, void _k_bluezServiceUnregistered())
+    ManagerPrivate *const d;
 };
 
 }

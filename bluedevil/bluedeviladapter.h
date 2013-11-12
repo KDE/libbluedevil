@@ -62,6 +62,7 @@ class BLUEDEVIL_EXPORT Adapter
     Q_PROPERTY(QStringList UUIDs READ UUIDs)
 
     friend class Manager;
+    friend class ManagerPrivate;
     friend class Device;
 
 public:

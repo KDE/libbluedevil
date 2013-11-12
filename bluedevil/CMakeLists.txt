@@ -4,6 +4,7 @@ include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINA
 
 set(libbluedevil_SRCS
     bluedevilmanager.cpp
+    bluedevilmanager_p.cpp
     bluedeviladapter.cpp
     bluedevildevice.cpp
     bluedevilutils.cpp
@@ -34,7 +35,6 @@ install(TARGETS bluedevil ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES bluedevilmanager.h
               bluedeviladapter.h
-              bluedevildbustypes.h
               bluedevildevice.h
               bluedevil_export.h
               bluedevil.h
