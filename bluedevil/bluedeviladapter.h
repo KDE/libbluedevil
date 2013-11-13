@@ -208,7 +208,7 @@ Q_SIGNALS:
     void pairableChanged(bool pairable);
     void pairableTimeoutChanged(quint32 pairableTimeout);
     void discoverableTimeoutChanged(quint32 discoverableTimeout);
-    void devicesChanged(const QList<Device*> &devices);
+    void deviceChanged(Device* device);
     void discoveringChanged(bool discovering);
     void propertyChanged(const QString &property, const QVariant &value);
 
@@ -233,6 +233,7 @@ private:
 
     Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QString))
     Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QVariantMap,QStringList))
+    Q_PRIVATE_SLOT(d, void _k_devicePropertyChanged(QString,QVariant))
 };
 
 }

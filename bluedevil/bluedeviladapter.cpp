@@ -41,6 +41,7 @@ public:
 
     void _k_deviceRemoved(const QString &objectPath);
     void _k_propertyChanged(const QString &property, const QVariantMap &changed_properties, const QStringList &invalidated_properties);
+    void _k_devicePropertyChanged(const QString &property, const QVariant &value);
 
     org::bluez::Adapter1               *m_bluezAdapterInterface;
     org::freedesktop::DBus::Properties *m_dbusPropertiesInterface;
@@ -105,6 +106,14 @@ void Adapter::Private::_k_propertyChanged(const QString &interface_name, const Q
       }
       emit m_q->propertyChanged(property, value);
     }
+}
+
+void Adapter::Private::_k_devicePropertyChanged(const QString& property, const QVariant& value)
+{
+    Device *device = qobject_cast<Device*>(m_q->sender());
+    Q_ASSERT(device);
+
+    emit m_q->deviceChanged(device);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -265,6 +274,8 @@ void Adapter::addDevice(const QString &objectPath)
         d->m_unpairedDevices.insert(objectPath,device);
         emit unpairedDeviceFound(device);
     }
+
+    connect(device, SIGNAL(propertyChanged(QString,QVariant)), SLOT(_k_devicePropertyChanged(QString,QVariant)));
 }
 
 void Adapter::removeDevice(const QString &objectPath)
