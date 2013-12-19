@@ -132,7 +132,7 @@ QList<Adapter*> Manager::adapters() const
     return d->m_adapters.values();
 }
 
-Device* Manager::deviceForUBI(const QString& UBI)
+Device* Manager::deviceForUBI(const QString& UBI) const
 {
     Device *device = 0;
     Q_FOREACH(Adapter *adapter, d->m_adapters) {

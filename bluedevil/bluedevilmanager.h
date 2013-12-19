@@ -98,10 +98,10 @@ public:
      * one adapter is iterating on all adapters and call deviceForUBI. This method basically
      * does that so application developers doesn't have to do it.
      *
-     * @arg Device UBI to find
+     * @param Device UBI to find
      * @return A device for the given UBI or null if none is found
      */
-    Device *deviceForUBI(const QString &UBI);
+    Device *deviceForUBI(const QString &UBI) const;
 
     /**
      * @return Whether the bluetooth system is ready to be used, and there is a usable adapter
