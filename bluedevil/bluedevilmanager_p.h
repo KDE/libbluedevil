@@ -29,6 +29,7 @@
 namespace BlueDevil {
 class Adapter;
 class Manager;
+class Device;
 
 class ManagerPrivate : public QObject
 {
@@ -40,6 +41,7 @@ public:
     void initialize();
     void clean();
     Adapter *findUsableAdapter();
+    Device  *deviceForUBI(const QString &UBI);
 
 
     org::freedesktop::DBus::ObjectManager *m_dbusObjectManager;

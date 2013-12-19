@@ -30,6 +30,7 @@
 
 namespace BlueDevil {
 
+class Device;
 class Adapter;
 class ManagerPrivate;
 
@@ -89,6 +90,18 @@ public:
      * @return A list with all the connected adapters.
      */
     QList<Adapter*> adapters() const;
+
+    /**
+     * Returns a device for a given UBI independently of the adapter they are in
+     *
+     * All devices belong to an adapter so in order to find a device when we have more than
+     * one adapter is iterating on all adapters and call deviceForUBI. This method basically
+     * does that so application developers doesn't have to do it.
+     *
+     * @arg Device UBI to find
+     * @return A device for the given UBI or null if none is found
+     */
+    Device *deviceForUBI(const QString &UBI);
 
     /**
      * @return Whether the bluetooth system is ready to be used, and there is a usable adapter
