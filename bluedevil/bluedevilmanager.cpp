@@ -145,6 +145,16 @@ Device* Manager::deviceForUBI(const QString& UBI) const
     return 0;
 }
 
+QList<Device*> Manager::devices() const
+{
+    QList<Device*> devices;
+    Q_FOREACH(Adapter *adapter, d->m_adapters) {
+        devices << adapter->devices();
+    }
+
+    return devices;
+}
+
 bool Manager::isBluetoothOperational() const
 {
     return QDBusConnection::systemBus().isConnected() && d->m_bluezServiceRunning && usableAdapter();

@@ -104,6 +104,11 @@ public:
     Device *deviceForUBI(const QString &UBI) const;
 
     /**
+     * Return a list of all known devices by all connected adaptors
+     * @return a list of all known devices
+     */
+    QList<Device*> devices() const;
+    /**
      * @return Whether the bluetooth system is ready to be used, and there is a usable adapter
      *         connected and turned on at the system.
      *
