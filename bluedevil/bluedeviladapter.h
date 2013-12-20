@@ -49,7 +49,7 @@ class BLUEDEVIL_EXPORT Adapter
     Q_OBJECT
 
     Q_PROPERTY(QString address READ address)
-    Q_PROPERTY(QString name READ name WRITE setName)
+    Q_PROPERTY(QString name READ name)
     Q_PROPERTY(quint32 adapterClass READ adapterClass)
     Q_PROPERTY(bool powered READ isPowered WRITE setPowered)
     Q_PROPERTY(bool discoverable READ isDiscoverable WRITE setDiscoverable)
@@ -57,22 +57,15 @@ class BLUEDEVIL_EXPORT Adapter
     Q_PROPERTY(quint32 paireableTimeout READ paireableTimeout WRITE setPaireableTimeout)
     Q_PROPERTY(quint32 discoverableTimeout READ discoverableTimeout WRITE setDiscoverableTimeout)
     Q_PROPERTY(bool isDiscovering READ isDiscovering)
-    Q_PROPERTY(QList<Device*> foundDevices READ foundDevices)
+    Q_PROPERTY(QList<Device*> unpairedDevices READ unpairedDevices)
     Q_PROPERTY(QList<Device*> devices READ devices)
     Q_PROPERTY(QStringList UUIDs READ UUIDs)
 
     friend class Manager;
+    friend class ManagerPrivate;
     friend class Device;
 
 public:
-
-    enum RegisterCapability {
-        DisplayOnly = 0,
-        DisplayYesNo = 1,
-        KeyboardOnly = 2,
-        NoInputNoOutput = 3
-    };
-
     virtual ~Adapter();
 
     /**
@@ -121,9 +114,9 @@ public:
     bool isDiscovering() const;
 
     /**
-     * @return A list with all found devices on the discovery phase.
+     * @return A list with all unpaired devices found on the discovery phase.
      */
-    QList<Device*> foundDevices() const;
+    QList<Device*> unpairedDevices() const;
 
     /**
      * @return A device defined by its hardware address.
@@ -147,23 +140,6 @@ public:
     QStringList UUIDs();
 
 public Q_SLOTS:
-    /**
-     * Registers agent.
-     */
-    void registerAgent(const QString &agentPath, RegisterCapability registerCapability);
-
-    /**
-     * Unregisters agent.
-     */
-    void unregisterAgent(const QString &agentPath);
-
-    /**
-     * Sets the name of this adapter to @p name.
-     *
-     * This is the friendly name of the adapter.
-     */
-    void setName(const QString &name);
-
     /**
      * Sets whether this adapter is consuming energy or not.
      */
@@ -223,20 +199,16 @@ public Q_SLOTS:
     void stopDiscovery() const;
 
 Q_SIGNALS:
-    void deviceFound(Device *device);
-    void deviceFound(const QVariantMap &info); // ###: Remove on new version
-    void deviceDisappeared(Device *device);
-    void deviceCreated(Device *device);
     void deviceRemoved(Device *device);
-    void pairedDeviceCreated(const QString &path);
-    void deviceCreated(const QString &path);
+    void deviceFound(Device *device);
+    void unpairedDeviceFound(Device *device);
     void nameChanged(const QString &name);
     void poweredChanged(bool powered);
     void discoverableChanged(bool discoverable);
     void pairableChanged(bool pairable);
     void pairableTimeoutChanged(quint32 pairableTimeout);
     void discoverableTimeoutChanged(quint32 discoverableTimeout);
-    void devicesChanged(const QList<Device*> &devices);
+    void deviceChanged(Device* device);
     void discoveringChanged(bool discovering);
     void propertyChanged(const QString &property, const QVariant &value);
 
@@ -249,38 +221,19 @@ private:
     /**
      * @internal
      */
-    QString findDevice(const QString &address) const;
+    void addDevice(const QString &objectPath);
 
     /**
      * @internal
      */
-    QString createDevice(const QString &address) const;
-
-    /**
-     * @internal
-     */
-    void createDeviceAsync(const QString& address) const;
-
-    /**
-     * @internal
-     */
-    void createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const;
-
-    /**
-     * @internal
-     */
-    void addDeviceWithUBI(const QString &UBI, Device *device);
+    void removeDevice(const QString &objectPath);
 
     class Private;
     Private *const d;
 
-    Q_PRIVATE_SLOT(d, void _k_deviceCreated(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_deviceFound(QString,QVariantMap))
-    Q_PRIVATE_SLOT(d, void _k_deviceDisappeared(QString))
-    Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QDBusObjectPath))
-    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QDBusVariant))
-    Q_PRIVATE_SLOT(d, void _k_createPairedDeviceReply(QDBusPendingCallWatcher*))
-    Q_PRIVATE_SLOT(d, void _k_createDeviceReply(QDBusPendingCallWatcher*));
+    Q_PRIVATE_SLOT(d, void _k_deviceRemoved(QString))
+    Q_PRIVATE_SLOT(d, void _k_propertyChanged(QString,QVariantMap,QStringList))
+    Q_PRIVATE_SLOT(d, void _k_devicePropertyChanged(QString,QVariant))
 };
 
 }

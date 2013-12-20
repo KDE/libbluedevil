@@ -45,7 +45,6 @@ void AdapterTest::adapterAdded(Adapter *adapter)
     qDebug() << "Adapter added: " << adapter;
     Manager *const manager = Manager::self();
     qDebug() << "\tBluetooth Operational: " << manager->isBluetoothOperational();
-    qDebug() << "\tDefault Adapter: " << manager->defaultAdapter();
     qDebug() << "\tUsable Adapter: " << manager->usableAdapter();
 }
 
@@ -54,16 +53,6 @@ void AdapterTest::adapterRemoved(Adapter *adapter)
     qDebug() << "Adapter removed: " << adapter;
     Manager *const manager = Manager::self();
     qDebug() << "\tBluetooth Operational: " << manager->isBluetoothOperational();
-    qDebug() << "\tDefault Adapter: " << manager->defaultAdapter();
-    qDebug() << "\tUsable Adapter: " << manager->usableAdapter();
-}
-
-void AdapterTest::defaultAdapterChanged(Adapter *adapter)
-{
-    qDebug() << "Default adapter changed: " << adapter;
-    Manager *const manager = Manager::self();
-    qDebug() << "\tBluetooth Operational: " << manager->isBluetoothOperational();
-    qDebug() << "\tDefault Adapter: " << manager->defaultAdapter();
     qDebug() << "\tUsable Adapter: " << manager->usableAdapter();
 }
 
@@ -72,7 +61,6 @@ void AdapterTest::usableAdapterChanged(Adapter *adapter)
     qDebug() << "Usable adapter changed: " << adapter;
     Manager *const manager = Manager::self();
     qDebug() << "\tBluetooth Operational: " << manager->isBluetoothOperational();
-    qDebug() << "\tDefault Adapter: " << manager->defaultAdapter();
     qDebug() << "\tUsable Adapter: " << manager->usableAdapter();
 }
 
@@ -81,7 +69,6 @@ void AdapterTest::allAdaptersRemoved()
     qDebug() << "All adapters have been removed";
     Manager *const manager = Manager::self();
     qDebug() << "\tBluetooth Operational: " << manager->isBluetoothOperational();
-    qDebug() << "\tDefault Adapter: " << manager->defaultAdapter();
     qDebug() << "\tUsable Adapter: " << manager->usableAdapter();
 }
 
@@ -90,7 +77,6 @@ void AdapterTest::run()
     Manager *const manager = Manager::self();
     while (true) {
         qDebug() << "Bluetooth Operational: " << manager->isBluetoothOperational();
-        qDebug() << "Default Adapter: " << manager->defaultAdapter();
         qDebug() << "Usable Adapter: " << manager->usableAdapter();
         sleep(5);
     }
@@ -107,7 +93,6 @@ int main(int argc, char **argv)
     Manager *const manager = Manager::self();
     QObject::connect(manager, SIGNAL(adapterAdded(Adapter*)), adapterTest, SLOT(adapterAdded(Adapter*)));
     QObject::connect(manager, SIGNAL(adapterRemoved(Adapter*)), adapterTest, SLOT(adapterRemoved(Adapter*)));
-    QObject::connect(manager, SIGNAL(defaultAdapterChanged(Adapter*)), adapterTest, SLOT(defaultAdapterChanged(Adapter*)));
     QObject::connect(manager, SIGNAL(usableAdapterChanged(Adapter*)), adapterTest, SLOT(usableAdapterChanged(Adapter*)));
     QObject::connect(manager, SIGNAL(allAdaptersRemoved()), adapterTest, SLOT(allAdaptersRemoved()));
 

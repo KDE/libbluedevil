@@ -1,8 +1,7 @@
 /*****************************************************************************
  * This file is part of the BlueDevil project                                *
  *                                                                           *
- * Copyright (C) 2011 Rafael Fernández López <ereslibre@kde.org>             *
- * Copyright (C) 2011 UFO Coders <info@ufocoders.com>                        *
+ * Copyright (C) 2013 Daniel Schaal <farbing@web.de>                         *
  *                                                                           *
  * This library is free software; you can redistribute it and/or             *
  * modify it under the terms of the GNU Library General Public               *
@@ -20,36 +19,16 @@
  * Boston, MA 02110-1301, USA.                                               *
  *****************************************************************************/
 
-#ifndef ADAPTERTEST_H
-#define ADAPTERTEST_H
+#ifndef dbustypes_H
+#define dbustypes_H
 
-#include <QtCore/QObject>
-#include <QtCore/QThread>
+#include <QVariantMap>
+#include <QDBusObjectPath>
 
-namespace BlueDevil {
-    class Adapter;
-    class Device;
-}
+typedef QMap<QString,QVariantMap> QVariantMapMap;
+Q_DECLARE_METATYPE(QVariantMapMap)
 
-using namespace BlueDevil;
+typedef QMap<QDBusObjectPath, QVariantMapMap> DBusManagerStruct;
+Q_DECLARE_METATYPE(DBusManagerStruct)
 
-class AdapterTest
-    : public QThread
-{
-    Q_OBJECT
-
-public:
-    AdapterTest(QObject *parent = 0);
-    virtual ~AdapterTest();
-
-private Q_SLOTS:
-    void adapterAdded(Adapter *adapter);
-    void adapterRemoved(Adapter *adapter);
-    void usableAdapterChanged(Adapter *adapter);
-    void allAdaptersRemoved();
-
-protected:
-    virtual void run();
-};
-
-#endif // ADAPTERTEST_H
+#endif // dbustypes_H

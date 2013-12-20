@@ -22,10 +22,15 @@
 
 #include "bluedevilmanager.h"
 #include "bluedeviladapter.h"
+#include "bluedevildevice.h"
+#include "bluedevilmanager_p.h"
+#include "bluedevildbustypes.h"
 
-#include "bluedevil/bluezmanager.h"
+#include "bluedevil/dbusobjectmanager.h"
+#include "bluedevil/bluezagentmanager1.h"
 
 #include <QtCore/QHash>
+#include <QVariantMap>
 
 #include <QtDBus/QDBusConnectionInterface>
 
@@ -33,248 +38,56 @@ namespace BlueDevil {
 
 static Manager *instance = 0;
 
-class Manager::Private
+void Manager::registerAgent(const QString &agentPath, RegisterCapability registerCapability)
 {
-public:
-    Private(Manager *q);
-    ~Private();
+    QString capability;
 
-    void initialize();
-    void clean();
-    Adapter *findUsableAdapter();
-
-    void _k_adapterAdded(const QDBusObjectPath &objectPath);
-    void _k_adapterRemoved(const QDBusObjectPath &objectPath);
-    void _k_defaultAdapterChanged(const QDBusObjectPath &objectPath);
-    void _k_adapterPoweredChanged(bool powered);
-    void _k_propertyChanged(const QString &property, const QDBusVariant &value);
-
-    void _k_bluezServiceRegistered();
-    void _k_bluezServiceUnregistered();
-
-    OrgBluezManagerInterface *m_bluezManagerInterface;
-    Adapter                  *m_defaultAdapter;
-    Adapter                  *m_usableAdapter;
-    QHash<QString, Adapter*>  m_adaptersHash;
-    bool                      m_bluezServiceRunning;
-
-    Manager *const m_q;
-};
-
-Manager::Private::Private(Manager *q)
-    : m_bluezManagerInterface(0)
-    , m_defaultAdapter(0)
-    , m_usableAdapter(0)
-    , m_q(q)
-{
-    m_bluezServiceRunning = false;
-    if (QDBusConnection::systemBus().isConnected()) {
-        QDBusReply<bool> reply = QDBusConnection::systemBus().interface()->isServiceRegistered("org.bluez");
-
-        if (reply.isValid()) {
-            m_bluezServiceRunning = reply.value();
-        }
+    switch (registerCapability) {
+        case DisplayOnly:
+            capability = "DisplayOnly";
+            break;
+        case DisplayYesNo:
+            capability = "DisplayYesNo";
+            break;
+        case KeyboardOnly:
+            capability = "KeyboardOnly";
+            break;
+        case NoInputNoOutput:
+            capability = "NoInputNoOutput";
+            break;
+        default:
+            return;
     }
+
+    QDBusObjectPath agentObjectPath = QDBusObjectPath(agentPath);
+    d->m_bluezAgentManager->RegisterAgent(agentObjectPath, capability);
 }
 
-Manager::Private::~Private()
+void Manager::requestDefaultAgent(const QString& agentPath)
 {
-    delete m_bluezManagerInterface;
+    QDBusObjectPath agentObjectPath = QDBusObjectPath(agentPath);
+    d->m_bluezAgentManager->RequestDefaultAgent(agentObjectPath);
 }
 
-void Manager::Private::initialize()
+void Manager::unregisterAgent(const QString &agentPath)
 {
-    if (QDBusConnection::systemBus().isConnected() && m_bluezServiceRunning) {
-        m_bluezManagerInterface = new OrgBluezManagerInterface("org.bluez", "/", QDBusConnection::systemBus(), m_q);
-
-        connect(m_bluezManagerInterface, SIGNAL(AdapterAdded(QDBusObjectPath)),
-                m_q, SLOT(_k_adapterAdded(QDBusObjectPath)));
-        connect(m_bluezManagerInterface, SIGNAL(AdapterRemoved(QDBusObjectPath)),
-                m_q, SLOT(_k_adapterRemoved(QDBusObjectPath)));
-        connect(m_bluezManagerInterface, SIGNAL(DefaultAdapterChanged(QDBusObjectPath)),
-                m_q, SLOT(_k_defaultAdapterChanged(QDBusObjectPath)));
-        connect(m_bluezManagerInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
-                m_q, SLOT(_k_propertyChanged(QString,QDBusVariant)));
-
-        QString defaultAdapterPath;
-        const QDBusReply<QDBusObjectPath> reply = m_bluezManagerInterface->DefaultAdapter();
-        if (reply.isValid()) {
-            defaultAdapterPath = reply.value().path();
-            if (!defaultAdapterPath.isEmpty()) {
-                m_defaultAdapter = new Adapter(defaultAdapterPath, m_q);
-                connect(m_defaultAdapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
-                m_adaptersHash.insert(defaultAdapterPath, m_defaultAdapter);
-                emit m_q->defaultAdapterChanged(m_defaultAdapter);
-            }
-        }
-        const QVariantMap properties = m_bluezManagerInterface->GetProperties().value();
-        const QList<QDBusObjectPath> adapters = qdbus_cast<QList<QDBusObjectPath> >(properties["Adapters"].value<QDBusArgument>());
-        if (adapters.count() > 1) {
-            Q_FOREACH (const QDBusObjectPath &path, adapters) {
-                if (path.path() != defaultAdapterPath) {
-                    Adapter *const adapter = new Adapter(path.path(), m_q);
-                    connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
-                    m_adaptersHash.insert(path.path(), adapter);
-                }
-            }
-        }
-
-        m_usableAdapter = findUsableAdapter();
-        emit m_q->usableAdapterChanged(m_usableAdapter);
-    }
+    d->m_bluezAgentManager->UnregisterAgent(QDBusObjectPath(agentPath));
 }
 
-void Manager::Private::clean()
-{
-    qDebug() << "Private::clean";
-    delete m_bluezManagerInterface;
-    QHashIterator<QString, Adapter*> i(m_adaptersHash);
-    while (i.hasNext()) {
-        i.next();
-        Adapter *adapter = m_adaptersHash.take(i.key());
-        emit m_q->adapterRemoved(adapter);
-        delete adapter;
-    }
 
-    m_usableAdapter = 0;
-    m_defaultAdapter = 0;
-
-    emit m_q->usableAdapterChanged(0);
-    emit m_q->defaultAdapterChanged(0);
-}
-Adapter *Manager::Private::findUsableAdapter()
-{
-    Adapter *const defAdapter = m_q->defaultAdapter();
-    if (defAdapter && defAdapter->isPowered()) {
-        m_usableAdapter = defAdapter;
-        return defAdapter;
-    }
-    Q_FOREACH (Adapter *const adapter, m_q->adapters()) {
-        if (adapter->isPowered()) {
-            m_usableAdapter = adapter;
-            return adapter;
-        }
-    }
-    return 0;
-}
-
-void Manager::Private::_k_adapterAdded(const QDBusObjectPath &objectPath)
-{
-    qDebug() << "Added: " << objectPath.path();
-    if (m_adaptersHash.contains(objectPath.path())) {
-        qDebug() << "Already in the adapterHash";
-        return;
-    }
-
-    Adapter *const adapter = new Adapter(objectPath.path(), m_q);
-    connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
-
-    m_adaptersHash.insert(objectPath.path(), adapter);
-    if (!m_defaultAdapter) {
-        m_defaultAdapter = adapter;
-        emit m_q->defaultAdapterChanged(m_defaultAdapter);
-    }
-    if (!m_usableAdapter || !m_usableAdapter->isPowered()) {
-        Adapter *const oldUsableAdapter = m_usableAdapter;
-        m_usableAdapter = findUsableAdapter();
-        if (m_usableAdapter != oldUsableAdapter) {
-            emit m_q->usableAdapterChanged(m_usableAdapter);
-        }
-    }
-    emit m_q->adapterAdded(adapter);
-}
-
-void Manager::Private::_k_adapterRemoved(const QDBusObjectPath &objectPath)
-{
-    qDebug() << "Removed: " << objectPath.path();
-    Adapter *const adapter = m_adaptersHash.take(objectPath.path()); // return and remove it from the hash
-    if (m_adaptersHash.isEmpty()) {
-        m_defaultAdapter = 0;
-        m_usableAdapter = 0;
-    }
-    if (adapter) {
-        emit m_q->adapterRemoved(adapter);
-        delete adapter;
-    }
-    if (m_adaptersHash.isEmpty()) {
-        emit m_q->defaultAdapterChanged(0);
-        emit m_q->usableAdapterChanged(0);
-        emit m_q->allAdaptersRemoved();
-    } else {
-        if (m_usableAdapter) {
-            Adapter *const oldUsableAdapter = m_usableAdapter;
-            m_usableAdapter = findUsableAdapter();
-            if (m_usableAdapter != oldUsableAdapter) {
-                emit m_q->usableAdapterChanged(m_usableAdapter);
-            }
-        }
-    }
-}
-
-void Manager::Private::_k_defaultAdapterChanged(const QDBusObjectPath &objectPath)
-{
-    Adapter *adapter = m_adaptersHash[objectPath.path()];
-    if (!adapter) {
-        adapter = new Adapter(objectPath.path(), m_q);
-        connect(adapter, SIGNAL(poweredChanged(bool)), m_q, SLOT(_k_adapterPoweredChanged(bool)));
-        m_adaptersHash.insert(objectPath.path(), adapter);
-    }
-    m_defaultAdapter = adapter;
-    emit m_q->defaultAdapterChanged(adapter);
-}
-
-void Manager::Private::_k_adapterPoweredChanged(bool powered)
-{
-    Adapter *adapter = qobject_cast< Adapter* >(m_q->sender());
-    if (!adapter) {
-        qWarning("adapterPoweredChanged was called from a null adapter");
-        return;
-    }
-
-    if (m_usableAdapter && adapter != m_usableAdapter) {
-        return;//The modified adapter is not the usable one, ignore the event (we do not care)
-    }
-
-    if (m_defaultAdapter && !powered) {
-        m_defaultAdapter = 0;
-        emit m_q->usableAdapterChanged(0);
-        return;
-    }
-
-    m_defaultAdapter = adapter;
-    emit m_q->usableAdapterChanged(m_defaultAdapter);
-}
-
-void Manager::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
-{
-    Q_UNUSED(property)
-    Q_UNUSED(value)
-}
-
-void Manager::Private::_k_bluezServiceRegistered()
-{
-    m_bluezServiceRunning = true;
-    initialize();
-}
-
-void Manager::Private::_k_bluezServiceUnregistered()
-{
-    m_bluezServiceRunning = false;
-    clean();
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Manager::Manager(QObject *parent)
     : QObject(parent)
-    , d(new Private(this))
+    , d(new ManagerPrivate(this))
 {
     // Keep an eye open if bluez stops running
     QDBusServiceWatcher *serviceWatcher = new QDBusServiceWatcher("org.bluez", QDBusConnection::systemBus(),
                                                                   QDBusServiceWatcher::WatchForRegistration |
                                                                   QDBusServiceWatcher::WatchForUnregistration, this);
-    connect(serviceWatcher, SIGNAL(serviceRegistered(QString)), this, SLOT(_k_bluezServiceRegistered()));
-    connect(serviceWatcher, SIGNAL(serviceUnregistered(QString)), this, SLOT(_k_bluezServiceUnregistered()));
+    connect(serviceWatcher, SIGNAL(serviceRegistered(QString)), d, SLOT(_k_bluezServiceRegistered()));
+    connect(serviceWatcher, SIGNAL(serviceUnregistered(QString)), d, SLOT(_k_bluezServiceUnregistered()));
 
     d->initialize();
 }
@@ -298,24 +111,6 @@ void Manager::release()
     instance = 0;
 }
 
-Adapter *Manager::defaultAdapter()
-{
-    if (!QDBusConnection::systemBus().isConnected() || !d->m_bluezServiceRunning) {
-        return 0;
-    }
-
-    if (!d->m_defaultAdapter) {
-        const QString adapterPath = d->m_bluezManagerInterface->DefaultAdapter().value().path();
-        if (!adapterPath.isEmpty() && !d->m_adaptersHash.contains(adapterPath)) {
-            d->m_defaultAdapter = new Adapter(adapterPath, const_cast<Manager*>(this));
-            connect(d->m_defaultAdapter, SIGNAL(poweredChanged(bool)), SLOT(_k_adapterPoweredChanged(bool)));
-            d->m_adaptersHash.insert(adapterPath, d->m_defaultAdapter);
-        }
-    }
-
-    return d->m_defaultAdapter;
-}
-
 Adapter *Manager::usableAdapter() const
 {
     if (!QDBusConnection::systemBus().isConnected() || !d->m_bluezServiceRunning) {
@@ -334,7 +129,30 @@ QList<Adapter*> Manager::adapters() const
         return QList<Adapter*>();
     }
 
-    return d->m_adaptersHash.values();
+    return d->m_adapters.values();
+}
+
+Device* Manager::deviceForUBI(const QString& UBI) const
+{
+    Device *device = 0;
+    Q_FOREACH(Adapter *adapter, d->m_adapters) {
+        device = adapter->deviceForUBI(UBI);
+        if (device) {
+            return device;
+        }
+    }
+
+    return 0;
+}
+
+QList<Device*> Manager::devices() const
+{
+    QList<Device*> devices;
+    Q_FOREACH(Adapter *adapter, d->m_adapters) {
+        devices << adapter->devices();
+    }
+
+    return devices;
 }
 
 bool Manager::isBluetoothOperational() const

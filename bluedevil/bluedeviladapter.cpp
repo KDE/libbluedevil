@@ -23,11 +23,8 @@
 #include "bluedeviladapter.h"
 #include "bluedevildevice.h"
 
-#include "bluedevil/bluezadapter.h"
-
-#define ENSURE_PROPERTIES_FETCHED if (!d->m_propertiesFetched) { \
-                                      d->fetchProperties();      \
-                                  }
+#include "bluedevil/bluezadapter1.h"
+#include "bluedevil/dbusproperties.h"
 
 namespace BlueDevil {
 
@@ -40,44 +37,26 @@ public:
     Private(Adapter *q);
     ~Private();
 
-    void fetchProperties();
-    void setDefaultProperties();
     void startDiscovery();
 
-    void _k_deviceCreated(const QDBusObjectPath &objectPath);
-    void _k_deviceFound(const QString &address, const QVariantMap &map);
-    void _k_deviceDisappeared(const QString &address);
-    void _k_deviceRemoved(const QDBusObjectPath &objectPath);
-    void _k_propertyChanged(const QString &property, const QDBusVariant &value);
-    void _k_createPairedDeviceReply(QDBusPendingCallWatcher *call);
-    void _k_createDeviceReply(QDBusPendingCallWatcher *call);
+    void _k_deviceRemoved(const QString &objectPath);
+    void _k_propertyChanged(const QString &property, const QVariantMap &changed_properties, const QStringList &invalidated_properties);
+    void _k_devicePropertyChanged(const QString &property, const QVariant &value);
 
-    OrgBluezAdapterInterface *m_bluezAdapterInterface;
+    org::bluez::Adapter1               *m_bluezAdapterInterface;
+    org::freedesktop::DBus::Properties *m_dbusPropertiesInterface;
+
     QMap<QString, Device*>    m_devicesMap;
     QMap<QString, Device*>    m_devicesMapUBIKey;
-    QStringList               m_knownDevices;
+    QMap<QString, Device*>    m_unpairedDevices;
 
-    // Bluez cached properties
-    QString        m_address;
-    QString        m_name;
-    quint32        m_class;
-    bool           m_powered;
-    bool           m_discoverable;
-    bool           m_pairable;
-    quint32        m_pairableTimeout;
-    quint32        m_discoverableTimeout;
-    bool           m_discovering;
-    QList<Device*> m_devices;
-    QStringList    m_UUIDs;
-    bool           m_propertiesFetched;
     bool           m_stableDiscovering;
 
     Adapter *const m_q;
 };
 
 Adapter::Private::Private(Adapter *q)
-    : m_propertiesFetched(false)
-    , m_stableDiscovering(false)
+    : m_stableDiscovering(false)
     , m_q(q)
 {
 }
@@ -85,187 +64,71 @@ Adapter::Private::Private(Adapter *q)
 Adapter::Private::~Private()
 {
     delete m_bluezAdapterInterface;
-}
-
-void Adapter::Private::fetchProperties()
-{
-    QDBusPendingReply <QVariantMap > reply = m_bluezAdapterInterface->GetProperties();
-
-    //This may happen when the AdapterRemoved signal has been emitted but the adapter
-    //is still returned by Manager::defaultAdapter
-    reply.waitForFinished();
-    if (!reply.isValid() || reply.isError()) {
-        qDebug() << reply.error().name();
-        qDebug() << reply.error().message();
-        setDefaultProperties();
-        return;
-    }
-
-    const QVariantMap properties = reply.value();
-    m_address = properties["Address"].toString();
-    m_name = properties["Name"].toString();
-    m_class = properties["Class"].toUInt();
-    m_powered = properties["Powered"].toBool();
-    m_discoverable = properties["Discoverable"].toBool();
-    m_pairable = properties["Pairable"].toBool();
-    m_pairableTimeout = properties["PairableTimeout"].toUInt();
-    m_discoverableTimeout = properties["DiscoverableTimeout"].toUInt();
-    m_discovering = properties["Discovering"].toBool();
-    const QList<QDBusObjectPath> devices = qdbus_cast<QList<QDBusObjectPath> >(properties["Devices"].value<QDBusArgument>());
-    Q_FOREACH (const QDBusObjectPath &device, devices) {
-        m_devices << new Device(device.path(), Device::DevicePath, m_q);
-    }
-    m_UUIDs = properties["UUIDs"].toStringList();
-    m_propertiesFetched = true;
-}
-
-void Adapter::Private::setDefaultProperties()
-{
-    m_address = QString();
-    m_name = QString();
-    m_class = 0;
-    m_powered = false;
-    m_discoverable = false;
-    m_pairable = false;
-    m_pairableTimeout = 0;
-    m_discoverableTimeout = 0;
-    m_discovering = false;
+    delete m_dbusPropertiesInterface;
 }
 
 void Adapter::Private::startDiscovery()
 {
-    qDeleteAll(m_devicesMap);
-    m_devicesMap.clear();
-    m_devicesMapUBIKey.clear();
-    m_knownDevices.clear();
     m_bluezAdapterInterface->StartDiscovery();
 }
 
-void Adapter::Private::_k_deviceCreated(const QDBusObjectPath &objectPath)
+void Adapter::Private::_k_deviceRemoved(const QString &objectPath)
 {
-    Device *const device = new Device(objectPath.path(), Device::DevicePath, m_q);
-    m_devices << device;
-    m_devicesMapUBIKey.insert(objectPath.path(), device);
-    emit m_q->deviceCreated(device);
-}
-
-void Adapter::Private::_k_deviceFound(const QString &address, const QVariantMap &map)
-{
-    emit m_q->deviceFound(map);
-    if (m_devicesMap.contains(address) || (m_stableDiscovering && m_knownDevices.contains(address))) {
-        return;
-    }
-    Device *const device = new Device(address, map["Alias"].toString(), map["Class"].toUInt(),
-                                      map["Icon"].toString(), map["LegacyPairing"].toBool(),
-                                      map["Name"].toString(), map["Paired"].toBool(), m_q);
-    m_devicesMap.insert(address, device);
-    m_knownDevices << address;
-    emit m_q->deviceFound(device);
-}
-
-void Adapter::Private::_k_deviceDisappeared(const QString &address)
-{
-    if (m_stableDiscovering) {
-        return;
-    }
-    Device *const device = m_devicesMap.take(address);
+    Device *const device = m_devicesMapUBIKey.take(objectPath);
     if (device) {
-        m_devices.removeOne(device);
-        m_devicesMapUBIKey.remove(m_devicesMapUBIKey.key(device));
-        emit m_q->deviceDisappeared(device);
-        delete device;
-    }
-}
-
-void Adapter::Private::_k_deviceRemoved(const QDBusObjectPath &objectPath)
-{
-    Device *const device = m_devicesMapUBIKey.take(objectPath.path());
-    if (device) {
-        m_devices.removeOne(device);
         m_devicesMap.remove(m_devicesMap.key(device));
+        m_unpairedDevices.remove(objectPath);
         emit m_q->deviceRemoved(device);
         delete device;
     }
 }
 
-void Adapter::Private::_k_propertyChanged(const QString &property, const QDBusVariant &value)
+void Adapter::Private::_k_propertyChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties)
 {
-    if (property == "Name") {
-        m_name = value.variant().toString();
-        emit m_q->nameChanged(m_name);
-    } else if (property == "Powered") {
-        m_powered = value.variant().toBool();
-        emit m_q->poweredChanged(m_powered);
-    } else if (property == "Discoverable") {
-        m_discoverable = value.variant().toBool();
-        emit m_q->discoverableChanged(m_discoverable);
-    } else if (property == "Pairable") {
-        m_pairable = value.variant().toBool();
-        emit m_q->pairableChanged(m_pairable);
-    } else if (property == "PairableTimeout") {
-        m_pairableTimeout = value.variant().toUInt();
-        emit m_q->pairableTimeoutChanged(m_pairableTimeout);
-    } else if (property == "DiscoverableTimeout") {
-        m_discoverableTimeout = value.variant().toUInt();
-        emit m_q->discoverableTimeoutChanged(m_discoverableTimeout);
-    } else if (property == "Devices") {
-        m_devices.clear();
-        const QList<QDBusObjectPath> devices = qdbus_cast<QList<QDBusObjectPath> >(value.variant().value<QDBusArgument>());
-        Q_FOREACH (const QDBusObjectPath &devicePath, devices) {
-            const QString device = devicePath.path();
-            if (m_devicesMapUBIKey.contains(device)) {
-                m_devices << m_devicesMapUBIKey[device];
-            } else {
-                m_devices << new Device(device, Device::DevicePath, m_q);
-            }
-        }
-        emit m_q->devicesChanged(m_devices);
-    } else if (property == "Discovering") {
-        m_discovering = value.variant().toBool();
-        emit m_q->discoveringChanged(m_discovering);
-    }
-    emit m_q->propertyChanged(property, value.variant());
-}
-
-void Adapter::Private::_k_createPairedDeviceReply(QDBusPendingCallWatcher *call)
-{
-    const QDBusPendingReply<QDBusObjectPath> reply = *call;
-    if (reply.isError()) {
-        qDebug() << "Error response: " << reply.error().message();
-    } else {
-        emit m_q->pairedDeviceCreated(reply.value().path());
-    }
-
-    call->deleteLater();
-}
-
-void Adapter::Private::_k_createDeviceReply(QDBusPendingCallWatcher *call)
-{
-    const QDBusPendingReply<QDBusObjectPath> reply = *call;
-    if (reply.isError()) {
-        qDebug() << "Error response: " << reply.error().message();
-    } else {
-        emit m_q->deviceCreated(reply.value().path());
+    QVariantMap::const_iterator i;
+    for(i = changed_properties.constBegin(); i != changed_properties.constEnd(); ++i) {
+      QVariant value = i.value();
+      QString property = i.key();
+      if (property == "Name") {
+          emit m_q->nameChanged(value.toString());
+      } else if (property == "Powered") {
+          emit m_q->poweredChanged(value.toBool());
+      } else if (property == "Discoverable") {
+          emit m_q->discoverableChanged(value.toBool());
+      } else if (property == "Pairable") {
+          emit m_q->pairableChanged(value.toBool());
+      } else if (property == "PairableTimeout") {
+          emit m_q->pairableTimeoutChanged(value.toUInt());
+      } else if (property == "DiscoverableTimeout") {
+          emit m_q->discoverableTimeoutChanged(value.toUInt());
+      } else if (property == "Discovering") {
+          emit m_q->discoveringChanged(value.toBool());
+      }
+      emit m_q->propertyChanged(property, value);
     }
 }
+
+void Adapter::Private::_k_devicePropertyChanged(const QString& property, const QVariant& value)
+{
+    Device *device = qobject_cast<Device*>(m_q->sender());
+    Q_ASSERT(device);
+
+    emit m_q->deviceChanged(device);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Adapter::Adapter(const QString &adapterPath, QObject *parent)
     : QObject(parent)
     , d(new Private(this))
 {
-    d->m_bluezAdapterInterface = new OrgBluezAdapterInterface("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
+    d->m_bluezAdapterInterface = new org::bluez::Adapter1("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
+    d->m_dbusPropertiesInterface = new org::freedesktop::DBus::Properties("org.bluez", adapterPath, QDBusConnection::systemBus(), this);
 
-    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceCreated(QDBusObjectPath)),
-            this, SLOT(_k_deviceCreated(QDBusObjectPath)));
-    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceFound(QString,QVariantMap)),
-            this, SLOT(_k_deviceFound(QString,QVariantMap)));
-    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceDisappeared(QString)),
-            this, SLOT(_k_deviceDisappeared(QString)));
-    connect(d->m_bluezAdapterInterface, SIGNAL(DeviceRemoved(QDBusObjectPath)),
-            this, SLOT(_k_deviceRemoved(QDBusObjectPath)));
-    connect(d->m_bluezAdapterInterface, SIGNAL(PropertyChanged(QString,QDBusVariant)),
-            this, SLOT(_k_propertyChanged(QString,QDBusVariant)));
+    connect(d->m_dbusPropertiesInterface, SIGNAL(PropertiesChanged(QString,QVariantMap,QStringList)),
+            this, SLOT(_k_propertyChanged(QString,QVariantMap,QStringList)));
+
+    setPowered(true); // TODO: remember powered setting.
 }
 
 Adapter::~Adapter()
@@ -275,61 +138,52 @@ Adapter::~Adapter()
 
 QString Adapter::address() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_address;
+    return d->m_bluezAdapterInterface->address();
 }
 
 QString Adapter::name() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_name;
+    return d->m_bluezAdapterInterface->name();
 }
 
 quint32 Adapter::adapterClass() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_class;
+    return d->m_bluezAdapterInterface->adapterClass();
 }
 
 bool Adapter::isPowered() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_powered;
+    return d->m_bluezAdapterInterface->powered();
 }
 
 bool Adapter::isDiscoverable() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_discoverable;
+    return d->m_bluezAdapterInterface->discoverable();
 }
 
 bool Adapter::isPairable() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_pairable;
+    return d->m_bluezAdapterInterface->pairable();
 }
 
 quint32 Adapter::paireableTimeout() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_pairableTimeout;
+    return d->m_bluezAdapterInterface->pairableTimeout();
 }
 
 quint32 Adapter::discoverableTimeout() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_discoverableTimeout;
+    return d->m_bluezAdapterInterface->discoverableTimeout();
 }
 
 bool Adapter::isDiscovering() const
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_discovering;
+    return d->m_bluezAdapterInterface->discovering();
 }
 
-QList<Device*> Adapter::foundDevices() const
+QList<Device*> Adapter::unpairedDevices() const
 {
-    return d->m_devicesMap.values();
+    return d->m_unpairedDevices.values();
 }
 
 Device *Adapter::deviceForAddress(const QString &address)
@@ -337,7 +191,7 @@ Device *Adapter::deviceForAddress(const QString &address)
     if (d->m_devicesMap.contains(address)) {
         return d->m_devicesMap[address];
     }
-    return new Device(address, Device::DeviceAddress, this);
+    return 0;
 }
 
 Device *Adapter::deviceForUBI(const QString &UBI)
@@ -345,78 +199,41 @@ Device *Adapter::deviceForUBI(const QString &UBI)
     if (d->m_devicesMapUBIKey.contains(UBI)) {
         return d->m_devicesMapUBIKey[UBI];
     }
-    return new Device(UBI, Device::DevicePath, this);
-}
-
-QList<Device*> Adapter::devices()
-{
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_devices;
+    return 0;
 }
 
 QStringList Adapter::UUIDs()
 {
-    ENSURE_PROPERTIES_FETCHED
-    return d->m_UUIDs;
-}
-
-void Adapter::registerAgent(const QString &agentPath, RegisterCapability registerCapability)
-{
-    QString capability;
-
-    switch (registerCapability) {
-        case DisplayOnly:
-            capability = "DisplayOnly";
-            break;
-        case DisplayYesNo:
-            capability = "DisplayYesNo";
-            break;
-        case KeyboardOnly:
-            capability = "KeyboardOnly";
-            break;
-        case NoInputNoOutput:
-            capability = "NoInputNoOutput";
-            break;
-        default:
-            return;
+    QStringList UUIDs = d->m_bluezAdapterInterface->uUIDs();
+    for(int i=0;i<UUIDs.size();i++) {
+      UUIDs[i] = UUIDs.value(i).toUpper();
     }
-
-    d->m_bluezAdapterInterface->RegisterAgent(QDBusObjectPath(agentPath), capability);
-}
-
-void Adapter::unregisterAgent(const QString &agentPath)
-{
-    d->m_bluezAdapterInterface->UnregisterAgent(QDBusObjectPath(agentPath));
-}
-
-void Adapter::setName(const QString &name)
-{
-    d->m_bluezAdapterInterface->SetProperty("Name", QDBusVariant(name));
+    return UUIDs;
 }
 
 void Adapter::setPowered(bool powered)
 {
-    d->m_bluezAdapterInterface->SetProperty("Powered", QDBusVariant(powered));
+    d->m_bluezAdapterInterface->setPowered(powered);
 }
 
 void Adapter::setDiscoverable(bool discoverable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Discoverable", QDBusVariant(discoverable));
+    d->m_bluezAdapterInterface->setDiscoverable(discoverable);
 }
 
 void Adapter::setPairable(bool pairable)
 {
-    d->m_bluezAdapterInterface->SetProperty("Pairable", QDBusVariant(pairable));
+    d->m_bluezAdapterInterface->setPairable(pairable);
 }
 
 void Adapter::setPaireableTimeout(quint32 paireableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("PaireableTimeout", QDBusVariant(paireableTimeout));
+    d->m_bluezAdapterInterface->setPairableTimeout(paireableTimeout);
 }
 
 void Adapter::setDiscoverableTimeout(quint32 discoverableTimeout)
 {
-    d->m_bluezAdapterInterface->SetProperty("DiscoverableTimeout", QDBusVariant(discoverableTimeout));
+    d->m_bluezAdapterInterface->setDiscoverableTimeout(discoverableTimeout);
 }
 
 void Adapter::removeDevice(Device *device)
@@ -442,47 +259,28 @@ void Adapter::stopDiscovery() const
     d->m_bluezAdapterInterface->StopDiscovery();
 }
 
-QString Adapter::findDevice(const QString &address) const
+QList< Device* > Adapter::devices()
 {
-    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->FindDevice(address);
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
-    watcher->waitForFinished();
-    return res.value().path();
+    return d->m_devicesMap.values();
 }
 
-QString Adapter::createDevice(const QString &address) const
+void Adapter::addDevice(const QString &objectPath)
 {
-    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreateDevice(address);
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
-    watcher->waitForFinished();
-    const QString ret = res.value().path();
-    if (!ret.isEmpty()) {
-        return ret;
+    Device * device = new Device(objectPath,this);
+    d->m_devicesMap.insert(device->address(),device);
+    d->m_devicesMapUBIKey.insert(objectPath,device);
+    emit deviceFound(device);
+    if(!device->isPaired()) {
+        d->m_unpairedDevices.insert(objectPath,device);
+        emit unpairedDeviceFound(device);
     }
-    const QString lastCall = findDevice(address);
-    if (!lastCall.isEmpty()) {
-        return lastCall;
-    }
-    return QString();
+
+    connect(device, SIGNAL(propertyChanged(QString,QVariant)), SLOT(_k_devicePropertyChanged(QString,QVariant)));
 }
 
-void Adapter::createDeviceAsync(const QString &address) const
+void Adapter::removeDevice(const QString &objectPath)
 {
-    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreateDevice(address);
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
-    connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createDeviceReply(QDBusPendingCallWatcher*)));
-}
-
-void Adapter::createPairedDevice(const QString &address, const QString &agentPath, const QString &options) const
-{
-    QDBusPendingReply<QDBusObjectPath> res = d->m_bluezAdapterInterface->CreatePairedDevice(address, QDBusObjectPath(agentPath), options);
-    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(res);
-    connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(_k_createPairedDeviceReply(QDBusPendingCallWatcher*)));
-}
-
-void Adapter::addDeviceWithUBI(const QString &UBI, Device *device)
-{
-    d->m_devicesMapUBIKey.insert(UBI, device);
+    d->_k_deviceRemoved(objectPath);
 }
 
 }

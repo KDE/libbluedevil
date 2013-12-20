@@ -29,7 +29,7 @@
  *     - Manager
  *         - Entry point to the library functionality. It is a singleton class, and it basically gives
  *           you access to the connected adapters. It will also inform through its signals when new
- *           adapters have been connected, removed, or when the default adapter has changed.
+ *           adapters have been connected or removed.
  *
  *     - Adapter
  *         - It gives you all kind of information (and also a way to modify it) about an adapter. With
@@ -56,8 +56,8 @@
  * @section manager Manager
  *
  * The Manager task is to serve as entry point to the library, being a singleton class. It will also
- * inform about the service state (operational or not), provide the default adapter connected to the
- * system, as well as notify of adapters being connected or disconnected.
+ * inform about the service state (operational or not), as well as notify of adapters being
+ * connected or disconnected.
  *
  * For brevity, we will directly include the whole namespace:
  *
@@ -76,14 +76,14 @@
  * @code
  * Manager *const manager = Manager::self();
  *
- * // If Bluetooth is operational, we can directly retrieve the default adapter, and start working
- * // with it. Otherwise, we can connect to the defaultAdapterChanged signal, so we will be notified
+ * // If Bluetooth is operational, we can directly retrieve the first usable adapter, and start working
+ * // with it. Otherwise, we can connect to the usableAdapterChanged signal, so we will be notified
  * // when we have an adapter ready to be used.
  * if (manager->isBluetoothOperational()) {
- *     Adapter *const defaultAdapter = manager->defaultAdapter();
+ *     Adapter *const adapter = manager->usableAdapter();
  *     // Do something interesting with the adapter...
  * } else {
- *     connect(manager, SIGNAL(defaultAdapterChanged(Adapter*)), this, SLOT(defaultAdapterChanged(Adapter*)));
+ *     connect(manager, SIGNAL(usableAdapterChanged(Adapter*)), this, SLOT(usableAdapterChanged(Adapter*)));
  * }
  * @endcode
  *
@@ -99,11 +99,10 @@
  * An adapter is a device physically connected to the system. Its main job is to let other devices
  * discover it as well as discover remote devices.
  *
- * As it has been described before, you can have access to the default adapter designated by the
- * system by asking it to the manager. We can perform a very typical task as discover remote devices.
+ * We can perform a very typical task as discover remote devices.
  *
  * @code
- * Adapter *const adapter = Manager::self()->defaultAdapter();
+ * Adapter *const adapter = Manager::self()->usableAdapter();
  * connect(adapter, SIGNAL(deviceFound(Device*)), this, SLOT(deviceFound(Device*)));
  * adapter->startDiscovery();
  * QTimer::singleShot(10000, adapter, SLOT(stopDiscovery())));
