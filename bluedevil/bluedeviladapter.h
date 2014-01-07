@@ -50,6 +50,7 @@ class BLUEDEVIL_EXPORT Adapter
 
     Q_PROPERTY(QString address READ address)
     Q_PROPERTY(QString name READ name)
+    Q_PROPERTY(QString alias READ alias WRITE setAlias)
     Q_PROPERTY(quint32 adapterClass READ adapterClass)
     Q_PROPERTY(bool powered READ isPowered WRITE setPowered)
     Q_PROPERTY(bool discoverable READ isDiscoverable WRITE setDiscoverable)
@@ -77,6 +78,11 @@ public:
      * @return The friendly name of the adapter.
      */
     QString name() const;
+
+    /**
+     * @return The alias of the adapter
+     */
+    QString alias() const;
 
     /**
      * @return The class of the adapter.
@@ -140,6 +146,11 @@ public:
     QStringList UUIDs();
 
 public Q_SLOTS:
+    /**
+     *  Set the alias of the adapter
+     */
+    void setAlias(const QString &alias);
+
     /**
      * Sets whether this adapter is consuming energy or not.
      */

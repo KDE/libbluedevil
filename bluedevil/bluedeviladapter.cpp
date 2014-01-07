@@ -146,6 +146,11 @@ QString Adapter::name() const
     return d->m_bluezAdapterInterface->name();
 }
 
+QString Adapter::alias() const
+{
+    return d->m_bluezAdapterInterface->alias();
+}
+
 quint32 Adapter::adapterClass() const
 {
     return d->m_bluezAdapterInterface->adapterClass();
@@ -209,6 +214,11 @@ QStringList Adapter::UUIDs()
       UUIDs[i] = UUIDs.value(i).toUpper();
     }
     return UUIDs;
+}
+
+void Adapter::setAlias(const QString& alias)
+{
+    d->m_bluezAdapterInterface->setAlias(alias);
 }
 
 void Adapter::setPowered(bool powered)
