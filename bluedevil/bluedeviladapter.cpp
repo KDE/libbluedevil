@@ -127,8 +127,6 @@ Adapter::Adapter(const QString &adapterPath, QObject *parent)
 
     connect(d->m_dbusPropertiesInterface, SIGNAL(PropertiesChanged(QString,QVariantMap,QStringList)),
             this, SLOT(_k_propertyChanged(QString,QVariantMap,QStringList)));
-
-    setPowered(true); // TODO: remember powered setting.
 }
 
 Adapter::~Adapter()
