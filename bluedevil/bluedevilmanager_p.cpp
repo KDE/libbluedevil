@@ -118,7 +118,6 @@ Adapter *ManagerPrivate::findUsableAdapter()
 {
     Q_FOREACH (Adapter *const adapter, m_q->adapters()) {
         if (adapter->isPowered()) {
-            m_usableAdapter = adapter;
             return adapter;
         }
     }
