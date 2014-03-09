@@ -56,6 +56,7 @@ public:
 public Q_SLOTS:
     void _k_bluezServiceRegistered();
     void _k_bluezServiceUnregistered();
+    void _k_bluezAdapterPoweredChanged(bool powered);
 
     void _k_interfacesAdded(const QDBusObjectPath &objectPath, const QVariantMapMap &interfaces);
     void _k_interfacesRemoved(const QDBusObjectPath &objectPath, const QStringList &interfaces);

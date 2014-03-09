@@ -69,6 +69,7 @@ void ManagerPrivate::initialize()
                 QVariantMapMap interfaces = managedObjectIt.value();
                 if(interfaces.contains("org.bluez.Adapter1")) {
                     Adapter *const adapter = new Adapter(path, m_q);
+                    connect(adapter, SIGNAL(poweredChanged(bool)), SLOT(_k_bluezAdapterPoweredChanged(bool)));
                     m_adapters.insert(managedObjectIt.key().path(), adapter);
                 } else if(interfaces.contains("org.bluez.Device1")) {
                     QString adapterPath = managedObjectIt.value().value("org.bluez.Device1").value("Adapter").value<QDBusObjectPath>().path();
@@ -130,6 +131,7 @@ void ManagerPrivate::_k_interfacesAdded(const QDBusObjectPath &objectPath, const
   for(i = interfaces.constBegin(); i != interfaces.constEnd(); ++i) {
     if(i.key() == "org.bluez.Adapter1") {
       Adapter * const adapter = new Adapter(objectPath.path(), m_q);
+      connect(adapter, SIGNAL(poweredChanged(bool)), SLOT(_k_bluezAdapterPoweredChanged(bool)));
       m_adapters.insert(objectPath.path(), adapter);
       if (!m_usableAdapter || !m_usableAdapter->isPowered()) {
           Adapter *const oldUsableAdapter = m_usableAdapter;
@@ -192,6 +194,17 @@ void ManagerPrivate::_k_bluezServiceUnregistered()
     clean();
 }
 
+void ManagerPrivate::_k_bluezAdapterPoweredChanged(bool powered)
+{
+    //If the power change has had no effect on usableAdpater, do nothing
+    Adapter *adapter = findUsableAdapter();
+    if (m_usableAdapter == adapter) {
+        return;
+    }
+
+    m_usableAdapter = adapter;
+    emit m_q->usableAdapterChanged(adapter);
+}
 
 }
 
