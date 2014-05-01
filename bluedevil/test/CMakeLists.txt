@@ -1,11 +1,15 @@
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${QT_INCLUDES})
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 set (bluedeviltest_SRCS bluedeviltest.cpp)
-qt4_automoc(${bluedeviltest_SRCS})
 add_executable(bluedeviltest ${bluedeviltest_SRCS})
-target_link_libraries(bluedeviltest ${QT_QTCORE_LIBRARY} ${QT_QTDBUS_LIBRARY} bluedevil)
+target_link_libraries(bluedeviltest
+    Qt5::Core
+    Qt5::DBus
+    bluedevil)
 
 set (adaptertest_SRCS adaptertest.cpp)
-qt4_automoc(${adaptertest_SRCS})
 add_executable(adaptertest ${adaptertest_SRCS})
-target_link_libraries(adaptertest ${QT_QTCORE_LIBRARY} ${QT_QTDBUS_LIBRARY} bluedevil)
+target_link_libraries(adaptertest
+    Qt5::Core
+    Qt5::DBus
+    bluedevil)

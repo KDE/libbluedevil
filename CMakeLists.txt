@@ -1,9 +1,14 @@
 project(libbluedevil)
 
-cmake_minimum_required(VERSION 2.6.4)
+cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
 
-find_package(Qt4 REQUIRED)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt5 CONFIG REQUIRED COMPONENTS
+    Core
+    DBus)
 
 include(CheckCXXCompilerFlag)
 

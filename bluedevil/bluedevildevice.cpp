@@ -285,4 +285,4 @@ void Device::connectDevice()
 
 }
 
-#include "bluedevildevice.moc"
+#include "moc_bluedevildevice.cpp"

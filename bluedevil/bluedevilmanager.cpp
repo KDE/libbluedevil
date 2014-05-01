@@ -162,4 +162,4 @@ bool Manager::isBluetoothOperational() const
 
 }
 
-#include "bluedevilmanager.moc"
+#include "moc_bluedevilmanager.cpp"

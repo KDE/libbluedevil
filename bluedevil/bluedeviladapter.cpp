@@ -293,4 +293,4 @@ void Adapter::removeDevice(const QString &objectPath)
 
 }
 
-#include "bluedeviladapter.moc"
+#include "moc_bluedeviladapter.cpp"
