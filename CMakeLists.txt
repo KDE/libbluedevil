@@ -11,6 +11,7 @@ find_package(Qt5 CONFIG REQUIRED COMPONENTS
     DBus)
 
 include(CheckCXXCompilerFlag)
+include(GNUInstallDirs)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -27,10 +28,8 @@ endif (_HAVE_VISIBILITY AND NOT WIN32)
 #
 ### lib64/32 support kde like
 #
-set(LIB_SUFFIX "" CACHE STRING "Define suffix for lib directory (32/64)")
-
 set(BIN_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+set(LIB_INSTALL_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
 
 set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
                                   LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
