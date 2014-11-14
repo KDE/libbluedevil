@@ -143,8 +143,10 @@ void ManagerPrivate::_k_interfacesAdded(const QDBusObjectPath &objectPath, const
     } else if(i.key() == "org.bluez.Device1") {
       QString adapterPath = i.value().value("Adapter").value<QDBusObjectPath>().path();
       Adapter * const adapter = m_adapters.value(adapterPath);
-      adapter->addDevice(objectPath.path());
-      m_devAdapter.insert(objectPath.path(),adapter);
+      if (adapter) {
+          adapter->addDevice(objectPath.path());
+          m_devAdapter.insert(objectPath.path(),adapter);
+      }
     }
   }
 }
@@ -176,7 +178,9 @@ void ManagerPrivate::_k_interfacesRemoved(const QDBusObjectPath &objectPath, con
             }
         } else if(interface == "org.bluez.Device1") {
             Adapter * const adapter = m_devAdapter.take(object);
-            adapter->removeDevice(object);
+            if (adapter) {
+                adapter->removeDevice(object);
+            }
         }
     }
 }
