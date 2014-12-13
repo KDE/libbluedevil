@@ -89,7 +89,7 @@ void Adapter::Private::_k_propertyChanged(const QString &interface_name, const Q
     for(i = changed_properties.constBegin(); i != changed_properties.constEnd(); ++i) {
       QVariant value = i.value();
       QString property = i.key();
-      if (property == "Name") {
+      if (property == "Alias") {
           emit m_q->nameChanged(value.toString());
       } else if (property == "Powered") {
           emit m_q->poweredChanged(value.toBool());
@@ -141,12 +141,12 @@ QString Adapter::address() const
 
 QString Adapter::name() const
 {
-    return d->m_bluezAdapterInterface->name();
+    return d->m_bluezAdapterInterface->alias();
 }
 
-QString Adapter::alias() const
+QString Adapter::systemName() const
 {
-    return d->m_bluezAdapterInterface->alias();
+    return d->m_bluezAdapterInterface->name();
 }
 
 quint32 Adapter::adapterClass() const
@@ -214,9 +214,9 @@ QStringList Adapter::UUIDs()
     return UUIDs;
 }
 
-void Adapter::setAlias(const QString& alias)
+void Adapter::setName(const QString& name)
 {
-    d->m_bluezAdapterInterface->setAlias(alias);
+    d->m_bluezAdapterInterface->setAlias(name);
 }
 
 void Adapter::setPowered(bool powered)
