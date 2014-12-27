@@ -144,6 +144,11 @@ QString Adapter::name() const
     return d->m_bluezAdapterInterface->alias();
 }
 
+QString Adapter::alias() const
+{
+    return name();
+}
+
 QString Adapter::systemName() const
 {
     return d->m_bluezAdapterInterface->name();
@@ -217,6 +222,11 @@ QStringList Adapter::UUIDs()
 void Adapter::setName(const QString& name)
 {
     d->m_bluezAdapterInterface->setAlias(name);
+}
+
+void Adapter::setAlias(const QString &alias)
+{
+    setName(alias);
 }
 
 void Adapter::setPowered(bool powered)
