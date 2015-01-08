@@ -1,4 +1,5 @@
 project(libbluedevil)
+set(PROJECT_VERSION "5.1.95")
 
 cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
@@ -36,8 +37,8 @@ set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
                                   ARCHIVE DESTINATION "${LIB_INSTALL_DIR}" COMPONENT Devel )
 
 
-set(GENERIC_LIB_VERSION "2.0")
-set(GENERIC_LIB_SOVERSION "2")
+set(GENERIC_LIB_VERSION ${PROJECT_VERSION})
+set(GENERIC_LIB_SOVERSION "5")
 set(VERSION ${GENERIC_LIB_VERSION})
 
 add_subdirectory(bluedevil)
