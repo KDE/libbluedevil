@@ -1,5 +1,5 @@
 project(libbluedevil)
-set(PROJECT_VERSION "5.1.95")
+set(PROJECT_VERSION "5.2.0")
 
 cmake_minimum_required(VERSION 2.8.11)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
