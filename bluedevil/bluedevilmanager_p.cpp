@@ -162,6 +162,10 @@ void ManagerPrivate::_k_interfacesRemoved(const QDBusObjectPath &objectPath, con
             }
             if (adapter) {
                 emit m_q->adapterRemoved(adapter);
+
+                if (adapter->devices().isEmpty()) {
+                    adapter->deleteLater();
+                }
             }
             if (m_adapters.isEmpty()) {
                 emit m_q->usableAdapterChanged(0);
@@ -180,7 +184,7 @@ void ManagerPrivate::_k_interfacesRemoved(const QDBusObjectPath &objectPath, con
             if (adapter) {
                 adapter->removeDevice(object);
 
-                if (adapter->devices().isEmpty()) {
+                if (adapter->devices().isEmpty() && !m_adapters.values().contains(adapter)) {
                     adapter->deleteLater();
                 }
             }
